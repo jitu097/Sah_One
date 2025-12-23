@@ -1,111 +1,107 @@
-import { useMemo } from 'react';
-import {
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Chip,
-  Grid,
-  Divider,
-} from '@mui/material';
-import { formatCurrency, formatDateTime, getOrderStatusColor } from '../../shared/utils/helpers';
-
-// Mock orders data
-const mockOrders = [
-  {
-    _id: 'ORD1701234567890',
-    status: 'delivered',
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    items: [
-      { menuItem: { name: 'Margherita Pizza' }, quantity: 2, price: 299 },
-      { menuItem: { name: 'Caesar Salad' }, quantity: 1, price: 149 },
-    ],
-    totalAmount: 747,
-    deliveryAddress: '123 Main Street, Apartment 4B, New York, NY 10001',
-  },
-  {
-    _id: 'ORD1701234567891',
-    status: 'out_for_delivery',
-    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    items: [
-      { menuItem: { name: 'Chicken Burger' }, quantity: 1, price: 199 },
-      { menuItem: { name: 'Chocolate Brownie' }, quantity: 2, price: 129 },
-    ],
-    totalAmount: 497,
-    deliveryAddress: '456 Park Avenue, Suite 12, Brooklyn, NY 11201',
-  },
-  {
-    _id: 'ORD1701234567892',
-    status: 'preparing',
-    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    items: [
-      { menuItem: { name: 'Veg Biryani' }, quantity: 3, price: 249 },
-    ],
-    totalAmount: 787,
-    deliveryAddress: '789 Broadway, Floor 3, Manhattan, NY 10003',
-  },
-];
+import { Container, Typography, Grid, Card, CardContent, Box, Chip, Button } from '@mui/material';
+import { AccessTime, CheckCircle, LocalShipping, Cancel } from '@mui/icons-material';
+import { MOCK_ORDERS } from '../../shared/utils/mockData';
+import { format } from 'date-fns';
 
 const Orders = () => {
-  const orders = useMemo(() => mockOrders, []);
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'delivered':
+        return <CheckCircle sx={{ color: '#4caf50' }} />;
+      case 'out_for_delivery':
+        return <LocalShipping sx={{ color: '#2196f3' }} />;
+      case 'preparing':
+        return <AccessTime sx={{ color: '#ff9800' }} />;
+      case 'cancelled':
+        return <Cancel sx={{ color: '#f44336' }} />;
+      default:
+        return <AccessTime sx={{ color: '#9e9e9e' }} />;
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    return status.replace('_', ' ').toUpperCase();
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'delivered':
+        return 'success';
+      case 'out_for_delivery':
+        return 'info';
+      case 'preparing':
+        return 'warning';
+      case 'cancelled':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
 
   return (
-    <Container maxWidth="md" className="orders-container">
-      <Typography variant="h4" gutterBottom className="page-title">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" fontWeight="600" gutterBottom sx={{ mb: 3 }}>
         My Orders
       </Typography>
 
-      {orders.length === 0 ? (
-        <Box className="no-orders-message">
-          <Typography variant="h6" color="text.secondary">
-            No orders yet
-          </Typography>
-        </Box>
+      {MOCK_ORDERS.length === 0 ? (
+        <Card>
+          <CardContent sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="text.secondary">
+              No orders yet
+            </Typography>
+          </CardContent>
+        </Card>
       ) : (
         <Grid container spacing={3}>
-          {orders.map((order) => (
-            <Grid item xs={12} key={order._id}>
-              <Card className="order-card">
+          {MOCK_ORDERS.map((order) => (
+            <Grid item xs={12} key={order.id}>
+              <Card>
                 <CardContent>
-                  <Box className="order-header">
-                    <Typography variant="h6">Order #{order._id.slice(-6)}</Typography>
-                    <Chip
-                      label={order.status.replace('_', ' ').toUpperCase()}
-                      color={getOrderStatusColor(order.status)}
-                      size="small"
-                    />
-                  </Box>
-                  
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {formatDateTime(order.createdAt)}
-                  </Typography>
-
-                  <Divider className="order-divider" />
-
-                  {order.items.map((item, index) => (
-                    <Box key={index} className="order-item">
-                      <Typography>
-                        {item.menuItem?.name || 'Item'} x {item.quantity}
-                        <Typography component="span" className="item-price">
-                          {formatCurrency(item.price * item.quantity)}
-                        </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                    <Box>
+                      <Typography variant="h6" fontWeight="600" gutterBottom>
+                        Order #{order.id}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {format(new Date(order.orderDate), 'MMM dd, yyyy • hh:mm a')}
                       </Typography>
                     </Box>
-                  ))}
-
-                  <Divider className="order-divider" />
-
-                  <Box className="order-total">
-                    <Typography variant="h6">Total</Typography>
-                    <Typography variant="h6" color="primary">
-                      {formatCurrency(order.totalAmount)}
-                    </Typography>
+                    <Chip
+                      icon={getStatusIcon(order.status)}
+                      label={getStatusLabel(order.status)}
+                      color={getStatusColor(order.status)}
+                    />
                   </Box>
 
-                  <Typography variant="body2" color="text.secondary" className="delivery-address">
-                    Delivery Address: {order.deliveryAddress}
-                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    {order.items.map((item, index) => (
+                      <Typography key={index} variant="body2" color="text.secondary">
+                        {item.quantity}x {item.name}
+                      </Typography>
+                    ))}
+                  </Box>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Payment: {order.paymentMethod}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        To: {order.deliveryAddress}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="h6" fontWeight="700" color="primary">
+                        ₹{order.totalAmount}
+                      </Typography>
+                      {order.status === 'out_for_delivery' && (
+                        <Button size="small" variant="outlined" sx={{ mt: 1 }}>
+                          Track Order
+                        </Button>
+                      )}
+                    </Box>
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>

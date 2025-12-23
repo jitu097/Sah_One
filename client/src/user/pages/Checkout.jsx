@@ -1,153 +1,130 @@
 import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
-  Card,
-  CardContent,
+  Paper,
   Typography,
+  Box,
   TextField,
   Button,
-  Box,
-  Radio,
   RadioGroup,
   FormControlLabel,
-  FormControl,
-  FormLabel,
+  Radio,
   Divider,
 } from '@mui/material';
-import { clearCart } from '../cartSlice';
-import { formatCurrency } from '../../shared/utils/helpers';
+import { CheckCircle } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 
 const Checkout = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { items, total } = useSelector((state) => state.cart);
-  const { user } = useSelector((state) => state.auth);
-
-  const [formData, setFormData] = useState({
-    address: '',
-    phone: user?.phone || '',
-    paymentMethod: 'cod',
+  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [address, setAddress] = useState({
+    street: '123 Main St, Apartment 4B',
+    city: 'New York',
+    zipCode: '10001',
   });
 
-  const deliveryFee = 40;
-  const grandTotal = total + deliveryFee;
+  const orderTotal = 697;
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e) => {
+  const handlePlaceOrder = (e) => {
     e.preventDefault();
-
-    if (!formData.address || !formData.phone) {
-      toast.error('Please fill all required fields');
-      return;
-    }
-
-    // Mock order creation
-    const orderId = 'ORD' + Date.now();
-    toast.success(`Order placed successfully! Order ID: ${orderId}`);
-    dispatch(clearCart());
-    navigate('/orders');
+    toast.success('Order placed successfully!');
+    setTimeout(() => {
+      navigate('/user/orders');
+    }, 1500);
   };
-
-  if (items.length === 0) {
-    navigate('/cart');
-    return null;
-  }
 
   return (
-    <Container maxWidth="md" className="checkout-container">
-      <Typography variant="h4" gutterBottom className="page-title">
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Typography variant="h4" fontWeight="600" gutterBottom sx={{ mb: 3 }}>
         Checkout
       </Typography>
 
-      <form onSubmit={handleSubmit}>
-        <Card className="delivery-details-card">
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Delivery Details
-            </Typography>
+      <form onSubmit={handlePlaceOrder}>
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" fontWeight="600" gutterBottom>
+            Delivery Address
+          </Typography>
+          <Box sx={{ mt: 2 }}>
             <TextField
               fullWidth
-              label="Delivery Address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              multiline
-              rows={3}
+              label="Street Address"
+              value={address.street}
+              onChange={(e) => setAddress({ ...address, street: e.target.value })}
               margin="normal"
               required
             />
             <TextField
               fullWidth
-              label="Phone Number"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
+              label="City"
+              value={address.city}
+              onChange={(e) => setAddress({ ...address, city: e.target.value })}
               margin="normal"
               required
             />
-          </CardContent>
-        </Card>
+            <TextField
+              fullWidth
+              label="ZIP Code"
+              value={address.zipCode}
+              onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
+              margin="normal"
+              required
+            />
+          </Box>
+        </Paper>
 
-        <Card className="payment-method-card">
-          <CardContent>
-            <FormControl component="fieldset">
-              <FormLabel component="legend">Payment Method</FormLabel>
-              <RadioGroup
-                name="paymentMethod"
-                value={formData.paymentMethod}
-                onChange={handleChange}
-              >
-                <FormControlLabel value="cod" control={<Radio />} label="Cash on Delivery" />
-                <FormControlLabel value="online" control={<Radio />} label="Online Payment" />
-              </RadioGroup>
-            </FormControl>
-          </CardContent>
-        </Card>
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" fontWeight="600" gutterBottom>
+            Payment Method
+          </Typography>
+          <RadioGroup
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            sx={{ mt: 2 }}
+          >
+            <FormControlLabel
+              value="card"
+              control={<Radio />}
+              label="Credit/Debit Card"
+            />
+            <FormControlLabel value="upi" control={<Radio />} label="UPI" />
+            <FormControlLabel value="cash" control={<Radio />} label="Cash on Delivery" />
+          </RadioGroup>
+        </Paper>
 
-        <Card className="order-summary-card">
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Order Summary
-            </Typography>
-            {items.map((item) => (
-              <Box key={item._id} className="summary-item">
-                <Typography>
-                  {item.name} x {item.quantity}
-                </Typography>
-                <Typography>{formatCurrency(item.price * item.quantity)}</Typography>
-              </Box>
-            ))}
-            <Divider className="summary-divider" />
-            <Box className="summary-item">
-              <Typography>Subtotal</Typography>
-              <Typography>{formatCurrency(total)}</Typography>
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h6" fontWeight="600" gutterBottom>
+            Order Summary
+          </Typography>
+          <Box sx={{ mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography color="text.secondary">Subtotal</Typography>
+              <Typography fontWeight="500">₹657</Typography>
             </Box>
-            <Box className="summary-item">
-              <Typography>Delivery Fee</Typography>
-              <Typography>{formatCurrency(deliveryFee)}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography color="text.secondary">Delivery Fee</Typography>
+              <Typography fontWeight="500">₹40</Typography>
             </Box>
-            <Divider className="summary-divider" />
-            <Box className="summary-total">
-              <Typography variant="h6">Total</Typography>
-              <Typography variant="h6" color="primary">
-                {formatCurrency(grandTotal)}
+            <Divider sx={{ mb: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+              <Typography variant="h6" fontWeight="600">
+                Total
+              </Typography>
+              <Typography variant="h6" fontWeight="600" color="primary">
+                ₹{orderTotal}
               </Typography>
             </Box>
-          </CardContent>
-        </Card>
-
-        <Button type="submit" fullWidth variant="contained" size="large" className="place-order-button">
-          Place Order
-        </Button>
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              size="large"
+              startIcon={<CheckCircle />}
+            >
+              Place Order
+            </Button>
+          </Box>
+        </Paper>
       </form>
     </Container>
   );

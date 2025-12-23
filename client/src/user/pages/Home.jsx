@@ -1,114 +1,106 @@
-import { useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Grid,
   Card,
-  CardMedia,
   CardContent,
+  CardMedia,
   Typography,
-  TextField,
-  InputAdornment,
   Box,
   Chip,
-  IconButton,
+  Button,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
-import { Search, Add } from '@mui/icons-material';
-import { addToCart } from '../cartSlice';
-import { formatCurrency } from '../../shared/utils/helpers';
+import {
+  Search,
+  ShoppingCart,
+  Star,
+  LocalOffer,
+  Receipt,
+  Person,
+} from '@mui/icons-material';
+import { MOCK_MENU_ITEMS } from '../../shared/utils/mockData';
 
-// Mock menu data
-const mockMenuItems = [
-  {
-    _id: '1',
-    name: 'Margherita Pizza',
-    description: 'Classic pizza with fresh tomatoes, mozzarella, and basil',
-    price: 299,
-    category: 'pizza',
-    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=300',
-    isAvailable: true,
-  },
-  {
-    _id: '2',
-    name: 'Chicken Burger',
-    description: 'Juicy grilled chicken with lettuce, tomato, and special sauce',
-    price: 199,
-    category: 'burgers',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300',
-    isAvailable: true,
-  },
-  {
-    _id: '3',
-    name: 'Veg Biryani',
-    description: 'Aromatic basmati rice with mixed vegetables and spices',
-    price: 249,
-    category: 'biryani',
-    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300',
-    isAvailable: true,
-  },
-  {
-    _id: '4',
-    name: 'Pasta Alfredo',
-    description: 'Creamy alfredo sauce with fettuccine pasta',
-    price: 279,
-    category: 'pasta',
-    image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=300',
-    isAvailable: true,
-  },
-  {
-    _id: '5',
-    name: 'Caesar Salad',
-    description: 'Fresh romaine lettuce with parmesan cheese and croutons',
-    price: 149,
-    category: 'salads',
-    image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=300',
-    isAvailable: true,
-  },
-  {
-    _id: '6',
-    name: 'Chocolate Brownie',
-    description: 'Rich chocolate brownie with vanilla ice cream',
-    price: 129,
-    category: 'desserts',
-    image: 'https://images.unsplash.com/photo-1607920591413-4ec007e70023?w=300',
-    isAvailable: true,
-  },
-];
-
-const Home = () => {
-  const dispatch = useDispatch();
+const UserHome = () => {
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const categories = useMemo(() => {
-    const cats = mockMenuItems.map(item => item.category);
-    return ['all', ...new Set(cats)];
-  }, []);
+  const categories = ['All', 'Pizza', 'Burgers', 'Chinese', 'Indian', 'Salads', 'Beverages'];
 
-  const filteredItems = useMemo(() => {
-    return mockMenuItems.filter((item) => {
-      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-      return matchesSearch && matchesCategory && item.isAvailable;
-    });
-  }, [searchQuery, selectedCategory]);
+  const filteredItems = MOCK_MENU_ITEMS.filter((item) => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
-  const handleAddToCart = (item) => {
-    dispatch(addToCart(item));
-  };
+  const quickActions = [
+    { icon: <ShoppingCart />, label: 'Cart', path: '/user/cart', color: '#667eea' },
+    { icon: <Receipt />, label: 'Orders', path: '/user/orders', color: '#f093fb' },
+    { icon: <LocalOffer />, label: 'Offers', path: '/user/offers', color: '#4facfe' },
+    { icon: <Person />, label: 'Profile', path: '/user/profile', color: '#43e97b' },
+  ];
 
   return (
-    <Container maxWidth="lg" className="home-container">
-      <Typography variant="h4" gutterBottom className="page-title">
-        Explore Our Menu
-      </Typography>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Welcome Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" fontWeight="600" gutterBottom>
+          Welcome back, {user?.name || 'Guest'}! 👋
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          What would you like to order today?
+        </Typography>
+      </Box>
 
+      {/* Quick Actions */}
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        {quickActions.map((action, index) => (
+          <Grid item xs={6} sm={3} key={index}>
+            <Card
+              sx={{
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+                '&:hover': { transform: 'translateY(-4px)' },
+              }}
+              onClick={() => navigate(action.path)}
+            >
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    bgcolor: action.color + '20',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 12px',
+                    color: action.color,
+                  }}
+                >
+                  {action.icon}
+                </Box>
+                <Typography variant="body2" fontWeight="500">
+                  {action.label}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Search */}
       <TextField
         fullWidth
-        placeholder="Search for dishes..."
+        placeholder="Search for food..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="search-field"
+        sx={{ mb: 3 }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -118,47 +110,55 @@ const Home = () => {
         }}
       />
 
-      <Box className="category-chips">
+      {/* Categories */}
+      <Box sx={{ mb: 3, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
         {categories.map((category) => (
           <Chip
             key={category}
-            label={category.charAt(0).toUpperCase() + category.slice(1)}
+            label={category}
             onClick={() => setSelectedCategory(category)}
             color={selectedCategory === category ? 'primary' : 'default'}
-            className="category-chip"
+            variant={selectedCategory === category ? 'filled' : 'outlined'}
           />
         ))}
       </Box>
 
+      {/* Menu Items */}
+      <Typography variant="h5" fontWeight="600" gutterBottom sx={{ mb: 2 }}>
+        Popular Dishes
+      </Typography>
       <Grid container spacing={3}>
         {filteredItems.map((item) => (
-          <Grid item xs={12} sm={6} md={4} key={item._id}>
-            <Card className="menu-item-card">
+          <Grid item xs={12} sm={6} md={4} key={item.id}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardMedia
                 component="img"
                 height="200"
                 image={item.image}
                 alt={item.name}
-                className="menu-item-image"
+                sx={{ objectFit: 'cover' }}
               />
-              <CardContent>
-                <Typography gutterBottom variant="h6" component="div">
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography variant="h6" fontWeight="600" gutterBottom>
                   {item.name}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" className="item-description">
+                <Typography variant="body2" color="text.secondary" gutterBottom>
                   {item.description}
                 </Typography>
-                <Box className="item-footer">
-                  <Typography variant="h6" color="primary">
-                    {formatCurrency(item.price)}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
+                  <Star sx={{ color: '#ffc107', fontSize: 18 }} />
+                  <Typography variant="body2" fontWeight="500">
+                    {item.rating}
                   </Typography>
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleAddToCart(item)}
-                    className="add-to-cart-button"
-                  >
-                    <Add />
-                  </IconButton>
+                  <Chip label={item.category} size="small" sx={{ ml: 'auto' }} />
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
+                  <Typography variant="h6" fontWeight="700" color="primary">
+                    ₹{item.price}
+                  </Typography>
+                  <Button variant="contained" size="small" startIcon={<ShoppingCart />}>
+                    Add
+                  </Button>
                 </Box>
               </CardContent>
             </Card>
@@ -167,7 +167,7 @@ const Home = () => {
       </Grid>
 
       {filteredItems.length === 0 && (
-        <Box className="no-items-message">
+        <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">
             No items found
           </Typography>
@@ -177,4 +177,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default UserHome;

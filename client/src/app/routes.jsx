@@ -1,8 +1,12 @@
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from '../auth/ProtectedRoute';
 
-// Auth
+// Landing Page
+import LandingPage from './pages/LandingPage';
+
+// Authentication Pages
 import Login from '../auth/Login';
+import Signup from '../auth/Signup';
 
 // User Pages
 import UserHome from '../user/pages/Home';
@@ -23,38 +27,40 @@ import AssignedOrders from '../delivery/pages/AssignedOrders';
 import Pickup from '../delivery/pages/Pickup';
 import DeliveryConfirm from '../delivery/pages/DeliveryConfirm';
 
+/**
+ * Main routing configuration for the Sah One app
+ * Flow: Landing Page (/) → Login (/login) → User Dashboard (/user)
+ */
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Landing page - First page users see */}
+      <Route path="/" element={<LandingPage />} />
+
+      {/* Authentication routes - Login and Signup */}
       <Route path="/login" element={<Login />} />
-      
-      {/* User Routes */}
-      <Route path="/" element={<ProtectedRoute allowedRoles={['user']} />}>
-        <Route index element={<UserHome />} />
-        <Route path="cart" element={<Cart />} />
-        <Route path="checkout" element={<Checkout />} />
-        <Route path="orders" element={<UserOrders />} />
-        <Route path="profile" element={<UserProfile />} />
-      </Route>
+      <Route path="/signup" element={<Signup />} />
 
-      {/* Admin Routes */}
-      <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']} />}>
-        <Route index element={<AdminDashboard />} />
-        <Route path="orders" element={<AdminOrders />} />
-        <Route path="menu" element={<AdminMenu />} />
-        <Route path="offers" element={<AdminOffers />} />
-        <Route path="reports" element={<AdminReports />} />
-      </Route>
+      {/* User routes - For customers ordering food */}
+      <Route path="/user" element={<UserHome />} />
+      <Route path="/user/cart" element={<Cart />} />
+      <Route path="/user/checkout" element={<Checkout />} />
+      <Route path="/user/orders" element={<UserOrders />} />
+      <Route path="/user/profile" element={<UserProfile />} />
 
-      {/* Delivery Routes */}
-      <Route path="/delivery" element={<ProtectedRoute allowedRoles={['delivery']} />}>
-        <Route index element={<AssignedOrders />} />
-        <Route path="pickup/:orderId" element={<Pickup />} />
-        <Route path="confirm/:orderId" element={<DeliveryConfirm />} />
-      </Route>
+      {/* Admin routes - For restaurant management */}
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/orders" element={<AdminOrders />} />
+      <Route path="/admin/menu" element={<AdminMenu />} />
+      <Route path="/admin/offers" element={<AdminOffers />} />
+      <Route path="/admin/reports" element={<AdminReports />} />
 
-      {/* Fallback */}
+      {/* Delivery routes - For delivery personnel */}
+      <Route path="/delivery" element={<AssignedOrders />} />
+      <Route path="/delivery/pickup/:orderId" element={<Pickup />} />
+      <Route path="/delivery/confirm/:orderId" element={<DeliveryConfirm />} />
+
+      {/* Catch all route - Redirect unknown URLs to landing page */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

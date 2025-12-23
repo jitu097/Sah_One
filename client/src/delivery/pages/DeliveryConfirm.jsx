@@ -1,136 +1,139 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container,
+  Paper,
+  Typography,
+  Box,
+  Button,
   Card,
   CardContent,
-  Typography,
-  Button,
-  Box,
-  Divider,
   TextField,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
 } from '@mui/material';
-import { CheckCircle, LocationOn } from '@mui/icons-material';
-import { formatCurrency } from '../../shared/utils/helpers';
+import { CheckCircle, ArrowBack } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 
-const mockOrder = {
-  _id: 'ORD1701234567891',
-  user: { name: 'Jane Smith' },
-  phone: '+91 9876543211',
-  deliveryAddress: '456 Park Ave, Mumbai, 400002',
-  items: [
-    { menuItem: { name: 'Veg Noodles' }, quantity: 1, price: 149 },
-  ],
-  totalAmount: 149,
-  status: 'out_for_delivery',
-};
-
 const DeliveryConfirm = () => {
-  const { orderId } = useParams();
   const navigate = useNavigate();
-  const [order] = useState(mockOrder);
+  const { orderId } = useParams();
+  const [paymentMethod, setPaymentMethod] = useState('cash');
   const [otp, setOtp] = useState('');
 
-  const handleConfirmDelivery = () => {
-    if (otp === '5678') {
-      toast.success('Order delivered successfully');
-      navigate('/delivery');
-    } else {
-      toast.error('Invalid OTP. Try 5678');
+  const orderDetails = {
+    id: orderId,
+    customerName: 'John Doe',
+    address: '123 Main St, Apartment 4B, New York, NY 10001',
+    phone: '+1 234 567 8900',
+    totalAmount: 697,
+    paymentMethod: 'Cash',
+  };
+
+  const handleDeliver = () => {
+    if (orderDetails.paymentMethod === 'Cash' && !otp) {
+      toast.error('Please enter delivery OTP');
+      return;
     }
+    toast.success('Order delivered successfully!');
+    setTimeout(() => {
+      navigate('/delivery');
+    }, 1500);
   };
 
   return (
-    <Container maxWidth="sm" className="delivery-confirm-container">
-      <Typography variant="h4" gutterBottom>
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => navigate('/delivery')}
+        sx={{ mb: 3 }}
+      >
+        Back
+      </Button>
+
+      <Typography variant="h4" fontWeight="600" gutterBottom sx={{ mb: 3 }}>
         Confirm Delivery
       </Typography>
 
-      <Card className="delivery-info-card">
-        <CardContent>
-          <Box className="delivery-address-section">
-            <LocationOn color="primary" />
-            <Box>
-              <Typography variant="subtitle2">Delivery Address</Typography>
-              <Typography variant="body2">{order.deliveryAddress}</Typography>
-            </Box>
-          </Box>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" fontWeight="600" gutterBottom>
+          Order #{orderDetails.id}
+        </Typography>
 
-          <Divider className="delivery-divider" />
-
-          <Box className="customer-details">
-            <Typography variant="subtitle2" gutterBottom>
+        <Card variant="outlined" sx={{ my: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight="600" gutterBottom>
               Customer Details
             </Typography>
-            <Typography variant="body2">Name: {order.user?.name || 'N/A'}</Typography>
-            <Typography variant="body2">Phone: {order.phone}</Typography>
-          </Box>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Name
+              </Typography>
+              <Typography variant="body1" fontWeight="500" gutterBottom>
+                {orderDetails.customerName}
+              </Typography>
 
-          <Divider className="delivery-divider" />
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Phone
+              </Typography>
+              <Typography variant="body1" fontWeight="500" gutterBottom>
+                {orderDetails.phone}
+              </Typography>
 
-          <Box className="delivery-items">
-            <Typography variant="subtitle2" gutterBottom>
-              Order Items
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Address
+              </Typography>
+              <Typography variant="body1" fontWeight="500">
+                {orderDetails.address}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+
+        <Card variant="outlined" sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+              Payment
             </Typography>
-            {order.items.map((item, index) => (
-              <Box key={index} className="delivery-item-row">
-                <Typography variant="body2">
-                  {item.menuItem?.name || 'Item'} x {item.quantity}
-                </Typography>
-                <Typography variant="body2">
-                  {formatCurrency(item.price * item.quantity)}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
+            <RadioGroup
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <FormControlLabel
+                value="cash"
+                control={<Radio />}
+                label={`Cash on Delivery - ₹${orderDetails.totalAmount}`}
+              />
+              <FormControlLabel
+                value="paid"
+                control={<Radio />}
+                label="Already Paid Online"
+              />
+            </RadioGroup>
+          </CardContent>
+        </Card>
 
-          <Divider className="delivery-divider" />
+        <TextField
+          fullWidth
+          label="Delivery OTP"
+          placeholder="Enter 4-digit OTP from customer"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          sx={{ mb: 3 }}
+          helperText="Ask the customer for their delivery OTP"
+        />
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="h6">Amount to Collect</Typography>
-            <Typography variant="h6" color="primary">
-              {formatCurrency(order.totalAmount)}
-            </Typography>
-          </Box>
-
-          <Typography variant="body2" color="text.secondary">
-            Payment Method: {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
-          </Typography>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent>
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <CheckCircle sx={{ fontSize: 80, color: 'success.main' }} />
-            <Typography variant="h6" sx={{ mt: 2 }}>
-              Ready to Deliver
-            </Typography>
-          </Box>
-
-          <TextField
-            fullWidth
-            label="Enter Delivery OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter 4-digit OTP from customer"
-            margin="normal"
-          />
-
-          <Button
-            fullWidth
-            variant="contained"
-            size="large"
-            color="success"
-            onClick={handleConfirmDelivery}
-            disabled={!otp || otp.length !== 4}
-            sx={{ mt: 2 }}
-          >
-            Confirm Delivery
-          </Button>
-        </CardContent>
-      </Card>
+        <Button
+          fullWidth
+          variant="contained"
+          size="large"
+          startIcon={<CheckCircle />}
+          onClick={handleDeliver}
+        >
+          Confirm Delivery
+        </Button>
+      </Paper>
     </Container>
   );
 };

@@ -1,108 +1,247 @@
-import { useMemo } from 'react';
+import { Container, Grid, Card, CardContent, Typography, Box, Paper } from '@mui/material';
 import {
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-} from '@mui/material';
-import {
-  TrendingUp,
-  ShoppingCart,
+  ShoppingBag,
   AttachMoney,
   People,
+  LocalShipping,
+  TrendingUp,
+  TrendingDown,
 } from '@mui/icons-material';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-import { Bar, Pie } from 'react-chartjs-2';
+import { Line, Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { MOCK_STATS, MOCK_CHARTS_DATA, MOCK_ORDERS } from '../../shared/utils/mockData';
+import { format } from 'date-fns';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Dashboard = () => {
-  const stats = useMemo(() => ({
-    totalOrders: 347,
-    totalRevenue: 52340,
-    totalCustomers: 1284,
-    pendingOrders: 12,
-  }), []);
+  const stats = [
+    {
+      title: 'Total Orders',
+      value: MOCK_STATS.totalOrders,
+      icon: <ShoppingBag />,
+      color: '#667eea',
+      change: '+12%',
+      positive: true,
+    },
+    {
+      title: 'Revenue',
+      value: `₹${MOCK_STATS.totalRevenue.toLocaleString()}`,
+      icon: <AttachMoney />,
+      color: '#4facfe',
+      change: '+23%',
+      positive: true,
+    },
+    {
+      title: 'Total Users',
+      value: MOCK_STATS.totalUsers,
+      icon: <People />,
+      color: '#f093fb',
+      change: '+8%',
+      positive: true,
+    },
+    {
+      title: 'Active Delivery',
+      value: MOCK_STATS.activeDelivery,
+      icon: <LocalShipping />,
+      color: '#43e97b',
+      change: '-2',
+      positive: false,
+    },
+  ];
 
-  const revenueData = useMemo(() => ({
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [{
-      label: 'Revenue (₹)',
-      data: [12000, 19000, 15000, 25000, 22000, 30000, 28000],
-      backgroundColor: 'rgba(255, 107, 53, 0.6)',
-    }],
-  }), []);
+  const ordersChartData = {
+    labels: MOCK_CHARTS_DATA.ordersOverTime.labels,
+    datasets: [
+      {
+        label: 'Orders',
+        data: MOCK_CHARTS_DATA.ordersOverTime.data,
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+        tension: 0.4,
+      },
+    ],
+  };
 
-  const orderStatusData = useMemo(() => ({
-    labels: ['Pending', 'Preparing', 'Delivered', 'Cancelled'],
-    datasets: [{
-      data: [12, 25, 150, 5],
-      backgroundColor: ['#f39c12', '#3498db', '#2ecc71', '#e74c3c'],
-    }],
-  }), []);
+  const categoryChartData = {
+    labels: MOCK_CHARTS_DATA.categoryDistribution.labels,
+    datasets: [
+      {
+        data: MOCK_CHARTS_DATA.categoryDistribution.data,
+        backgroundColor: [
+          '#667eea',
+          '#f093fb',
+          '#4facfe',
+          '#43e97b',
+          '#fa709a',
+          '#feca57',
+        ],
+      },
+    ],
+  };
 
-  const StatCard = ({ title, value, icon: Icon, color }) => (
-    <Card className="stat-card">
-      <CardContent>
-        <Box className="stat-card-content">
-          <Box>
-            <Typography color="text.secondary" variant="body2">
-              {title}
-            </Typography>
-            <Typography variant="h4">{value}</Typography>
-          </Box>
-          <Icon style={{ fontSize: 40, color }} />
-        </Box>
-      </CardContent>
-    </Card>
-  );
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+  };
 
   return (
-    <Container maxWidth="lg" className="dashboard-container">
-      <Typography variant="h4" gutterBottom className="page-title">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" fontWeight="600" gutterBottom sx={{ mb: 3 }}>
         Admin Dashboard
       </Typography>
 
-      <Grid container spacing={3} className="stats-grid">
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Orders" value={stats.totalOrders} icon={ShoppingCart} color="#ff6b35" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Revenue" value={`₹${stats.totalRevenue}`} icon={AttachMoney} color="#2ecc71" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Customers" value={stats.totalCustomers} icon={People} color="#004e89" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Pending" value={stats.pendingOrders} icon={TrendingUp} color="#f39c12" />
-        </Grid>
+      {/* Stats Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {stats.map((stat, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Box
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 2,
+                      bgcolor: stat.color + '20',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: stat.color,
+                    }}
+                  >
+                    {stat.icon}
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {stat.positive ? (
+                      <TrendingUp sx={{ color: '#4caf50', fontSize: 18 }} />
+                    ) : (
+                      <TrendingDown sx={{ color: '#f44336', fontSize: 18 }} />
+                    )}
+                    <Typography
+                      variant="body2"
+                      sx={{ color: stat.positive ? '#4caf50' : '#f44336' }}
+                    >
+                      {stat.change}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Typography variant="h5" fontWeight="700" gutterBottom>
+                  {stat.value}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {stat.title}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
-      <Grid container spacing={3} className="charts-grid">
+      {/* Charts */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} md={8}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Weekly Revenue
-              </Typography>
-              <Bar data={revenueData} />
-            </CardContent>
-          </Card>
+          <Paper sx={{ p: 3, height: 350 }}>
+            <Typography variant="h6" fontWeight="600" gutterBottom>
+              Orders Overview
+            </Typography>
+            <Box sx={{ height: 280 }}>
+              <Line data={ordersChartData} options={chartOptions} />
+            </Box>
+          </Paper>
         </Grid>
-
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Order Status
-              </Typography>
-              <Pie data={orderStatusData} />
-            </CardContent>
-          </Card>
+          <Paper sx={{ p: 3, height: 350 }}>
+            <Typography variant="h6" fontWeight="600" gutterBottom>
+              Category Distribution
+            </Typography>
+            <Box sx={{ height: 280 }}>
+              <Doughnut data={categoryChartData} options={chartOptions} />
+            </Box>
+          </Paper>
         </Grid>
       </Grid>
+
+      {/* Recent Orders */}
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" fontWeight="600" gutterBottom sx={{ mb: 2 }}>
+          Recent Orders
+        </Typography>
+        {MOCK_ORDERS.slice(0, 5).map((order) => (
+          <Box
+            key={order.id}
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              py: 2,
+              borderBottom: 1,
+              borderColor: 'divider',
+              '&:last-child': { borderBottom: 0 },
+            }}
+          >
+            <Box>
+              <Typography variant="body1" fontWeight="600">
+                Order #{order.id}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {format(new Date(order.orderDate), 'MMM dd, yyyy • hh:mm a')}
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography variant="body1" fontWeight="600" color="primary">
+                ₹{order.totalAmount}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1,
+                  bgcolor:
+                    order.status === 'delivered'
+                      ? '#4caf5020'
+                      : order.status === 'preparing'
+                        ? '#ff980020'
+                        : '#2196f320',
+                  color:
+                    order.status === 'delivered'
+                      ? '#4caf50'
+                      : order.status === 'preparing'
+                        ? '#ff9800'
+                        : '#2196f3',
+                }}
+              >
+                {order.status.replace('_', ' ')}
+              </Typography>
+            </Box>
+          </Box>
+        ))}
+      </Paper>
     </Container>
   );
 };

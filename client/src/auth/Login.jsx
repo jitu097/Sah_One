@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   Container,
   Box,
@@ -8,24 +9,22 @@ import {
   TextField,
   Button,
   Typography,
-  Tabs,
-  Tab,
+  InputAdornment,
+  IconButton,
+  Alert,
 } from '@mui/material';
-import { RestaurantMenu } from '@mui/icons-material';
+import { RestaurantMenu, Visibility, VisibilityOff } from '@mui/icons-material';
+import { login } from './authSlice';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(0);
+  const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: '',
-    phone: '',
   });
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
 
   const handleChange = (e) => {
     setFormData({
@@ -36,67 +35,68 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (activeTab === 0) {
-      // Login with fixed credentials
-      if (formData.email === 'admin123@gmail.com' && formData.password === 'admin') {
-        navigate('/admin');
-      } else if (formData.email === 'delivery123@gmail.com' && formData.password === 'delivery') {
-        navigate('/delivery');
-      } else {
-        // Any other email/password goes to user dashboard
-        navigate('/');
-      }
+
+    let userData;
+    let redirectPath;
+
+    // Check credentials and determine role
+    if (formData.email === 'admin123@gmail.com' && formData.password === 'admin') {
+      userData = {
+        id: 'admin1',
+        name: 'Admin User',
+        email: formData.email,
+        role: 'admin',
+      };
+      redirectPath = '/admin';
+      toast.success('Welcome Admin!');
+    } else if (formData.email === 'delivery123@gmail.com' && formData.password === 'delivery') {
+      userData = {
+        id: 'delivery1',
+        name: 'Delivery Person',
+        email: formData.email,
+        role: 'delivery',
+      };
+      redirectPath = '/delivery';
+      toast.success('Welcome Delivery Partner!');
     } else {
-      // Registration - any input goes to user dashboard
-      navigate('/');
+      // Any other credentials = user
+      userData = {
+        id: 'user1',
+        name: 'John Doe',
+        email: formData.email,
+        role: 'user',
+      };
+      redirectPath = '/user';
+      toast.success('Welcome!');
     }
+
+    dispatch(login(userData));
+    navigate(redirectPath);
   };
 
   return (
     <Container maxWidth="sm">
-      <Box className="login-container">
-        <Card className="login-card">
-          <CardContent className="login-card-content">
-            <Box className="login-header">
-              <RestaurantMenu className="login-icon" />
-              <Typography variant="h4" component="h1" className="app-title">
-                Sah One
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', py: 4 }}>
+        <Card sx={{ width: '100%', boxShadow: 3 }}>
+          <CardContent sx={{ p: 4 }}>
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <RestaurantMenu sx={{ fontSize: 60, color: 'primary.main', mb: 1 }} />
+              <Typography variant="h4" component="h1" fontWeight="600" gutterBottom>
+                Welcome Back
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Your favorite food delivery app
+                Sign in to your Sah One account
               </Typography>
             </Box>
 
-            <Tabs value={activeTab} onChange={handleTabChange} centered className="auth-tabs">
-              <Tab label="Login" />
-              <Tab label="Register" />
-            </Tabs>
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <strong>Test Credentials:</strong><br />
+              Admin: admin123@gmail.com / admin<br />
+              Delivery: delivery123@gmail.com / delivery<br />
+              User: Any email / Any password
+            </Alert>
 
-            <form onSubmit={handleSubmit} className="auth-form">
-              {activeTab === 1 && (
-                <>
-                  <TextField
-                    fullWidth
-                    label="Full Name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    margin="normal"
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    margin="normal"
-                    required
-                  />
-                </>
-              )}
-
+            <form onSubmit={handleSubmit}>
               <TextField
                 fullWidth
                 label="Email"
@@ -106,18 +106,32 @@ const Login = () => {
                 onChange={handleChange}
                 margin="normal"
                 required
-                helperText={activeTab === 0 ? "Admin: admin123@gmail.com | Delivery: delivery123@gmail.com | User: any email" : ""}
+                autoFocus
+                placeholder="Enter any email"
               />
 
               <TextField
                 fullWidth
                 label="Password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
                 margin="normal"
                 required
+                placeholder="Enter any password"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
 
               <Button
@@ -125,10 +139,19 @@ const Login = () => {
                 type="submit"
                 variant="contained"
                 size="large"
-                className="submit-button"
+                sx={{ mt: 3, mb: 2, py: 1.5 }}
               >
-                {activeTab === 0 ? 'Login' : 'Register'}
+                Sign In
               </Button>
+
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  Don't have an account?{' '}
+                  <Link to="/signup" style={{ color: '#667eea', textDecoration: 'none', fontWeight: 500 }}>
+                    Sign Up
+                  </Link>
+                </Typography>
+              </Box>
             </form>
           </CardContent>
         </Card>

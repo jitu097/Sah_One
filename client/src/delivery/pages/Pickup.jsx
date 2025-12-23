@@ -1,107 +1,129 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container,
+  Paper,
+  Typography,
+  Box,
+  Button,
   Card,
   CardContent,
-  Typography,
-  Button,
-  Box,
-  Divider,
-  TextField,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
-import { CheckCircle } from '@mui/icons-material';
-import { formatCurrency } from '../../shared/utils/helpers';
+import { CheckCircle, ArrowBack } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 
-const mockOrder = {
-  _id: 'ORD1701234567890',
-  items: [
-    { menuItem: { name: 'Margherita Pizza' }, quantity: 2, price: 299 },
-    { menuItem: { name: 'Chicken Burger' }, quantity: 1, price: 199 },
-  ],
-  totalAmount: 797,
-  status: 'preparing',
-};
-
 const Pickup = () => {
-  const { orderId } = useParams();
   const navigate = useNavigate();
-  const [order] = useState(mockOrder);
-  const [otp, setOtp] = useState('');
+  const { orderId } = useParams();
+  const [verified, setVerified] = useState(false);
 
-  const handleConfirmPickup = () => {
-    if (otp === '1234') {
-      toast.success('Order picked up successfully');
-      navigate('/delivery');
-    } else {
-      toast.error('Invalid OTP. Try 1234');
+  const orderDetails = {
+    id: orderId,
+    restaurant: 'Sah One Restaurant',
+    address: 'Downtown, Main Street',
+    items: [
+      { name: 'Margherita Pizza', quantity: 2 },
+      { name: 'Mango Smoothie', quantity: 1 },
+    ],
+    totalAmount: 697,
+  };
+
+  const handlePickup = () => {
+    if (!verified) {
+      toast.error('Please verify all items');
+      return;
     }
+    toast.success('Order picked up successfully!');
+    navigate('/delivery');
   };
 
   return (
-    <Container maxWidth="sm" className="pickup-container">
-      <Typography variant="h4" gutterBottom>
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => navigate('/delivery')}
+        sx={{ mb: 3 }}
+      >
+        Back
+      </Button>
+
+      <Typography variant="h4" fontWeight="600" gutterBottom sx={{ mb: 3 }}>
         Pickup Order
       </Typography>
 
-      <Card>
-        <CardContent>
-          <Box className="pickup-header">
-            <CheckCircle className="pickup-icon" />
-            <Typography variant="h6" className="order-number">
-              Order #{order._id.slice(-6)}
-            </Typography>
-          </Box>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" fontWeight="600" gutterBottom>
+          Order #{orderDetails.id}
+        </Typography>
 
-          <Divider className="pickup-divider" />
+        <Box sx={{ mt: 3, mb: 3 }}>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Pickup Location
+          </Typography>
+          <Typography variant="body1" fontWeight="500">
+            {orderDetails.restaurant}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {orderDetails.address}
+          </Typography>
+        </Box>
 
-          <Box className="order-items-section">
-            <Typography variant="subtitle2" gutterBottom>
+        <Card variant="outlined" sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight="600" gutterBottom>
               Order Items
             </Typography>
-            {order.items.map((item, index) => (
-              <Box key={index} className="order-item-row">
-                <Typography variant="body2">
-                  {item.menuItem?.name || 'Item'} x {item.quantity}
-                </Typography>
-                <Typography variant="body2">
-                  {formatCurrency(item.price * item.quantity)}
+            {orderDetails.items.map((item, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  py: 1,
+                  borderBottom: index < orderDetails.items.length - 1 ? 1 : 0,
+                  borderColor: 'divider',
+                }}
+              >
+                <Typography variant="body2">{item.name}</Typography>
+                <Typography variant="body2" fontWeight="500">
+                  x{item.quantity}
                 </Typography>
               </Box>
             ))}
-          </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+              <Typography variant="body1" fontWeight="600">
+                Total
+              </Typography>
+              <Typography variant="h6" fontWeight="700" color="primary">
+                ₹{orderDetails.totalAmount}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
 
-          <Divider className="pickup-divider" />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={verified}
+              onChange={(e) => setVerified(e.target.checked)}
+            />
+          }
+          label="I have verified all items in the order"
+        />
 
-          <Box className="order-total">
-            <Typography variant="h6">Total</Typography>
-            <Typography variant="h6" color="primary">
-              {formatCurrency(order.totalAmount)}
-            </Typography>
-          </Box>
-
-          <TextField
-            fullWidth
-            label="Enter Pickup OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter 4-digit OTP"
-            margin="normal"
-          />
-
-          <Button
-            fullWidth
-            variant="contained"
-            size="large"
-            onClick={handleConfirmPickup}
-            disabled={!otp || otp.length !== 4}
-            sx={{ mt: 2 }}
-          >
-            Confirm Pickup
-          </Button>
-        </CardContent>
-      </Card>
+        <Button
+          fullWidth
+          variant="contained"
+          size="large"
+          startIcon={<CheckCircle />}
+          onClick={handlePickup}
+          sx={{ mt: 2 }}
+        >
+          Confirm Pickup
+        </Button>
+      </Paper>
     </Container>
   );
 };

@@ -1,31 +1,30 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   Container,
-  Card,
-  CardContent,
+  Paper,
   Typography,
-  TextField,
-  Button,
   Box,
   Avatar,
-  Divider,
+  TextField,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
 } from '@mui/material';
-import { Person, Edit } from '@mui/icons-material';
-import { logout, updateProfile } from '../../auth/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { Edit, LocationOn, Phone, Email } from '@mui/icons-material';
+import { updateProfile } from '../../auth/authSlice';
 import toast from 'react-hot-toast';
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: user?.phone || '',
+    phone: user?.phone || '+1 234 567 8900',
   });
 
   const handleChange = (e) => {
@@ -38,117 +37,145 @@ const Profile = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(updateProfile(formData));
-    toast.success('Profile updated successfully');
     setIsEditing(false);
-  };
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
-    toast.success('Logged out successfully');
+    toast.success('Profile updated successfully!');
   };
 
   return (
-    <Container maxWidth="sm" className="profile-container">
-      <Card className="profile-card">
-        <CardContent>
-          <Box className="profile-header">
-            <Avatar className="profile-avatar">
-              <Person className="profile-avatar-icon" />
-            </Avatar>
-            <Typography variant="h5">{user?.name}</Typography>
-            <Typography variant="body2" color="text.secondary" className="user-role">
-              {user?.role?.toUpperCase()}
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Typography variant="h4" fontWeight="600" gutterBottom sx={{ mb: 3 }}>
+        My Profile
+      </Typography>
+
+      <Paper sx={{ p: 4, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+          <Avatar
+            sx={{
+              width: 100,
+              height: 100,
+              bgcolor: 'primary.main',
+              fontSize: '2.5rem',
+              mr: 3,
+            }}
+          >
+            {user?.name?.charAt(0) || 'U'}
+          </Avatar>
+          <Box>
+            <Typography variant="h5" fontWeight="600">
+              {user?.name}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {user?.email}
             </Typography>
           </Box>
+          <IconButton
+            sx={{ ml: 'auto' }}
+            onClick={() => setIsEditing(!isEditing)}
+            color="primary"
+          >
+            <Edit />
+          </IconButton>
+        </Box>
 
-          <Divider className="profile-divider" />
-
-          {isEditing ? (
-            <form onSubmit={handleSubmit} className="profile-form">
-              <TextField
-                fullWidth
-                label="Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                margin="normal"
-              />
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                margin="normal"
-                disabled
-              />
-              <TextField
-                fullWidth
-                label="Phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                margin="normal"
-              />
-              <Box className="profile-actions">
-                <Button
+        {isEditing ? (
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
                   fullWidth
-                  variant="contained"
-                  type="submit"
-                >
-                  Save Changes
-                </Button>
-                <Button
+                  label="Full Name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
                   fullWidth
-                  variant="outlined"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </Button>
-              </Box>
-            </form>
-          ) : (
-            <>
-              <Box className="profile-info-item">
-                <Typography variant="body2" color="text.secondary">Email</Typography>
-                <Typography variant="body1">{user?.email}</Typography>
-              </Box>
-              <Box className="profile-info-item">
-                <Typography variant="body2" color="text.secondary">Phone</Typography>
-                <Typography variant="body1">{user?.phone || 'Not provided'}</Typography>
-              </Box>
-              <Box className="profile-info-item">
-                <Typography variant="body2" color="text.secondary">Member Since</Typography>
-                <Typography variant="body1">
-                  {new Date(user?.createdAt).toLocaleDateString()}
-                </Typography>
-              </Box>
-
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<Edit />}
-                onClick={() => setIsEditing(true)}
-                className="edit-profile-button"
-              >
-                Edit Profile
-              </Button>
-
-              <Button
-                fullWidth
-                variant="contained"
-                color="error"
-                onClick={handleLogout}
-                className="logout-button"
-              >
-                Logout
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Button type="submit" variant="contained">
+                    Save Changes
+                  </Button>
+                  <Button variant="outlined" onClick={() => setIsEditing(false)}>
+                    Cancel
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </form>
+        ) : (
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Email color="primary" />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Email
+                      </Typography>
+                      <Typography variant="body1">{user?.email}</Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Phone color="primary" />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Phone
+                      </Typography>
+                      <Typography variant="body1">{formData.phone}</Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'start', gap: 2 }}>
+                    <LocationOn color="primary" />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Default Address
+                      </Typography>
+                      <Typography variant="body1">
+                        123 Main St, Apartment 4B
+                        <br />
+                        New York, NY 10001
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        )}
+      </Paper>
     </Container>
   );
 };

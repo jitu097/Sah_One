@@ -10,6 +10,10 @@ const Navbar = () => {
 
   const cartItemsCount = items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
+  // Safe user display
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
+  const userRole = user?.role || 'user';
+
   return (
     <AppBar position="sticky" sx={{ bgcolor: 'primary.main' }}>
       <Toolbar>
@@ -26,14 +30,14 @@ const Navbar = () => {
           variant="h6"
           component="div"
           sx={{ flexGrow: 1, cursor: 'pointer' }}
-          onClick={() => navigate(user?.role === 'admin' ? '/admin' : user?.role === 'delivery' ? '/delivery' : '/')}
+          onClick={() => navigate(userRole === 'admin' ? '/admin' : userRole === 'delivery' ? '/delivery' : '/user')}
         >
           Sah One
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          {user?.role === 'user' && (
-            <IconButton color="inherit" onClick={() => navigate('/cart')}>
+          {userRole === 'user' && (
+            <IconButton color="inherit" onClick={() => navigate('/user/cart')}>
               <Badge badgeContent={cartItemsCount} color="error">
                 <ShoppingCart />
               </Badge>
@@ -46,9 +50,9 @@ const Navbar = () => {
             </Badge>
           </IconButton>
 
-          <IconButton onClick={() => navigate('/profile')}>
+          <IconButton onClick={() => navigate('/user/profile')}>
             <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-              {user?.name?.charAt(0).toUpperCase()}
+              {userInitial}
             </Avatar>
           </IconButton>
         </Box>
