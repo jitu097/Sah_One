@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../../shared/components/Logo';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -17,9 +18,7 @@ const LandingPage = () => {
   return (
     <div className="landing-page">
       <div className={`landing-content ${show ? 'show' : ''}`}>
-        <div className="logo-container">
-          <div className="landing-logo">🍔</div>
-        </div>
+        <Logo size="large" showText={false} />
         
         <h1 className="landing-title">Sah One</h1>
         <p className="landing-subtitle">Your Favorite Food Delivery App</p>

@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 
 export default function Menu() {
   return (
-    <div className="admin-container">
-      <div className="admin-header">
-        <h1>🍽️ Manage Menu</h1>
-        <Link to="/admin" className="back-btn">← Back</Link>
-      </div>
+    <>
+      <Navbar />
+      <div className="admin-container">
+        <div className="admin-header">
+          <h1>🍽️ Manage Menu</h1>
+        </div>
 
       <button className="add-item-btn">+ Add New Item</button>
 
@@ -39,6 +41,7 @@ export default function Menu() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

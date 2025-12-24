@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 
 export default function Reports() {
   return (
-    <div className="admin-container">
-      <div className="admin-header">
-        <h1>📈 Reports</h1>
-        <Link to="/admin" className="back-btn">← Back</Link>
-      </div>
+    <>
+      <Navbar />
+      <div className="admin-container">
+        <div className="admin-header">
+          <h1>📈 Reports</h1>
+        </div>
 
       <div className="report-cards">
         <div className="report-card">
@@ -29,6 +31,7 @@ export default function Reports() {
           <span className="report-change negative">-3%</span>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

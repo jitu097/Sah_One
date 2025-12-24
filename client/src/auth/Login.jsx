@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import Logo from '../shared/components/Logo';
 import './auth.css';
 
 const Login = () => {
@@ -43,7 +44,7 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo">🍔</div>
+          <Logo size="medium" showText={false} />
           <h1>Sah One</h1>
           <p>Welcome Back!</p>
         </div>

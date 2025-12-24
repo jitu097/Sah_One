@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 
 export default function Orders() {
   return (
-    <div className="admin-container">
-      <div className="admin-header">
-        <h1>📦 All Orders</h1>
-        <Link to="/admin" className="back-btn">← Back</Link>
-      </div>
+    <>
+      <Navbar />
+      <div className="admin-container">
+        <div className="admin-header">
+          <h1>📦 All Orders</h1>
+        </div>
 
       <div className="admin-list">
         <div className="admin-item">
@@ -29,6 +31,7 @@ export default function Orders() {
           <span className="item-price">₹299</span>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

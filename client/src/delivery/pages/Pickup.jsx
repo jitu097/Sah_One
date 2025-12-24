@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 
 export default function Pickup() {
   return (
-    <div className="delivery-container">
-      <div className="delivery-header">
-        <h1>🏪 Pickup Orders</h1>
-        <Link to="/login" className="logout-btn">Logout</Link>
-      </div>
+    <>
+      <Navbar />
+      <div className="delivery-container">
+        <div className="delivery-header">
+          <h1>🏪 Pickup Orders</h1>
+        </div>
 
       <div className="pickup-details">
         <div className="detail-card">
@@ -28,21 +30,7 @@ export default function Pickup() {
           <button className="btn-confirm-pickup">Confirm Pickup</button>
         </div>
       </div>
-
-      <nav className="bottom-nav">
-        <Link to="/delivery" className="nav-item">
-          <span className="nav-icon">📦</span>
-          <span>Orders</span>
-        </Link>
-        <Link to="/delivery/pickup" className="nav-item active">
-          <span className="nav-icon">🏪</span>
-          <span>Pickup</span>
-        </Link>
-        <Link to="/delivery/confirm" className="nav-item">
-          <span className="nav-icon">✅</span>
-          <span>Confirm</span>
-        </Link>
-      </nav>
-    </div>
+      </div>
+    </>
   );
 }

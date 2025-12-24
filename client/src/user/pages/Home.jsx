@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 
 export default function Home() {
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1>🍕 Browse Menu</h1>
-        <Link to="/login" className="logout-btn">Logout</Link>
-      </div>
+    <>
+      <Navbar />
+      <div className="page-container">
+        <div className="page-header">
+          <h1>🍕 Browse Menu</h1>
+        </div>
 
       <div className="menu-grid">
         <div className="menu-item">
@@ -51,25 +53,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <nav className="bottom-nav">
-        <Link to="/user" className="nav-item active">
-          <span className="nav-icon">🏠</span>
-          <span>Home</span>
-        </Link>
-        <Link to="/user/cart" className="nav-item">
-          <span className="nav-icon">🛒</span>
-          <span>Cart</span>
-        </Link>
-        <Link to="/user/orders" className="nav-item">
-          <span className="nav-icon">📦</span>
-          <span>Orders</span>
-        </Link>
-        <Link to="/user/profile" className="nav-item">
-          <span className="nav-icon">👤</span>
-          <span>Profile</span>
-        </Link>
-      </nav>
-    </div>
+      </div>
+    </>
   );
 }

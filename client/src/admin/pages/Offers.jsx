@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 
 export default function Offers() {
   return (
-    <div className="admin-container">
-      <div className="admin-header">
-        <h1>🎁 Manage Offers</h1>
-        <Link to="/admin" className="back-btn">← Back</Link>
-      </div>
+    <>
+      <Navbar />
+      <div className="admin-container">
+        <div className="admin-header">
+          <h1>🎁 Manage Offers</h1>
+        </div>
 
       <button className="add-item-btn">+ Create New Offer</button>
 
@@ -31,6 +33,7 @@ export default function Offers() {
           <button className="edit-btn">Edit</button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 
 export default function Dashboard() {
   return (
-    <div className="admin-container">
-      <div className="admin-header">
-        <h1>🔧 Admin Dashboard</h1>
-        <Link to="/login" className="logout-btn">Logout</Link>
-      </div>
+    <>
+      <Navbar />
+      <div className="admin-container">
+        <div className="admin-header">
+          <h1>🔧 Admin Dashboard</h1>
+        </div>
 
       <div className="stats-grid">
         <div className="stat-card">
@@ -62,6 +64,7 @@ export default function Dashboard() {
           <h3>View Reports</h3>
         </Link>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
