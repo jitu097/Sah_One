@@ -17,7 +17,7 @@ import {
   TextField,
 } from '@mui/material';
 import { Add, Edit, Delete } from '@mui/icons-material';
-import { MOCK_MENU_ITEMS } from '../../shared/utils/mockData';
+import { MOCK_MENU_ITEMS } from '../utils/mockData';
 import toast from 'react-hot-toast';
 
 const AdminMenu = () => {

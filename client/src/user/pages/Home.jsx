@@ -22,7 +22,7 @@ import {
   Receipt,
   Person,
 } from '@mui/icons-material';
-import { MOCK_MENU_ITEMS } from '../../shared/utils/mockData';
+import { MOCK_MENU_ITEMS } from '../utils/mockData';
 
 const UserHome = () => {
   const navigate = useNavigate();

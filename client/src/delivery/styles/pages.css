@@ -1,0 +1,212 @@
+/* Delivery Pages Common Styles */
+
+.delivery-page {
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.delivery-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.delivery-page .page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+}
+
+/* Delivery Order Cards */
+.delivery-order-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+  border-left: 4px solid #43e97b;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.delivery-order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.delivery-order-card .order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.delivery-order-card .order-id {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.delivery-order-card .order-status {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.delivery-order-card .order-status.pending {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.delivery-order-card .order-status.assigned {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.delivery-order-card .order-status.picked-up {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.delivery-order-card .order-status.delivered {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.delivery-order-card .customer-info {
+  margin-bottom: 12px;
+}
+
+.delivery-order-card .customer-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.delivery-order-card .customer-phone {
+  color: #666;
+  font-size: 14px;
+}
+
+.delivery-order-card .delivery-address {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.delivery-order-card .address-icon {
+  color: #43e97b;
+  margin-right: 8px;
+}
+
+.delivery-order-card .order-items {
+  margin: 12px 0;
+}
+
+.delivery-order-card .item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.delivery-order-card .order-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  font-weight: 700;
+  color: #333;
+  font-size: 16px;
+}
+
+.delivery-order-card .action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Delivery Buttons */
+.delivery-btn-primary {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex: 1;
+}
+
+.delivery-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 233, 123, 0.4);
+}
+
+.delivery-btn-secondary {
+  background: #fff;
+  color: #43e97b;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 2px solid #43e97b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.delivery-btn-secondary:hover {
+  background: #43e97b;
+  color: #fff;
+}
+
+/* Stats */
+.delivery-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.delivery-stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.delivery-stat-card .stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #43e97b;
+  margin-bottom: 8px;
+}
+
+.delivery-stat-card .stat-label {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .delivery-page {
+    padding: 16px;
+  }
+
+  .delivery-page .page-title {
+    font-size: 24px;
+  }
+
+  .delivery-order-card .action-buttons {
+    flex-direction: column;
+  }
+}

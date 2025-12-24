@@ -11,7 +11,7 @@ import {
   Paper,
 } from '@mui/material';
 import { Navigation, CheckCircle, AttachMoney, LocalShipping } from '@mui/icons-material';
-import { MOCK_DELIVERY_ORDERS } from '../../shared/utils/mockData';
+import { MOCK_DELIVERY_ORDERS } from '../utils/mockData';
 
 const AssignedOrders = () => {
   const navigate = useNavigate();

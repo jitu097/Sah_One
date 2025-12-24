@@ -1,0 +1,13 @@
+/* Admin Styles - Import all admin-specific styles */
+
+/* Import role-specific styles in order */
+@import './navigation.css';
+@import './dashboard.css';
+@import './pages.css';
+
+/* Admin-specific variables can be defined here later */
+:root {
+  --admin-primary: #667eea;
+  --admin-secondary: #764ba2;
+  --admin-accent: #f093fb;
+}

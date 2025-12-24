@@ -19,7 +19,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { MOCK_STATS, MOCK_CHARTS_DATA, MOCK_ORDERS } from '../../shared/utils/mockData';
+import { MOCK_STATS, MOCK_CHARTS_DATA, MOCK_ORDERS } from '../utils/mockData';
 import { format } from 'date-fns';
 
 ChartJS.register(

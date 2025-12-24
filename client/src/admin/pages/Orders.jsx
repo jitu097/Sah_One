@@ -18,7 +18,7 @@ import {
   InputLabel,
 } from '@mui/material';
 import { Visibility } from '@mui/icons-material';
-import { MOCK_ORDERS } from '../../shared/utils/mockData';
+import { MOCK_ORDERS } from '../utils/mockData';
 import { format } from 'date-fns';
 
 const AdminOrders = () => {

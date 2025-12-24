@@ -1,6 +1,6 @@
 import { Container, Typography, Grid, Card, CardContent, Box, Chip, Button } from '@mui/material';
 import { AccessTime, CheckCircle, LocalShipping, Cancel } from '@mui/icons-material';
-import { MOCK_ORDERS } from '../../shared/utils/mockData';
+import { MOCK_ORDERS } from '../utils/mockData';
 import { format } from 'date-fns';
 
 const Orders = () => {

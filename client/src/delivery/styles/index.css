@@ -1,0 +1,12 @@
+/* Delivery Styles - Import all delivery-specific styles */
+
+/* Import role-specific styles in order */
+@import './navigation.css';
+@import './pages.css';
+
+/* Delivery-specific variables can be defined here later */
+:root {
+  --delivery-primary: #43e97b;
+  --delivery-secondary: #38f9d7;
+  --delivery-accent: #fa709a;
+}
