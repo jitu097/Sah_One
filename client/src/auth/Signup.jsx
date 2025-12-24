@@ -1,158 +1,129 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import {
-    Container,
-    Box,
-    Card,
-    CardContent,
-    TextField,
-    Button,
-    Typography,
-    InputAdornment,
-    IconButton,
-} from '@mui/material';
-import { RestaurantMenu, Visibility, VisibilityOff } from '@mui/icons-material';
-import { login } from './authSlice';
-import toast from 'react-hot-toast';
+import './auth.css';
 
 const Signup = () => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const [showPassword, setShowPassword] = useState(false);
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        password: '',
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
     });
+    setError('');
+  };
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError('Please fill in all fields');
+      return;
+    }
 
-        // Simple validation
-        if (!formData.name || !formData.email || !formData.phone || !formData.password) {
-            toast.error('Please fill all fields');
-            return;
-        }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
-        // Mock signup - always creates a user account
-        const userData = {
-            id: 'user_' + Date.now(),
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            role: 'user',
-        };
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
 
-        dispatch(login(userData));
-        toast.success('Account created successfully!');
-        navigate('/user');
-    };
+    // Successful signup - redirect to user dashboard
+    alert('Account created successfully!');
+    navigate('/user');
+  };
 
-    return (
-        <Container maxWidth="sm">
-            <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', py: 4 }}>
-                <Card sx={{ width: '100%', boxShadow: 3 }}>
-                    <CardContent sx={{ p: 4 }}>
-                        <Box sx={{ textAlign: 'center', mb: 3 }}>
-                            <RestaurantMenu sx={{ fontSize: 60, color: 'primary.main', mb: 1 }} />
-                            <Typography variant="h4" component="h1" fontWeight="600" gutterBottom>
-                                Join Sah One
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Create your account to order delicious food
-                            </Typography>
-                        </Box>
+  return (
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="auth-logo">🍔</div>
+          <h1>Sah One</h1>
+          <p>Create Your Account</p>
+        </div>
 
-                        <form onSubmit={handleSubmit}>
-                            <TextField
-                                fullWidth
-                                label="Full Name"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                margin="normal"
-                                required
-                                autoFocus
-                            />
+        {error && <div className="error-alert">{error}</div>}
 
-                            <TextField
-                                fullWidth
-                                label="Email"
-                                name="email"
-                                type="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                margin="normal"
-                                required
-                            />
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label>Full Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter your name"
+              required
+            />
+          </div>
 
-                            <TextField
-                                fullWidth
-                                label="Phone Number"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                margin="normal"
-                                required
-                                placeholder="+1 234 567 8900"
-                            />
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
 
-                            <TextField
-                                fullWidth
-                                label="Password"
-                                name="password"
-                                type={showPassword ? 'text' : 'password'}
-                                value={formData.password}
-                                onChange={handleChange}
-                                margin="normal"
-                                required
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                edge="end"
-                                            >
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
+          <div className="form-group">
+            <label>Password</label>
+            <div className="password-field">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Create a password"
+                required
+              />
+              <button
+                type="button"
+                className="toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
+          </div>
 
-                            <Button
-                                fullWidth
-                                type="submit"
-                                variant="contained"
-                                size="large"
-                                sx={{ mt: 3, mb: 2, py: 1.5 }}
-                            >
-                                Create Account
-                            </Button>
+          <div className="form-group">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your password"
+              required
+            />
+          </div>
 
-                            <Box sx={{ textAlign: 'center' }}>
-                                <Typography variant="body2" color="text.secondary">
-                                    Already have an account?{' '}
-                                    <Link to="/login" style={{ color: '#667eea', textDecoration: 'none', fontWeight: 500 }}>
-                                        Sign In
-                                    </Link>
-                                </Typography>
-                            </Box>
-                        </form>
-                    </CardContent>
-                </Card>
-            </Box>
-        </Container>
-    );
+          <button type="submit" className="btn-primary">
+            Create Account
+          </button>
+
+          <p className="auth-footer">
+            Already have an account? <Link to="/login">Login</Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default Signup;
