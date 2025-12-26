@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import Logo from '../../shared/components/Logo';
 import '../styles/navbar.css';
 
 export default function Navbar() {
@@ -19,7 +18,7 @@ export default function Navbar() {
     <nav className="admin-navbar">
       <div className="navbar-container">
         <div className="navbar-brand">
-          <Logo size="small" showText={false} />
+          <img src="/LOGO.png" alt="Logo" className="navbar-logo" />
           <span className="brand-text">Admin Panel</span>
         </div>
 

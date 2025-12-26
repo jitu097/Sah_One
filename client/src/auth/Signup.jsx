@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Logo from '../shared/components/Logo';
 import './auth.css';
 
 const Signup = () => {
@@ -49,7 +48,7 @@ const Signup = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <Logo size="medium" showText={false} />
+          <img src="/LOGO.png" alt="Sah One Logo" className="auth-logo" />
           <h1>Sah One</h1>
           <p>Create Your Account</p>
         </div>

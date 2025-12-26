@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 // App Pages
 import LandingPage from './app/pages/LandingPage';
+import HomePage from './app/pages/HomePage';
 
 // Auth Pages
 import Login from './auth/Login';
@@ -32,6 +33,7 @@ function App() {
       <Routes>
         {/* Landing & Auth */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 

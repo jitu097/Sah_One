@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Logo from '../../shared/components/Logo';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -10,7 +9,7 @@ const LandingPage = () => {
   useEffect(() => {
     setShow(true);
     const timer = setTimeout(() => {
-      navigate('/login');
+      navigate('/home');
     }, 3000);
     return () => clearTimeout(timer);
   }, [navigate]);
@@ -18,9 +17,9 @@ const LandingPage = () => {
   return (
     <div className="landing-page">
       <div className={`landing-content ${show ? 'show' : ''}`}>
-        <Logo size="large" showText={false} />
+        <img src="/LOGO.png" alt="Sah's One Logo" className="landing-logo" />
         
-        <h1 className="landing-title">Sah One</h1>
+        
         <p className="landing-subtitle">Your Favorite Food Delivery App</p>
         
         <div className="loading-dots">

@@ -1,52 +1,41 @@
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import Logo from '../../shared/components/Logo';
-import '../styles/navbar.css';
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import "../styles/navbar.css";
+import SideBar from "./SideBar";
 
 export default function Navbar() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    navigate('/login');
-  };
-
-  const isActive = (path) => {
-    return location.pathname === path ? 'active' : '';
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   return (
-    <nav className="user-navbar">
-      <div className="navbar-container">
-        <div className="navbar-brand">
-          <Logo size="small" showText={false} />
-          <span className="brand-text">Sah One</span>
+    <>
+      <nav className="navbar">
+        <div className="nav-left">
+          <img src="/LOGO.png" alt="SAH_ONE" className="logo-img" />
+          <span className="location">📍 Your City</span>
         </div>
 
-        <div className="navbar-links">
-          <Link to="/user" className={`nav-link ${isActive('/user')}`}>
-            <span className="nav-icon">🏠</span>
-            <span className="nav-text">Home</span>
-          </Link>
-          <Link to="/user/cart" className={`nav-link ${isActive('/user/cart')}`}>
-            <span className="nav-icon">🛒</span>
-            <span className="nav-text">Cart</span>
-          </Link>
-          <Link to="/user/orders" className={`nav-link ${isActive('/user/orders')}`}>
-            <span className="nav-icon">📦</span>
-            <span className="nav-text">Orders</span>
-          </Link>
-          <Link to="/user/profile" className={`nav-link ${isActive('/user/profile')}`}>
-            <span className="nav-icon">👤</span>
-            <span className="nav-text">Profile</span>
-          </Link>
+        <div className="nav-center">
+          <input type="text" placeholder="Search food..." />
         </div>
 
-        <button className="logout-btn" onClick={handleLogout}>
-          <span className="logout-icon">🚪</span>
-          <span className="logout-text">Logout</span>
-        </button>
-      </div>
-    </nav>
+        <div className="nav-right">
+          <Link to="/offers">Offers</Link>
+          <Link to="/orders">Orders</Link>
+          <Link to="/profile">Profile</Link>
+          <Link to="/cart" className="cart-btn">Cart</Link>
+          <img 
+            src="/hamburger.png" 
+            alt="Menu" 
+            className="hamburger-icon" 
+            onClick={toggleSidebar}
+          />
+        </div>
+      </nav>
+      <SideBar isOpen={isSidebarOpen} onClose={toggleSidebar} />
+    </>
   );
 }
