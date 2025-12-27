@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import './auth.css';
+import './login.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -40,65 +40,77 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <img src="/LOGO.png" alt="Sah One Logo" className="auth-logo" />
-          <h1>Sah One</h1>
-          <p>Welcome Back!</p>
+    <div className="login-container">
+      <div className="login-left">
+        <div className="login-image-wrapper">
+          <img src="/login.jpeg" alt="Food" className="login-image" />
+          <div className="login-overlay">
+            <h2 className="login-tagline">Need some<br />Pizza, yo?</h2>
+            <p className="login-description">C'mon and order from nearby Pizza<br />delivery and pickup restaurants</p>
+          </div>
         </div>
+      </div>
 
-        {error && <div className="error-alert">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              required
-            />
+      <div className="login-right">
+        <div className="login-card">
+          <div className="login-header">
+            <img src="/LOGO.png" alt="Sah One Logo" className="login-logo" />
+            <h1 className="login-brand">Sah One</h1>
+            <p className="login-welcome">Welcome Back!</p>
           </div>
 
-          <div className="form-group">
-            <label>Password</label>
-            <div className="password-field">
+          {error && <div className="error-alert">{error}</div>}
+
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label>Email</label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your password"
+                placeholder="Enter your email"
                 required
               />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
             </div>
-          </div>
 
-          <button type="submit" className="btn-primary">
-            Login
-          </button>
+            <div className="form-group">
+              <label>Password</label>
+              <div className="password-field">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
+            </div>
 
-          <p className="auth-footer">
-            Don't have an account? <Link to="/signup">Sign up</Link>
-          </p>
+            <button type="submit" className="login-btn">
+              Login
+            </button>
 
-          <div className="test-credentials">
-            <p><strong>Test Credentials:</strong></p>
-            <p>Admin: admin@test.com / admin</p>
-            <p>Delivery: delivery@test.com / delivery</p>
-            <p>User: user@test.com / user</p>
-          </div>
-        </form>
+            <p className="login-footer">
+              Don't have an account? <Link to="/signup">Sign up</Link>
+            </p>
+
+            <div className="test-credentials">
+              <p><strong>Test Credentials:</strong></p>
+              <p>Admin: admin@test.com / admin</p>
+              <p>Delivery: delivery@test.com / delivery</p>
+              <p>User: user@test.com / user</p>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
