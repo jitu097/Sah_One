@@ -312,10 +312,12 @@
 }
 
 .menu-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  justify-content: center;
   gap: 30px;
   padding: 0;
+  margin: 0 auto;
+  margin-left: 250px;
 }
 
 .menu-card {
@@ -330,6 +332,41 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+.menu-card.locked {
+  cursor: not-allowed;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.menu-card.locked:hover {
+  transform: none;
+}
+
+.menu-card.locked img {
+  filter: blur(1.2px);
+}
+
+.lock-overlay {
+  position: absolute;
+  top: 57%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  filter: blur(0);
+}
+
+.lock-icon {
+  font-size: 2rem;
+  opacity: 0.9;
+  filter: blur(0) !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  margin-top: 20px;
 }
 
 .menu-card:hover {
@@ -338,8 +375,8 @@
 }
 
 .menu-card img {
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 15px;
@@ -349,6 +386,15 @@
   color: #e23744;
   font-weight: 600;
   margin: 10px 0;
+  transition: color 0.3s ease;
+}
+
+.menu-card .active-time {
+  color: #28a745 !important;
+}
+
+.menu-card .inactive-time {
+  color: #dc3545 !important;
 }
 
 .menu-card h3 {

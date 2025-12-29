@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 //import SideBar from '../components/SideBar';
@@ -6,6 +6,44 @@ import '../styles/pages.css';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const getTimeStatus = (startHour, endHour) => {
+    const now = currentTime;
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    
+    // Check if current time is within the range
+    if (hours >= startHour && hours < endHour) {
+      // Calculate remaining time
+      const endTime = new Date(now);
+      endTime.setHours(endHour, 0, 0, 0);
+      const diff = endTime - now;
+      
+      const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+      const minutesLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secondsLeft = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      return {
+        isActive: true,
+        timeString: `${hoursLeft}h ${minutesLeft}m ${secondsLeft}s left`
+      };
+    } else {
+      return {
+        isActive: false,
+        timeString: `${startHour > 12 ? startHour - 12 : startHour}${startHour >= 12 ? 'pm' : 'am'} to ${endHour > 12 ? endHour - 12 : endHour}${endHour >= 12 ? 'pm' : 'am'}`
+      };
+    }
+  };
   
   const slides = [
     {
@@ -89,38 +127,71 @@ export default function Home() {
 
         {/* Menu Items Section */}
         <section className="menu-section">
-          <h2 className="section-title">Popular Dishes</h2>
+          <h2 className="section-title">Special Serving Hours</h2>
           <div className="menu-grid">
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/200" alt="Chicken" />
-              <p className="price">$20.00/kg</p>
-              <h3>Chicken</h3>
-            </div>
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/200" alt="Biryani" />
-              <p className="price">From $5</p>
-              <h3>Biryani</h3>
-            </div>
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/200" alt="Masala Dosa" />
-              <p className="price">From $5</p>
-              <h3>Masala Dosa</h3>
-            </div>
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/200" alt="Paneer Tikka" />
-              <p className="price">From $15</p>
-              <h3>Paneer Tikka</h3>
-            </div>
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/200" alt="Rogan Josh" />
-              <p className="price">$16.00/kg</p>
-              <h3>Rogan Josh</h3>
-            </div>
-            <div className="menu-card">
-              <img src="https://via.placeholder.com/200" alt="Butter Chicken" />
-              <p className="price">$25.00/kg</p>
-              <h3>Butter Chicken</h3>
-            </div>
+            {getTimeStatus(9, 11).isActive ? (
+              <Link to="/user/breakfast" className="menu-card">
+                <img src="/Breakfast.jpeg" alt="Breakfast" />
+                <p className="price active-time">
+                  {getTimeStatus(9, 11).timeString}
+                </p>
+                <h3>Breakfast</h3>
+              </Link>
+            ) : (
+              <div className="menu-card locked">
+                <div className="lock-overlay">
+                  <span className="lock-icon">🔒</span>
+                </div>
+                <img src="/Breakfast.jpeg" alt="Breakfast" />
+                <p className="price inactive-time">
+                  {getTimeStatus(7, 11).timeString}
+                </p>
+                <h3>Breakfast</h3>
+              </div>
+            )}
+            
+            {getTimeStatus(13, 16).isActive ? (
+              <Link to="/user/lunch" className="menu-card">
+                <img src="/lunch.jpeg" alt="Lunch" />
+                <p className="price active-time">
+                  {getTimeStatus(13, 16).timeString}
+                </p>
+                <h3>Lunch</h3>
+              </Link>
+            ) : (
+              <div className="menu-card locked">
+                <div className="lock-overlay">
+                  <span className="lock-icon">🔒</span>
+                </div>
+                <img src="/lunch.jpeg" alt="Lunch" />
+                <p className="price inactive-time">
+                  {getTimeStatus(13, 16).timeString}
+                </p>
+                <h3>Lunch</h3>
+              </div>
+            )}
+            
+            {getTimeStatus(19, 23).isActive ? (
+              <Link to="/user/dinner" className="menu-card">
+                <img src="/Dinner.jpeg" alt="Dinner" />
+                <p className="price active-time">
+                  {getTimeStatus(19, 23).timeString}
+                </p>
+                <h3>Dinner</h3>
+              </Link>
+            ) : (
+              <div className="menu-card locked">
+                <div className="lock-overlay">
+                  <span className="lock-icon">🔒</span>
+                </div>
+                <img src="/Dinner.jpeg" alt="Dinner" />
+                <p className="price inactive-time">
+                  {getTimeStatus(19, 23).timeString}
+                </p>
+                <h3>Dinner</h3>
+              </div>
+            )}
+            
           </div>
         </section>
 

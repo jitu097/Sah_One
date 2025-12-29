@@ -14,6 +14,9 @@ import UserHome from './user/pages/Home';
 import Cart from './user/pages/Cart';
 import UserOrders from './user/pages/Orders';
 import Profile from './user/pages/Profile';
+import Breakfast from './user/pages/Breakfast';
+import Lunch from './user/pages/Lunch';
+import Dinner from './user/pages/Dinner';
 
 // Admin Pages
 import AdminDashboard from './admin/pages/Dashboard';
@@ -42,6 +45,9 @@ function App() {
         <Route path="/user/cart" element={<Cart />} />
         <Route path="/user/orders" element={<UserOrders />} />
         <Route path="/user/profile" element={<Profile />} />
+        <Route path="/user/breakfast" element={<Breakfast />} />
+        <Route path="/user/lunch" element={<Lunch />} />
+        <Route path="/user/dinner" element={<Dinner />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboard />} />
