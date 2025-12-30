@@ -7,6 +7,14 @@ import '../styles/pages.css';
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showPartyModal, setShowPartyModal] = useState(false);
+  const [partyForm, setPartyForm] = useState({
+    name: '',
+    phone: '',
+    guests: '',
+    date: '',
+    time: ''
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -73,6 +81,22 @@ export default function Home() {
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
+  };
+
+  const handlePartyFormChange = (e) => {
+    setPartyForm({
+      ...partyForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handlePartyFormSubmit = (e) => {
+    e.preventDefault();
+    console.log('Party Booking:', partyForm);
+    // Add your form submission logic here (API call, etc.)
+    alert(`Booking submitted for ${partyForm.name}!`);
+    setShowPartyModal(false);
+    setPartyForm({ name: '', phone: '', guests: '', date: '', time: '' });
   };
 
   return (
@@ -194,6 +218,103 @@ export default function Home() {
             
           </div>
         </section>
+
+        {/* Parties Section */}
+        <section className="parties-section">
+          <div className="parties-image-container">
+            <img src="/parties.png" alt="Parties" className="parties-image" />
+            <img src="/Background.png" alt="Background" className="parties-background-image" />
+            <img 
+              src="/69.png" 
+              alt="Book Now" 
+              className="parties-button-image" 
+              onClick={() => setShowPartyModal(true)}
+            />
+          </div>
+        </section>
+
+        {/* Party Booking Modal */}
+        {showPartyModal && (
+          <div className="modal-overlay" onClick={() => setShowPartyModal(false)}>
+            <div className="party-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setShowPartyModal(false)}>
+                ×
+              </button>
+              <h2>Party Booking Enquiry</h2>
+              <form onSubmit={handlePartyFormSubmit} className="party-form">
+                <div className="form-group">
+                  <label htmlFor="name">Name *</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={partyForm.name}
+                    onChange={handlePartyFormChange}
+                    required
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="phone">Phone Number *</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={partyForm.phone}
+                    onChange={handlePartyFormChange}
+                    required
+                    placeholder="Enter phone number"
+                    pattern="[0-9]{10}"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="guests">Number of Guests *</label>
+                  <input
+                    type="number"
+                    id="guests"
+                    name="guests"
+                    value={partyForm.guests}
+                    onChange={handlePartyFormChange}
+                    required
+                    placeholder="Enter number of guests"
+                    min="1"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="date">Date for Booking *</label>
+                  <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={partyForm.date}
+                    onChange={handlePartyFormChange}
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="time">Time *</label>
+                  <input
+                    type="time"
+                    id="time"
+                    name="time"
+                    value={partyForm.time}
+                    onChange={handlePartyFormChange}
+                    required
+                  />
+                </div>
+
+                <button type="submit" className="submit-btn">
+                  Submit Enquiry
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Delivery Process Section */}
         <section className="delivery-section">

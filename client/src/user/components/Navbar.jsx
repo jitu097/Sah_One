@@ -26,7 +26,9 @@ export default function Navbar() {
           <Link to="/offers">Offers</Link>
           <Link to="/orders">Orders</Link>
           <Link to="/profile">Profile</Link>
-          <Link to="/cart" className="cart-btn">Cart</Link>
+          <Link to="/user/cart" className="cart-btn">
+            <img src="/basket.png" alt="Cart" />
+          </Link>
           <img 
             src="/hamburger.png" 
             alt="Menu" 

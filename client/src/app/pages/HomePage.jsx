@@ -8,12 +8,7 @@ const HomePage = () => {
   const pricePerItem = 12.15;
   const totalPrice = (quantity * pricePerItem).toFixed(2);
 
-  const foodItems = [
-    { id: 1, name: 'Burger', price: 3.25, color: '#d4f4dd', emoji: '🍔' },
-    { id: 2, name: 'Cake', price: 2.25, color: '#ffd4e5', emoji: '🍰' },
-    { id: 3, name: 'Salad', price: 5.25, color: '#ffe5d4', emoji: '🥗' },
-    { id: 4, name: 'Pizza', price: 8.99, color: '#fff4d4', emoji: '🍕' },
-  ];
+
 
   const incrementQuantity = () => setQuantity(quantity + 1);
   const decrementQuantity = () => {

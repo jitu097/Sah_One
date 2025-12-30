@@ -1,10 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useCart } from '../../context/CartContext';
 import '../styles/pages.css';
 import '../styles/Breakfast.css';
 
 export default function Breakfast() {
+  const { addToCart, cartItems, updateQuantity } = useCart();
+
+  const getItemQuantity = (itemId) => {
+    const cartItem = cartItems.find(item => item.id === itemId);
+    return cartItem ? cartItem.quantity : 0;
+  };
+
   const breakfastItems = [
     {
       id: 1,
@@ -80,7 +88,30 @@ export default function Breakfast() {
                   <p className="breakfast-card-description">{item.description}</p>
                   <div className="breakfast-card-footer">
                     <span className="breakfast-price">{item.price}</span>
-                    <button className="breakfast-add-btn">Add to Cart</button>
+                    {getItemQuantity(item.id) === 0 ? (
+                      <button 
+                        className="breakfast-add-btn"
+                        onClick={() => addToCart(item)}
+                      >
+                        Add to Cart
+                      </button>
+                    ) : (
+                      <div className="quantity-controls">
+                        <button 
+                          className="qty-control-btn"
+                          onClick={() => updateQuantity(item.id, -1)}
+                        >
+                          -
+                        </button>
+                        <span className="qty-display">{getItemQuantity(item.id)}</span>
+                        <button 
+                          className="qty-control-btn"
+                          onClick={() => updateQuantity(item.id, 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

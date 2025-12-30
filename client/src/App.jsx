@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
 
 // App Pages
 import LandingPage from './app/pages/LandingPage';
@@ -32,8 +33,9 @@ import DeliveryConfirm from './delivery/pages/DeliveryConfirm';
 
 function App() {
   return (
-    <div className="app">
-      <Routes>
+    <CartProvider>
+      <div className="app">
+        <Routes>
         {/* Landing & Auth */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/home" element={<HomePage />} />
@@ -65,6 +67,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
+    </CartProvider>
   );
 }
 

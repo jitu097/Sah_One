@@ -100,6 +100,44 @@
   transform: scale(1.05);
 }
 
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f0f0f0;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.qty-control-btn {
+  background: #e23744;
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.qty-control-btn:hover {
+  background: #c12e39;
+  transform: scale(1.1);
+}
+
+.qty-display {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  min-width: 25px;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .breakfast-grid {
     grid-template-columns: 1fr;
