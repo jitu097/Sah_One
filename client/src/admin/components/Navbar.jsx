@@ -16,38 +16,32 @@ export default function Navbar() {
 
   return (
     <nav className="admin-navbar">
-      <div className="navbar-container">
-        <div className="navbar-brand">
-          <img src="/LOGO.png" alt="Logo" className="navbar-logo" />
-          <span className="brand-text">Admin Panel</span>
-        </div>
+      <div className="admin-nav-left">
+        <img src="/LOGO.png" alt="SAH_ONE Admin" className="admin-logo" />
+        <span className="admin-badge">Admin Panel</span>
+      </div>
 
-        <div className="navbar-links">
-          <Link to="/admin" className={`nav-link ${isActive('/admin')}`}>
-            <span className="nav-icon">📊</span>
-            <span className="nav-text">Dashboard</span>
-          </Link>
-          <Link to="/admin/menu" className={`nav-link ${isActive('/admin/menu')}`}>
-            <span className="nav-icon">🍽️</span>
-            <span className="nav-text">Menu</span>
-          </Link>
-          <Link to="/admin/orders" className={`nav-link ${isActive('/admin/orders')}`}>
-            <span className="nav-icon">📦</span>
-            <span className="nav-text">Orders</span>
-          </Link>
-          <Link to="/admin/offers" className={`nav-link ${isActive('/admin/offers')}`}>
-            <span className="nav-icon">🎁</span>
-            <span className="nav-text">Offers</span>
-          </Link>
-          <Link to="/admin/reports" className={`nav-link ${isActive('/admin/reports')}`}>
-            <span className="nav-icon">📈</span>
-            <span className="nav-text">Reports</span>
-          </Link>
-        </div>
+      <div className="admin-nav-center">
+        <Link to="/admin" className={`admin-nav-link ${isActive('/admin')}`}>
+          Dashboard
+        </Link>
+        <Link to="/admin/menu" className={`admin-nav-link ${isActive('/admin/menu')}`}>
+          Menu
+        </Link>
+        <Link to="/admin/orders" className={`admin-nav-link ${isActive('/admin/orders')}`}>
+          Orders
+        </Link>
+        <Link to="/admin/offers" className={`admin-nav-link ${isActive('/admin/offers')}`}>
+          Offers
+        </Link>
+        <Link to="/admin/reports" className={`admin-nav-link ${isActive('/admin/reports')}`}>
+          Reports
+        </Link>
+      </div>
 
-        <button className="logout-btn" onClick={handleLogout}>
-          <span className="logout-icon">🚪</span>
-          <span className="logout-text">Logout</span>
+      <div className="admin-nav-right">
+        <button className="admin-logout-btn" onClick={handleLogout}>
+          Logout
         </button>
       </div>
     </nav>
