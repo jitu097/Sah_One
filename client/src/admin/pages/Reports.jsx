@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import '../styles/pages.css';
+import '../styles/reports.css';
 
 export default function Reports() {
   return (

@@ -5,6 +5,21 @@ import '../styles/pages.css';
 
 export default function Cart() {
   const { cartItems, updateQuantity } = useCart();
+
+  // Check if restaurant is open
+  const isRestaurantOpen = () => {
+    const savedStatus = localStorage.getItem('restaurantOpen');
+    return savedStatus !== null ? savedStatus === 'true' : true;
+  };
+
+  // Handle quantity update with restaurant status check
+  const handleUpdateQuantity = (itemId, change) => {
+    if (!isRestaurantOpen() && change > 0) {
+      alert('⚠️ Restaurant is temporarily closed. Cannot increase item quantity.');
+      return;
+    }
+    updateQuantity(itemId, change);
+  };
   const navigate = useNavigate();
   const deliveryCharge = 50;
 
@@ -58,14 +73,14 @@ export default function Cart() {
                 <div className="item-actions">
                   <button 
                     className="qty-btn" 
-                    onClick={() => updateQuantity(item.id, -1)}
+                    onClick={() => handleUpdateQuantity(item.id, -1)}
                   >
                     -
                   </button>
                   <span className="qty">{item.quantity}</span>
                   <button 
                     className="qty-btn" 
-                    onClick={() => updateQuantity(item.id, 1)}
+                    onClick={() => handleUpdateQuantity(item.id, 1)}
                   >
                     +
                   </button>

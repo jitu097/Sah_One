@@ -13,6 +13,30 @@ export default function Breakfast() {
     return cartItem ? cartItem.quantity : 0;
   };
 
+  // Check if restaurant is open
+  const isRestaurantOpen = () => {
+    const savedStatus = localStorage.getItem('restaurantOpen');
+    return savedStatus !== null ? savedStatus === 'true' : true;
+  };
+
+  // Handle add to cart with restaurant status check
+  const handleAddToCart = (item) => {
+    if (!isRestaurantOpen()) {
+      alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
+      return;
+    }
+    addToCart(item);
+  };
+
+  // Handle quantity update with restaurant status check
+  const handleUpdateQuantity = (itemId, change) => {
+    if (!isRestaurantOpen() && change > 0) {
+      alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
+      return;
+    }
+    updateQuantity(itemId, change);
+  };
+
   const breakfastItems = [
     {
       id: 1,
@@ -91,7 +115,7 @@ export default function Breakfast() {
                     {getItemQuantity(item.id) === 0 ? (
                       <button 
                         className="breakfast-add-btn"
-                        onClick={() => addToCart(item)}
+                        onClick={() => handleAddToCart(item)}
                       >
                         Add to Cart
                       </button>
@@ -99,14 +123,14 @@ export default function Breakfast() {
                       <div className="quantity-controls">
                         <button 
                           className="qty-control-btn"
-                          onClick={() => updateQuantity(item.id, -1)}
+                          onClick={() => handleUpdateQuantity(item.id, -1)}
                         >
                           -
                         </button>
                         <span className="qty-display">{getItemQuantity(item.id)}</span>
                         <button 
                           className="qty-control-btn"
-                          onClick={() => updateQuantity(item.id, 1)}
+                          onClick={() => handleUpdateQuantity(item.id, 1)}
                         >
                           +
                         </button>

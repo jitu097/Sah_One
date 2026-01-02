@@ -1,6 +1,7 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
+import RestaurantStatus from './user/components/RestaurantStatus';
 
 // App Pages
 import LandingPage from './app/pages/LandingPage';
@@ -31,11 +32,18 @@ import AssignedOrders from './delivery/pages/AssignedOrders';
 import Pickup from './delivery/pages/Pickup';
 import DeliveryConfirm from './delivery/pages/DeliveryConfirm';
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isUserRoute = location.pathname.startsWith('/user');
+
+  console.log('📍 Current route:', location.pathname, '| Is user route:', isUserRoute);
+
   return (
-    <CartProvider>
-      <div className="app">
-        <Routes>
+    <>
+      {/* Restaurant Status Popup - Shows only on user pages */}
+      {isUserRoute && <RestaurantStatus />}
+      
+      <Routes>
         {/* Landing & Auth */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/home" element={<HomePage />} />
@@ -66,7 +74,16 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <CartProvider>
+      <div className="app">
+        <AppContent />
+      </div>
     </CartProvider>
   );
 }
