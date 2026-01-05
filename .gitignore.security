@@ -1,0 +1,15 @@
+# .gitignore additions for security
+
+# Firebase service account key (SENSITIVE - DO NOT COMMIT)
+firebase/serviceAccountKey.json
+
+# Environment files
+.env
+.env.local
+.env.production
+client/.env
+client/.env.local
+
+# Convex
+.convex/
+convex/_generated/

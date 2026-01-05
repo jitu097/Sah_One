@@ -5,16 +5,15 @@ import { getStorage } from 'firebase/storage';
 
 /**
  * Firebase Configuration
- * Replace with your actual Firebase project credentials
+ * Using environment variables for security
  */
 const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY || "your-api-key",
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
-    projectId: process.env.FIREBASE_PROJECT_ID || "your-project-id",
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "your-sender-id",
-    appId: process.env.FIREBASE_APP_ID || "your-app-id",
-    measurementId: process.env.FIREBASE_MEASUREMENT_ID || "your-measurement-id"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCKkYourActualAPIKey",
+    authDomain: "sahone-e0b82.firebaseapp.com",
+    projectId: "sahone-e0b82",
+    storageBucket: "sahone-e0b82.appspot.com",
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef"
 };
 
 // Initialize Firebase

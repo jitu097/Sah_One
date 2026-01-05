@@ -16,6 +16,7 @@ import UserHome from './user/pages/Home';
 import Cart from './user/pages/Cart';
 import UserOrders from './user/pages/Orders';
 import Profile from './user/pages/Profile';
+import UserOffers from './user/pages/Offers';
 import Breakfast from './user/pages/Breakfast';
 import Lunch from './user/pages/Lunch';
 import Dinner from './user/pages/Dinner';
@@ -55,6 +56,7 @@ function AppContent() {
         <Route path="/user/cart" element={<Cart />} />
         <Route path="/user/orders" element={<UserOrders />} />
         <Route path="/user/profile" element={<Profile />} />
+        <Route path="/user/offers" element={<UserOffers />} />
         <Route path="/user/breakfast" element={<Breakfast />} />
         <Route path="/user/lunch" element={<Lunch />} />
         <Route path="/user/dinner" element={<Dinner />} />

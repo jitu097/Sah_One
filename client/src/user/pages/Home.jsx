@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-//import SideBar from '../components/SideBar';
 import '../styles/pages.css';
+import '../styles/Home.css';
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showPartyModal, setShowPartyModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [partyForm, setPartyForm] = useState({
     name: '',
     phone: '',
@@ -102,16 +103,13 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      {/* <SideBar /> */}
       <div className="page-container">
         {/* Hero Carousel Section */}
         <section 
-          className="hero-carousel"
-          style={{
-            background: slides[currentSlide].type === 'original' 
-              ? `url('${slides[currentSlide].backgroundImage}') center/cover` 
-              : '#ffffff'
-          }}
+          className={`hero-carousel ${slides[currentSlide].type === 'original' ? 'hero-carousel-dynamic' : 'hero-carousel-white'}`}
+          style={slides[currentSlide].type === 'original' ? {
+            backgroundImage: `url('${slides[currentSlide].backgroundImage}')`
+          } : {}}
         >
           <button className="carousel-btn prev" onClick={prevSlide}>
             ←
@@ -121,6 +119,21 @@ export default function Home() {
             {slides[currentSlide].type === 'original' ? (
               <>
                 <div className="hero-content">
+                  {/* Mobile Search Bar - Only visible on mobile */}
+                  <div className="mobile-hero-search">
+                    <input 
+                      type="text" 
+                      placeholder="Search for food..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <button className="search-icon-btn">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
                   <img src="/34.png" alt="Hero" className="hero-image" />
                   <div className="hero-buttons">
                     <img src="/583.png" alt="See Our Menu" className="btn-image" />

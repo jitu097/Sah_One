@@ -14,7 +14,9 @@ export default function Navbar() {
     <>
       <nav className="navbar">
         <div className="nav-left">
-          <img src="/LOGO.png" alt="SAH_ONE" className="logo-img" />
+          <Link to="/user">
+            <img src="/LOGO.png" alt="SAH_ONE" className="logo-img" />
+          </Link>
           <span className="location">📍 Your City</span>
         </div>
 
@@ -23,9 +25,8 @@ export default function Navbar() {
         </div>
 
         <div className="nav-right">
-          <Link to="/offers">Offers</Link>
-          <Link to="/orders">Orders</Link>
-          <Link to="/profile">Profile</Link>
+          <Link to="/user/offers">Offers</Link>
+          <Link to="/user/orders">Orders</Link>
           <Link to="/user/cart" className="cart-btn">
             <img src="/basket.png" alt="Cart" />
           </Link>

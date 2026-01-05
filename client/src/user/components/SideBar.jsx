@@ -5,10 +5,11 @@ export default function SideBar({ isOpen, onClose }) {
   const location = useLocation();
 
   const menu = [
-    { path: "/", icon: "🏠", label: "Home" },
-    { path: "/orders", icon: "📦", label: "Orders" },
-    { path: "/cart", icon: "🛒", label: "Cart" },
-    { path: "/profile", icon: "⚙️", label: "Settings" },
+    { path: "/user", icon: "🏠", label: "Home" },
+    { path: "/user/orders", icon: "📦", label: "Orders" },
+    { path: "/user/cart", icon: "🛒", label: "Cart" },
+    { path: "/user/profile", icon: "👤", label: "Profile" },
+    { path: "/user/profile", icon: "⚙️", label: "Settings" },
   ];
 
   return (

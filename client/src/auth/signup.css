@@ -94,6 +94,15 @@
   transform: translateY(0);
 }
 
+.google-signin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-signin-btn svg {
+  flex-shrink: 0;
+}
+
 /* Divider */
 .divider {
   display: flex;
