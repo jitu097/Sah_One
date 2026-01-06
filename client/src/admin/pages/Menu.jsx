@@ -288,6 +288,9 @@ export default function Menu() {
           <button className="add-category-btn" onClick={() => setShowCategoryModal(true)}>
             📁 Manage Categories
           </button>
+          <Link to="/admin/special-serving-hours" className="special-hours-btn">
+            🕐 Special Serving Hours
+          </Link>
         </div>
 
         {/* Category-based Menu Display */}

@@ -17,9 +17,8 @@ import Cart from './user/pages/Cart';
 import UserOrders from './user/pages/Orders';
 import Profile from './user/pages/Profile';
 import UserOffers from './user/pages/Offers';
-import Breakfast from './user/pages/Breakfast';
-import Lunch from './user/pages/Lunch';
-import Dinner from './user/pages/Dinner';
+import ServingHours from './user/pages/ServingHours';
+import UserMenu from './user/pages/UserMenu';
 
 // Admin Pages
 import AdminDashboard from './admin/pages/Dashboard';
@@ -27,6 +26,7 @@ import Menu from './admin/pages/Menu';
 import AdminOrders from './admin/pages/Orders';
 import Offers from './admin/pages/Offers';
 import Reports from './admin/pages/Reports';
+import SpecialServingHours from './admin/pages/SpecialServingHours';
 
 // Delivery Pages
 import AssignedOrders from './delivery/pages/AssignedOrders';
@@ -57,9 +57,8 @@ function AppContent() {
         <Route path="/user/orders" element={<UserOrders />} />
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/offers" element={<UserOffers />} />
-        <Route path="/user/breakfast" element={<Breakfast />} />
-        <Route path="/user/lunch" element={<Lunch />} />
-        <Route path="/user/dinner" element={<Dinner />} />
+        <Route path="/user/serving-hours" element={<ServingHours />} />
+        <Route path="/user/menu" element={<UserMenu />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboard />} />
@@ -67,6 +66,7 @@ function AppContent() {
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/offers" element={<Offers />} />
         <Route path="/admin/reports" element={<Reports />} />
+        <Route path="/admin/special-serving-hours" element={<SpecialServingHours />} />
 
         {/* Delivery Routes */}
         <Route path="/delivery" element={<AssignedOrders />} />

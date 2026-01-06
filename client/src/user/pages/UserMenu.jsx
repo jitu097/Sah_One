@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useCart } from '../../context/CartContext';
 import '../styles/pages.css';
-import '../styles/Breakfast.css';
+import '../styles/UserMenu.css';
 
-export default function Breakfast() {
+export default function UserMenu() {
   const { addToCart, cartItems, updateQuantity } = useCart();
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   const getItemQuantity = (itemId) => {
     const cartItem = cartItems.find(item => item.id === itemId);
@@ -37,10 +38,12 @@ export default function Breakfast() {
     updateQuantity(itemId, change);
   };
 
-  const breakfastItems = [
+  const allMenuItems = [
+    // Breakfast Items
     {
       id: 1,
       name: 'Bhujia Roti',
+      category: 'Breakfast',
       image: '/bhujia roti.jpeg',
       description: 'Delicious traditional bhujia with fresh roti',
       price: '₹80'
@@ -48,6 +51,7 @@ export default function Breakfast() {
     {
       id: 2,
       name: 'Chola Bhatura',
+      category: 'Breakfast',
       image: '/chola bhatura.jpeg',
       description: 'Fluffy bhatura served with spicy chola',
       price: '₹120'
@@ -55,6 +59,7 @@ export default function Breakfast() {
     {
       id: 3,
       name: 'Chola',
+      category: 'Breakfast',
       image: '/chola.jpeg',
       description: 'Spicy and tangy chickpea curry',
       price: '₹60'
@@ -62,6 +67,7 @@ export default function Breakfast() {
     {
       id: 4,
       name: 'Egg Paratha',
+      category: 'Breakfast',
       image: '/eggpratha.jpeg',
       description: 'Paratha stuffed with egg and spices',
       price: '₹90'
@@ -69,6 +75,7 @@ export default function Breakfast() {
     {
       id: 5,
       name: 'Poha',
+      category: 'Breakfast',
       image: '/poha.jpeg',
       description: 'Light and flavorful flattened rice dish',
       price: '₹50'
@@ -76,6 +83,7 @@ export default function Breakfast() {
     {
       id: 6,
       name: 'Tadka Roti',
+      category: 'Breakfast',
       image: '/tadkaroti.jpeg',
       description: 'Crispy roti with special tadka seasoning',
       price: '₹70'
@@ -83,38 +91,95 @@ export default function Breakfast() {
     {
       id: 7,
       name: 'Sattu Paratha',
+      category: 'Breakfast',
       image: '/sattu paratha.jpeg',
       description: 'Nutritious paratha filled with roasted gram flour',
       price: '₹85'
+    },
+    // Lunch Items
+    {
+      id: 8,
+      name: 'Rice Thali',
+      category: 'Lunch',
+      image: '/ricethali.jpeg',
+      description: 'Complete meal with rice, dal, vegetables, roti and dessert',
+      price: '₹150'
+    },
+    // Dinner Items
+    {
+      id: 11,
+      name: 'Dal Fry',
+      category: 'Dinner',
+      image: '/dalfry.jpeg',
+      description: 'Tempered yellow lentils with aromatic spices',
+      price: '₹100'
+    },
+    {
+      id: 12,
+      name: 'Paneer Butter Masala',
+      category: 'Dinner',
+      image: '/paneerbuttermasala.jpeg',
+      description: 'Cottage cheese in rich tomato gravy',
+      price: '₹180'
+    },
+    {
+      id: 13,
+      name: 'Veg Biryani',
+      category: 'Dinner',
+      image: '/vegbiryani.jpeg',
+      description: 'Aromatic basmati rice with mixed vegetables',
+      price: '₹150'
     }
   ];
+
+  const categories = ['All', 'Breakfast', 'Lunch', 'Dinner'];
+
+  const filteredItems = selectedCategory === 'All' 
+    ? allMenuItems 
+    : allMenuItems.filter(item => item.category === selectedCategory);
 
   return (
     <>
       <Navbar />
       <div className="page-container">
-        <div className="breakfast-container">
-          <div className="breakfast-header">
-            <h1>Breakfast Menu</h1>
-            <span className="time-badge">Available: 9am to 11am</span>
+        <div className="menu-page-container">
+          <div className="menu-page-header">
+            <h1>🍽️ Our Menu</h1>
+            <p>Browse our complete menu selection</p>
           </div>
-          
-          <div className="breakfast-grid">
-            {breakfastItems.map(item => (
-              <div key={item.id} className="breakfast-card">
+
+          {/* Category Filter */}
+          <div className="category-filter">
+            {categories.map(category => (
+              <button
+                key={category}
+                className={`filter-btn ${selectedCategory === category ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          {/* Menu Items Grid */}
+          <div className="menu-items-grid">
+            {filteredItems.map(item => (
+              <div key={item.id} className="menu-item-card">
+                <div className="category-badge">{item.category}</div>
                 <img 
                   src={item.image} 
                   alt={item.name} 
-                  className="breakfast-card-image"
+                  className="menu-item-image"
+                  onError={(e) => e.target.src = '/image.png'}
                 />
-                <div className="breakfast-card-content">
-                  <h3 className="breakfast-card-title">{item.name}</h3>
-                  <p className="breakfast-card-description">{item.description}</p>
-                  <div className="breakfast-card-footer">
-                    <span className="breakfast-price">{item.price}</span>
+                <div className="menu-item-content">
+                  <h3 className="menu-item-title">{item.name}</h3>
+                  <p className="menu-item-description">{item.description}</p>
+                  <div className="menu-item-footer">
+                    <span className="menu-item-price">{item.price}</span>
                     {getItemQuantity(item.id) === 0 ? (
                       <button 
-                        className="breakfast-add-btn"
+                        className="menu-add-btn"
                         onClick={() => handleAddToCart(item)}
                       >
                         Add to Cart
@@ -122,14 +187,14 @@ export default function Breakfast() {
                     ) : (
                       <div className="quantity-controls">
                         <button 
-                          className="qty-control-btn"
+                          className="qty-btn"
                           onClick={() => handleUpdateQuantity(item.id, -1)}
                         >
-                          -
+                          −
                         </button>
-                        <span className="qty-display">{getItemQuantity(item.id)}</span>
+                        <span className="qty-number">{getItemQuantity(item.id)}</span>
                         <button 
-                          className="qty-control-btn"
+                          className="qty-btn"
                           onClick={() => handleUpdateQuantity(item.id, 1)}
                         >
                           +

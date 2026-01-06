@@ -8,7 +8,6 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showPartyModal, setShowPartyModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [partyForm, setPartyForm] = useState({
     name: '',
     phone: '',
@@ -119,25 +118,7 @@ export default function Home() {
             {slides[currentSlide].type === 'original' ? (
               <>
                 <div className="hero-content">
-                  {/* Mobile Search Bar - Only visible on mobile */}
-                  <div className="mobile-hero-search">
-                    <input 
-                      type="text" 
-                      placeholder="Search for food..." 
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <button className="search-icon-btn">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                  
                   <img src="/34.png" alt="Hero" className="hero-image" />
-                  <div className="hero-buttons">
-                    <img src="/583.png" alt="See Our Menu" className="btn-image" />
-                  </div>
                 </div>
               </>
             ) : (
@@ -167,7 +148,7 @@ export default function Home() {
           <h2 className="section-title">Special Serving Hours</h2>
           <div className="menu-grid">
             {getTimeStatus(9, 11).isActive ? (
-              <Link to="/user/breakfast" className="menu-card">
+              <Link to="/user/serving-hours" className="menu-card">
                 <img src="/Breakfast.jpeg" alt="Breakfast" />
                 <p className="price active-time">
                   {getTimeStatus(9, 11).timeString}
@@ -188,7 +169,7 @@ export default function Home() {
             )}
             
             {getTimeStatus(13, 16).isActive ? (
-              <Link to="/user/lunch" className="menu-card">
+              <Link to="/user/serving-hours" className="menu-card">
                 <img src="/lunch.jpeg" alt="Lunch" />
                 <p className="price active-time">
                   {getTimeStatus(13, 16).timeString}
@@ -208,11 +189,11 @@ export default function Home() {
               </div>
             )}
             
-            {getTimeStatus(19, 23).isActive ? (
-              <Link to="/user/dinner" className="menu-card">
+            {getTimeStatus(19, 24).isActive ? (
+              <Link to="/user/serving-hours" className="menu-card">
                 <img src="/Dinner.jpeg" alt="Dinner" />
                 <p className="price active-time">
-                  {getTimeStatus(19, 23).timeString}
+                  {getTimeStatus(19, 24).timeString}
                 </p>
                 <h3>Dinner</h3>
               </Link>
@@ -223,7 +204,7 @@ export default function Home() {
                 </div>
                 <img src="/Dinner.jpeg" alt="Dinner" />
                 <p className="price inactive-time">
-                  {getTimeStatus(19, 23).timeString}
+                  {getTimeStatus(19, 24).timeString}
                 </p>
                 <h3>Dinner</h3>
               </div>
@@ -382,6 +363,12 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      {/* Floating Menu Button */}
+      <Link to="/user/menu" className="floating-menu-btn">
+        <span>Menu</span>
+        <span className="arrow">→</span>
+      </Link>
     </>
   );
 }
