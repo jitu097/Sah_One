@@ -102,4 +102,44 @@ export default defineSchema({
   })
     .index("by_code", ["code"])
     .index("by_active", ["isActive"]),
+
+  // Special Serving Hours
+  specialServingHours: defineTable({
+    date: v.string(), // Format: "YYYY-MM-DD"
+    dayOfWeek: v.string(), // "monday", "tuesday", etc.
+    openingTime: v.string(), // Format: "HH:MM"
+    closingTime: v.string(), // Format: "HH:MM"
+    isClosed: v.boolean(),
+    reason: v.optional(v.string()), // e.g., "Holiday", "Special Event"
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_date", ["date"])
+    .index("by_day", ["dayOfWeek"]),
+
+  // Restaurant Settings
+  restaurantSettings: defineTable({
+    settingKey: v.string(),
+    settingValue: v.string(),
+    description: v.optional(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_key", ["settingKey"]),
+
+  // Reports/Analytics
+  reports: defineTable({
+    reportType: v.string(), // "daily", "weekly", "monthly"
+    date: v.string(),
+    totalOrders: v.number(),
+    totalRevenue: v.number(),
+    totalDeliveries: v.number(),
+    topSellingItems: v.optional(v.array(v.object({
+      itemId: v.string(),
+      itemName: v.string(),
+      quantity: v.number(),
+    }))),
+    createdAt: v.number(),
+  })
+    .index("by_type", ["reportType"])
+    .index("by_date", ["date"]),
 });
