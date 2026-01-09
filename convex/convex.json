@@ -1,5 +1,5 @@
 {
-  "functions": {
-    "node": "18"
+  "node": {
+    "version": "18"
   }
 }

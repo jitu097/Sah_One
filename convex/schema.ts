@@ -51,13 +51,26 @@ export default defineSchema({
     .index("by_email", ["email"])
     .index("by_availability", ["isAvailable"]),
 
+  // Categories
+  categories: defineTable({
+    name: v.string(),
+    isActive: v.boolean(),
+    order: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_name", ["name"])
+    .index("by_active", ["isActive"]),
+
   // Menu items
   menuItems: defineTable({
     name: v.string(),
     description: v.string(),
-    price: v.number(),
-    category: v.string(), // "breakfast", "lunch", "dinner"
+    category: v.string(),
     image: v.optional(v.string()),
+    hasHalfPortion: v.boolean(),
+    halfPrice: v.optional(v.number()),
+    fullPrice: v.number(),
     isAvailable: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
