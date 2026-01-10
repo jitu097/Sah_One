@@ -1,0 +1,178 @@
+/* Dark Overlay */
+.category-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent black */
+    backdrop-filter: blur(4px);
+    /* Blur effect for better focus */
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Align to bottom for mobile sheet feel */
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Modal Content */
+.category-popup-content {
+    width: 100%;
+    max-width: 480px;
+    /* Limit width on larger screens */
+    background: #1a1b1e;
+    /* Dark background matching the screenshot */
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    max-height: 85vh;
+    /* Allow scrolling if content is long */
+    overflow-y: auto;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+/* Header Section */
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.popup-title h3 {
+    color: #ff6b6b;
+    /* Accent color from screenshot */
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.popup-title span {
+    font-size: 1.1rem;
+    color: #ff6b6b;
+    display: block;
+}
+
+.item-count-badge {
+    background: #ff6b6b;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* Category List */
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.category-item:hover {
+    opacity: 0.8;
+}
+
+.category-name {
+    font-size: 1rem;
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.category-count {
+    font-size: 1rem;
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+/* Highlight "Large Order Menu" specifically if needed, or other special items */
+.category-item.special-item {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    margin-top: 8px;
+}
+
+.category-item.special-item .category-name {
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+/* Close Button in Footer/Bottom */
+.popup-footer {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.close-btn {
+    background: #2c2d33;
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: #3e4047;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .category-popup-overlay {
+        align-items: center;
+    }
+
+    .category-popup-content {
+        border-radius: 20px;
+        max-height: 80vh;
+    }
+}

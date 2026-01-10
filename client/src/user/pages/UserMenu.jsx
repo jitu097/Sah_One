@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
@@ -9,8 +9,22 @@ import '../styles/UserMenu.css';
 
 export default function UserMenu() {
   const { addToCart, cartItems, updateQuantity } = useCart();
+  const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [expandedCategories, setExpandedCategories] = useState({});
+
+  useEffect(() => {
+    if (location.state?.category) {
+      const category = location.state.category;
+      setSelectedCategory(category);
+      setExpandedCategories(prev => ({
+        ...prev,
+        [category]: true
+      }));
+      // Clear state so it doesn't persist on refresh if desired, or keep it.
+      // optional: window.history.replaceState({}, document.title) or similar if needed.
+    }
+  }, [location.state]);
 
   // Fetch data from Convex
   const allMenuItems = useQuery(api.modules.menu.menu.getAvailableMenuItems);
@@ -175,10 +189,10 @@ export default function UserMenu() {
             {categoriesList.map(category => {
               const categoryItems = getItemsByCategory(category);
               const isExpanded = expandedCategories[category];
-              
+
               return (
                 <div key={category} className="accordion-category">
-                  <div 
+                  <div
                     className="accordion-category-header"
                     onClick={() => toggleCategory(category)}
                   >
@@ -190,7 +204,7 @@ export default function UserMenu() {
                       ▼
                     </span>
                   </div>
-                  
+
                   {isExpanded && (
                     <div className="accordion-category-content">
                       {categoryItems.map(item => (

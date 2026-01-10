@@ -6,10 +6,13 @@ import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 import '../styles/Home.css';
 
+import CategoryPopup from '../components/CategoryPopup';
+
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showPartyModal, setShowPartyModal] = useState(false);
+  const [showCategoryPopup, setShowCategoryPopup] = useState(false);
   const [partyForm, setPartyForm] = useState({
     name: '',
     phone: '',
@@ -365,10 +368,13 @@ export default function Home() {
       </div>
 
       {/* Floating Menu Button */}
-      <Link to="/user/menu" className="floating-menu-btn">
+      <CategoryPopup isOpen={showCategoryPopup} onClose={() => setShowCategoryPopup(false)} />
+
+      {/* Floating Menu Button */}
+      <button className="floating-menu-btn" onClick={() => setShowCategoryPopup(true)}>
         <span>Menu</span>
-        <span className="arrow">→</span>
-      </Link>
+        <span className="arrow">↑</span>
+      </button>
     </>
   );
 }
