@@ -43,7 +43,6 @@ export const uploadImageToCloudinary = async (file, onProgress = null) => {
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     formData.append('folder', CLOUDINARY_FOLDER);
-    formData.append('transformation', 'c_limit,w_800,h_800,q_auto:good'); // Auto optimize
 
     // Upload to Cloudinary
     const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
@@ -66,7 +65,16 @@ export const uploadImageToCloudinary = async (file, onProgress = null) => {
           const response = JSON.parse(xhr.responseText);
           resolve(response.secure_url);
         } else {
-          reject(new Error('Upload failed'));
+          // Better error message
+          let errorMessage = 'Upload failed';
+          try {
+            const errorResponse = JSON.parse(xhr.responseText);
+            errorMessage = errorResponse.error?.message || errorMessage;
+          } catch (e) {
+            // Response wasn't JSON
+          }
+          console.error('Cloudinary error:', xhr.status, xhr.responseText);
+          reject(new Error(errorMessage));
         }
       });
 

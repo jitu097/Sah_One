@@ -10,6 +10,7 @@ import '../styles/UserMenu.css';
 export default function UserMenu() {
   const { addToCart, cartItems, updateQuantity } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [expandedCategories, setExpandedCategories] = useState({});
 
   // Fetch data from Convex
   const allMenuItems = useQuery(api.modules.menu.menu.getAvailableMenuItems);
@@ -45,9 +46,36 @@ export default function UserMenu() {
     updateQuantity(itemId, change);
   };
 
-  // Loading state
-  if (!allMenuItems || !categoriesList) {
-    return <div className="loading-spinner">Loading menu...</div>;
+  // Better loading state with error detection
+  if (allMenuItems === undefined || categoriesList === undefined) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>Loading menu...</p>
+          <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '10px' }}>
+            If this takes too long, please check your internet connection or refresh the page.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle empty data
+  if (!allMenuItems || allMenuItems.length === 0) {
+    return (
+      <>
+        <Navbar />
+        <div className="page-container">
+          <div className="menu-page-container">
+            <div className="menu-page-header">
+              <h1>🍽️ Our Menu</h1>
+              <p>No items available at the moment</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
   }
 
   const categories = ['All', ...categoriesList];
@@ -55,6 +83,23 @@ export default function UserMenu() {
   const filteredItems = selectedCategory === 'All'
     ? allMenuItems
     : allMenuItems.filter(item => item.category === selectedCategory);
+
+  // Toggle category expansion for mobile
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  // Group items by category for mobile accordion view
+  const getItemsByCategory = (category) => {
+    return allMenuItems.filter(item => item.category === category);
+  };
+
+  const getCategoryItemCount = (category) => {
+    return allMenuItems.filter(item => item.category === category).length;
+  };
 
   return (
     <>
@@ -66,8 +111,8 @@ export default function UserMenu() {
             <p>Browse our complete menu selection</p>
           </div>
 
-          {/* Category Filter */}
-          <div className="category-filter">
+          {/* Desktop Category Filter */}
+          <div className="category-filter desktop-only">
             {categories.map(category => (
               <button
                 key={category}
@@ -79,8 +124,8 @@ export default function UserMenu() {
             ))}
           </div>
 
-          {/* Menu Items Grid */}
-          <div className="menu-items-grid">
+          {/* Desktop Menu Items Grid */}
+          <div className="menu-items-grid desktop-only">
             {filteredItems.map(item => (
               <div key={item._id} className="menu-item-card">
                 <div className="category-badge">{item.category}</div>
@@ -123,6 +168,77 @@ export default function UserMenu() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Mobile Accordion View */}
+          <div className="mobile-menu-accordion mobile-only">
+            {categoriesList.map(category => {
+              const categoryItems = getItemsByCategory(category);
+              const isExpanded = expandedCategories[category];
+              
+              return (
+                <div key={category} className="accordion-category">
+                  <div 
+                    className="accordion-category-header"
+                    onClick={() => toggleCategory(category)}
+                  >
+                    <div className="category-info">
+                      <h3>{category}</h3>
+                      <span className="item-count">({categoryItems.length} items)</span>
+                    </div>
+                    <span className={`accordion-arrow ${isExpanded ? 'expanded' : ''}`}>
+                      ▼
+                    </span>
+                  </div>
+                  
+                  {isExpanded && (
+                    <div className="accordion-category-content">
+                      {categoryItems.map(item => (
+                        <div key={item._id} className="mobile-menu-item">
+                          <img
+                            src={item.image || '/image.png'}
+                            alt={item.name}
+                            className="mobile-item-image"
+                            onError={(e) => e.target.src = '/image.png'}
+                          />
+                          <div className="mobile-item-details">
+                            <h4 className="mobile-item-name">{item.name}</h4>
+                            <p className="mobile-item-description">{item.description}</p>
+                            <div className="mobile-item-footer">
+                              <span className="mobile-item-price">₹{item.fullPrice}</span>
+                              {getItemQuantity(item._id) === 0 ? (
+                                <button
+                                  className="mobile-add-btn"
+                                  onClick={() => handleAddToCart(item)}
+                                >
+                                  Add
+                                </button>
+                              ) : (
+                                <div className="mobile-quantity-controls">
+                                  <button
+                                    className="mobile-qty-btn"
+                                    onClick={() => handleUpdateQuantity(item._id, -1)}
+                                  >
+                                    −
+                                  </button>
+                                  <span className="mobile-qty-number">{getItemQuantity(item._id)}</span>
+                                  <button
+                                    className="mobile-qty-btn"
+                                    onClick={() => handleUpdateQuantity(item._id, 1)}
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

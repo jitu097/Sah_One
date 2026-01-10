@@ -492,106 +492,85 @@
   color: #333;
 }
 
-/* Image Selection */
-.image-selection {
+/* Image Upload Section */
+.image-upload-section {
   border: 2px dashed #e0e0e0;
   border-radius: 10px;
-  padding: 15px;
+  padding: 20px;
+  text-align: center;
 }
 
 .selected-image-preview {
-  text-align: center;
+  position: relative;
+  display: inline-block;
   margin-bottom: 15px;
 }
 
 .selected-image-preview img {
-  max-width: 150px;
-  max-height: 150px;
+  max-width: 200px;
+  max-height: 200px;
   object-fit: cover;
   border-radius: 10px;
-  margin-bottom: 10px;
+  border: 2px solid #e0e0e0;
 }
 
-.selected-image-preview p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.image-buttons {
+.remove-image-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 0.9rem;
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
 }
 
-.select-existing-btn,
-.upload-new-btn {
-  flex: 1;
-  padding: 10px 15px;
-  border: 2px solid #667eea;
-  background: white;
-  color: #667eea;
-  border-radius: 8px;
+.remove-image-btn:hover {
+  background: #cc0000;
+  transform: scale(1.1);
+}
+
+.upload-btn {
+  display: inline-block;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s;
-  text-align: center;
 }
 
-.select-existing-btn:hover,
-.upload-new-btn:hover {
-  background: #667eea;
-  color: white;
+.upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-.image-picker {
-  max-height: 300px;
-  overflow-y: auto;
-  border-top: 2px solid #f0f0f0;
-  padding-top: 15px;
-  margin-top: 15px;
+.upload-btn span {
+  pointer-events: none;
 }
 
-.image-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
-}
-
-.image-option {
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-  text-align: center;
-}
-
-.image-option:hover {
-  border-color: #667eea;
-  transform: scale(1.05);
-}
-
-.image-option.selected {
-  border-color: #667eea;
-  background: #f0f4ff;
-}
-
-.image-option img {
+.upload-progress-bar {
   width: 100%;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 5px;
-  margin-bottom: 5px;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 10px;
+  margin-top: 15px;
+  overflow: hidden;
 }
 
-.image-option p {
-  margin: 0;
-  font-size: 0.7rem;
-  color: #666;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.upload-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.3s ease;
+  border-radius: 10px;
 }
 
 .price-row {

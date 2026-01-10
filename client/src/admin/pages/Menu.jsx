@@ -4,24 +4,7 @@ import Navbar from '../components/Navbar';
 import '../styles/menu.css';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
-
-// Available images in public folder
-const PUBLIC_IMAGES = [
-  'bhujia roti.jpeg',
-  'Breakfast.jpeg',
-  'chola bhatura.jpeg',
-  'chola.jpeg',
-  'Dinner.jpeg',
-  'eggpratha.jpeg',
-  'hamburger.png',
-  'lunch.jpeg',
-  'poha.jpeg',
-  'ricethali.jpeg',
-  'sattu paratha.jpeg',
-  'tadkaroti.jpeg',
-  'parties.png',
-  'image.png'
-];
+import { uploadImageToCloudinary } from '../../utils/cloudinary';
 
 export default function Menu() {
   const [activeCategory, setActiveCategory] = useState('All');
@@ -29,9 +12,10 @@ export default function Menu() {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
   const [currentEditId, setCurrentEditId] = useState(null);
-  const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Convex Queries
   const categoriesRaw = useQuery(api.modules.menu.menu.getAllCategories) || [];
@@ -92,7 +76,8 @@ export default function Menu() {
     });
     setSelectedImage('');
     setShowModal(true);
-    setShowImagePicker(false);
+    setUploading(false);
+    setUploadProgress(0);
   };
 
   const toggleCategory = (categoryName) => {
@@ -185,17 +170,31 @@ export default function Menu() {
     }
   };
 
-  const handleImageSelect = (imageName) => {
-    setSelectedImage(imageName);
-    setFormData({ ...formData, image: imageName });
-    setShowImagePicker(false);
-  };
-
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      alert("Image upload will be implemented with Cloudinary. Please select from available images for now.");
-      // In future: upload logic here
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      setUploadProgress(0);
+      
+      // Upload to Cloudinary
+      const cloudinaryUrl = await uploadImageToCloudinary(file, (progress) => {
+        setUploadProgress(progress);
+      });
+
+      // Set the Cloudinary URL
+      setSelectedImage(cloudinaryUrl);
+      setFormData({ ...formData, image: cloudinaryUrl });
+      setUploading(false);
+      setUploadProgress(0);
+      
+      alert('Image uploaded successfully!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert(error.message || 'Failed to upload image. Please check your Cloudinary configuration.');
+      setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -315,7 +314,7 @@ export default function Menu() {
                       categoryItems.map(item => (
                         <div key={item.id} className={`admin-item ${!item.isActive ? 'inactive-item' : ''}`}>
                           <img
-                            src={`/${item.image}`}
+                            src={item.image || '/image.png'}
                             alt={item.name}
                             className="item-image"
                             onError={(e) => e.target.src = '/image.png'}
@@ -404,46 +403,41 @@ export default function Menu() {
 
                 <div className="form-group">
                   <label>Image *</label>
-                  <div className="image-selection">
+                  <div className="image-upload-section">
                     {selectedImage && (
                       <div className="selected-image-preview">
-                        <img src={`/${selectedImage}`} alt="Selected" onError={(e) => e.target.src = '/image.png'} />
-                        <p>{selectedImage}</p>
+                        <img src={selectedImage} alt="Selected" onError={(e) => e.target.src = '/image.png'} />
+                        <button 
+                          type="button" 
+                          className="remove-image-btn"
+                          onClick={() => {
+                            setSelectedImage('');
+                            setFormData({ ...formData, image: '' });
+                          }}
+                        >
+                          ✕ Remove
+                        </button>
                       </div>
                     )}
-                    <div className="image-buttons">
-                      <button
-                        type="button"
-                        className="select-existing-btn"
-                        onClick={() => setShowImagePicker(!showImagePicker)}
-                      >
-                        📁 Select from Existing
-                      </button>
-                      <label className="upload-new-btn">
-                        📤 Upload New Image
+                    
+                    {!selectedImage && (
+                      <label className="upload-btn">
                         <input
                           type="file"
                           accept="image/*"
                           onChange={handleImageUpload}
+                          disabled={uploading}
                           style={{ display: 'none' }}
                         />
+                        <span>
+                          {uploading ? `📤 Uploading... ${uploadProgress}%` : '📤 Upload Image to Cloudinary'}
+                        </span>
                       </label>
-                    </div>
-
-                    {showImagePicker && (
-                      <div className="image-picker">
-                        <div className="image-grid">
-                          {PUBLIC_IMAGES.map((img) => (
-                            <div
-                              key={img}
-                              className={`image-option ${selectedImage === img ? 'selected' : ''}`}
-                              onClick={() => handleImageSelect(img)}
-                            >
-                              <img src={`/${img}`} alt={img} onError={(e) => e.target.src = '/image.png'} />
-                              <p>{img}</p>
-                            </div>
-                          ))}
-                        </div>
+                    )}
+                    
+                    {uploading && (
+                      <div className="upload-progress-bar">
+                        <div className="upload-progress-fill" style={{ width: `${uploadProgress}%` }}></div>
                       </div>
                     )}
                   </div>
