@@ -47,6 +47,37 @@ export const createOrUpdateUser = mutation({
 });
 
 /**
+ * Update user details (address, phone, name)
+ */
+export const updateUser = mutation({
+  args: {
+    firebaseUid: v.string(),
+    name: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    address: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { firebaseUid, ...updates } = args;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", firebaseUid))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await ctx.db.patch(user._id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+
+    return user._id;
+  },
+});
+
+/**
  * Get user by Firebase UID
  */
 export const getUserByFirebaseUid = query({

@@ -10,6 +10,7 @@
 
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_role from "../lib/role.js";
+import type * as modules_auth_admins from "../modules/auth/admins.js";
 import type * as modules_auth_auth from "../modules/auth/auth.js";
 import type * as modules_delivery_delivery from "../modules/delivery/delivery.js";
 import type * as modules_menu_menu from "../modules/menu/menu.js";
@@ -30,6 +31,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/role": typeof lib_role;
+  "modules/auth/admins": typeof modules_auth_admins;
   "modules/auth/auth": typeof modules_auth_auth;
   "modules/delivery/delivery": typeof modules_delivery_delivery;
   "modules/menu/menu": typeof modules_menu_menu;

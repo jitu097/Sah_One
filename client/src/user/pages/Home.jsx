@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 import '../styles/Home.css';
@@ -16,6 +18,8 @@ export default function Home() {
     time: ''
   });
 
+  const menuItems = useQuery(api.modules.menu.menu.getAvailableMenuItems);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -29,18 +33,18 @@ export default function Home() {
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
-    
+
     // Check if current time is within the range
     if (hours >= startHour && hours < endHour) {
       // Calculate remaining time
       const endTime = new Date(now);
       endTime.setHours(endHour, 0, 0, 0);
       const diff = endTime - now;
-      
+
       const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
       const minutesLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const secondsLeft = Math.floor((diff % (1000 * 60)) / 1000);
-      
+
       return {
         isActive: true,
         timeString: `${hoursLeft}h ${minutesLeft}m ${secondsLeft}s left`
@@ -52,7 +56,7 @@ export default function Home() {
       };
     }
   };
-  
+
   const slides = [
     {
       id: 1,
@@ -104,7 +108,7 @@ export default function Home() {
       <Navbar />
       <div className="page-container">
         {/* Hero Carousel Section */}
-        <section 
+        <section
           className={`hero-carousel ${slides[currentSlide].type === 'original' ? 'hero-carousel-dynamic' : 'hero-carousel-white'}`}
           style={slides[currentSlide].type === 'original' ? {
             backgroundImage: `url('${slides[currentSlide].backgroundImage}')`
@@ -113,7 +117,7 @@ export default function Home() {
           <button className="carousel-btn prev" onClick={prevSlide}>
             ←
           </button>
-          
+
           <div className="carousel-content">
             {slides[currentSlide].type === 'original' ? (
               <>
@@ -167,7 +171,7 @@ export default function Home() {
                 <h3>Breakfast</h3>
               </div>
             )}
-            
+
             {getTimeStatus(13, 16).isActive ? (
               <Link to="/user/serving-hours" className="menu-card">
                 <img src="/lunch.jpeg" alt="Lunch" />
@@ -188,7 +192,7 @@ export default function Home() {
                 <h3>Lunch</h3>
               </div>
             )}
-            
+
             {getTimeStatus(19, 24).isActive ? (
               <Link to="/user/serving-hours" className="menu-card">
                 <img src="/Dinner.jpeg" alt="Dinner" />
@@ -209,7 +213,7 @@ export default function Home() {
                 <h3>Dinner</h3>
               </div>
             )}
-            
+
           </div>
         </section>
 
@@ -218,10 +222,10 @@ export default function Home() {
           <div className="parties-image-container">
             <img src="/parties.png" alt="Parties" className="parties-image" />
             <img src="/Background.png" alt="Background" className="parties-background-image" />
-            <img 
-              src="/69.png" 
-              alt="Book Now" 
-              className="parties-button-image" 
+            <img
+              src="/69.png"
+              alt="Book Now"
+              className="parties-button-image"
               onClick={() => setShowPartyModal(true)}
             />
           </div>
@@ -315,7 +319,7 @@ export default function Home() {
           <h3 className="delivery-tag">EXPRESS DELIVERY</h3>
           <h2 className="section-title">60 Minutes Delivery Process</h2>
           <p className="section-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus orci tempus.</p>
-          
+
           <div className="delivery-steps">
             <div className="step">
               <div className="step-icon">🍜</div>
@@ -340,26 +344,22 @@ export default function Home() {
         <section className="bestsellers-section">
           <h2 className="section-title">Best Sellers</h2>
           <div className="bestsellers-grid">
-            <div className="bestseller-card">
-              <img src="https://via.placeholder.com/300x200" alt="Roasted Corn" />
-              <h3>Roasted Corn</h3>
-              <div className="rating">★★★★★</div>
-            </div>
-            <div className="bestseller-card">
-              <img src="https://via.placeholder.com/300x200" alt="Purple Onion" />
-              <h3>Purple Onion</h3>
-              <div className="rating">★★★★★</div>
-            </div>
-            <div className="bestseller-card">
-              <img src="https://via.placeholder.com/300x200" alt="Chili Bell Pepper" />
-              <h3>Chili Bell Pepper</h3>
-              <div className="rating">★★★★★</div>
-            </div>
-            <div className="bestseller-card">
-              <img src="https://via.placeholder.com/300x200" alt="Organic Asparagus" />
-              <h3>Organic Asparagus</h3>
-              <div className="rating">★★★★★</div>
-            </div>
+            {menuItems ? (
+              menuItems.slice(0, 4).map((item) => (
+                <div key={item._id} className="bestseller-card">
+                  <img
+                    src={item.image || '/image.png'}
+                    alt={item.name}
+                    onError={(e) => e.target.src = '/image.png'}
+                  />
+                  <h3>{item.name}</h3>
+                  <div className="rating">★★★★★</div>
+                  <p className="price">₹{item.fullPrice}</p>
+                </div>
+              ))
+            ) : (
+              <div className="loading-text">Loading delicious items...</div>
+            )}
           </div>
         </section>
       </div>

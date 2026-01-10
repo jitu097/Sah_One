@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { 
+import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
-      
+
       if (user) {
         let role = 'user';
         if (user.email === 'admin@test.com') {
@@ -65,6 +65,7 @@ export const AuthProvider = ({ children }) => {
               firebaseUid: user.uid,
               email: user.email,
               name: user.displayName || 'User',
+              phone: user.phoneNumber || '',
               role: 'user',
             });
           }
@@ -74,7 +75,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setUserRole(null);
       }
-      
+
       setLoading(false);
     });
 
@@ -87,7 +88,7 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password, userData = {}) => {
     const result = await createUserWithEmailAndPassword(auth, email, password);
-    
+
     if (userData.name && result.user) {
       await updateProfile(result.user, {
         displayName: userData.name
@@ -99,12 +100,13 @@ export const AuthProvider = ({ children }) => {
         firebaseUid: result.user.uid,
         email: result.user.email,
         name: userData.name || '',
+        phone: userData.phone || '',
         role: 'user',
       });
     } catch (error) {
       console.warn('Convex sync failed (user created in Firebase):', error.message);
     }
-    
+
     return result;
   };
 

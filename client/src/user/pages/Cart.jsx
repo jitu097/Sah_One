@@ -1,10 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import '../styles/pages.css';
 
 export default function Cart() {
   const { cartItems, updateQuantity } = useCart();
+  const { currentUser } = useAuth();
+
+  const user = useQuery(api.modules.users.users.getUserByFirebaseUid,
+    currentUser ? { firebaseUid: currentUser.uid } : "skip"
+  );
 
   // Check if restaurant is open
   const isRestaurantOpen = () => {
@@ -25,7 +33,7 @@ export default function Cart() {
 
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => {
-      const price = typeof item.price === 'string' ? 
+      const price = typeof item.price === 'string' ?
         parseInt(item.price.replace('₹', '')) : item.price;
       return total + (price * item.quantity);
     }, 0);
@@ -33,6 +41,26 @@ export default function Cart() {
 
   const calculateTotal = () => {
     return calculateSubtotal() + deliveryCharge;
+  };
+
+  const handleCheckout = () => {
+    if (!currentUser) {
+      alert("Please login to checkout");
+      navigate('/login');
+      return;
+    }
+
+    if (!user) return; // Loading state
+
+    if (!user.phone || !user.address) {
+      alert("Please complete your profile (Phone Number and Address) to proceed with delivery.");
+      navigate('/user/profile');
+      return;
+    }
+
+    // Process checkout (currently just an alert or placeholder)
+    alert("Order placed successfully! (This is a demo)");
+    // navigate('/user/orders');
   };
 
   return (
@@ -49,7 +77,7 @@ export default function Cart() {
             <div className="empty-cart">
               <h2>Your cart is empty</h2>
               <p>Add some delicious items from our menu!</p>
-              <button 
+              <button
                 className="browse-menu-btn"
                 onClick={() => navigate('/user')}
               >
@@ -60,8 +88,8 @@ export default function Cart() {
             cartItems.map(item => (
               <div key={item.id} className="cart-item">
                 <div className="item-info">
-                  <img 
-                    src={item.image} 
+                  <img
+                    src={item.image}
                     alt={item.name}
                     className="cart-item-image"
                   />
@@ -71,21 +99,21 @@ export default function Cart() {
                   </div>
                 </div>
                 <div className="item-actions">
-                  <button 
-                    className="qty-btn" 
+                  <button
+                    className="qty-btn"
                     onClick={() => handleUpdateQuantity(item.id, -1)}
                   >
                     -
                   </button>
                   <span className="qty">{item.quantity}</span>
-                  <button 
-                    className="qty-btn" 
+                  <button
+                    className="qty-btn"
                     onClick={() => handleUpdateQuantity(item.id, 1)}
                   >
                     +
                   </button>
                   <span className="item-price">
-                    ₹{(typeof item.price === 'string' ? 
+                    ₹{(typeof item.price === 'string' ?
                       parseInt(item.price.replace('₹', '')) : item.price) * item.quantity}
                   </span>
                 </div>
@@ -108,7 +136,7 @@ export default function Cart() {
               <span>Total:</span>
               <span>₹{calculateTotal()}</span>
             </div>
-            <button className="checkout-btn">Proceed to Checkout</button>
+            <button className="checkout-btn" onClick={handleCheckout}>Proceed to Checkout</button>
           </div>
         )}
       </div>

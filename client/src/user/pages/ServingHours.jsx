@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
 import { useCart } from '../../context/CartContext';
 import '../styles/pages.css';
@@ -38,112 +40,41 @@ export default function ServingHours() {
     updateQuantity(itemId, change);
   };
 
-  const categories = [
-    {
-      id: 1,
-      name: 'Breakfast',
-      icon: '🌅',
-      time: '9am to 11am',
-      color: '#FF9800',
-      items: [
-        {
-          id: 1,
-          name: 'Bhujia Roti',
-          image: '/bhujia roti.jpeg',
-          description: 'Delicious traditional bhujia with fresh roti',
-          price: '₹80'
-        },
-        {
-          id: 2,
-          name: 'Chola Bhatura',
-          image: '/chola bhatura.jpeg',
-          description: 'Fluffy bhatura served with spicy chola',
-          price: '₹120'
-        },
-        {
-          id: 3,
-          name: 'Chola',
-          image: '/chola.jpeg',
-          description: 'Spicy and tangy chickpea curry',
-          price: '₹60'
-        },
-        {
-          id: 4,
-          name: 'Egg Paratha',
-          image: '/eggpratha.jpeg',
-          description: 'Paratha stuffed with egg and spices',
-          price: '₹90'
-        },
-        {
-          id: 5,
-          name: 'Poha',
-          image: '/poha.jpeg',
-          description: 'Light and flavorful flattened rice dish',
-          price: '₹50'
-        },
-        {
-          id: 6,
-          name: 'Tadka Roti',
-          image: '/tadkaroti.jpeg',
-          description: 'Crispy roti with special tadka seasoning',
-          price: '₹70'
-        },
-        {
-          id: 7,
-          name: 'Sattu Paratha',
-          image: '/sattu paratha.jpeg',
-          description: 'Nutritious paratha filled with roasted gram flour',
-          price: '₹85'
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Lunch',
-      icon: '☀️',
-      time: '1pm to 4pm',
-      color: '#4CAF50',
-      items: [
-        {
-          id: 8,
-          name: 'Rice Thali',
-          image: '/ricethali.jpeg',
-          description: 'Complete meal with rice, dal, vegetables, roti and dessert',
-          price: '₹150'
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Dinner',
-      icon: '🌙',
-      time: '9pm to 12am',
-      color: '#2196F3',
-      items: [
-        {
-          id: 11,
-          name: 'Dal Fry',
-          image: '/dalfry.jpeg',
-          description: 'Tempered yellow lentils with aromatic spices',
-          price: '₹100'
-        },
-        {
-          id: 12,
-          name: 'Paneer Butter Masala',
-          image: '/paneerbuttermasala.jpeg',
-          description: 'Cottage cheese in rich tomato gravy',
-          price: '₹180'
-        },
-        {
-          id: 13,
-          name: 'Veg Biryani',
-          image: '/vegbiryani.jpeg',
-          description: 'Aromatic basmati rice with mixed vegetables',
-          price: '₹150'
-        }
-      ]
-    }
-  ];
+  // Fetch data from Convex
+  const allMenuItems = useQuery(api.modules.menu.menu.getAvailableMenuItems);
+  const categoriesList = useQuery(api.modules.menu.menu.getCategoryNames);
+
+  // Static metadata for categories
+  const categoryMetadata = {
+    'Breakfast': { icon: '🌅', time: '9am to 11am', color: '#FF9800', order: 1 },
+    'Lunch': { icon: '☀️', time: '1pm to 4pm', color: '#4CAF50', order: 2 },
+    'Dinner': { icon: '🌙', time: '9pm to 12am', color: '#2196F3', order: 3 }
+  };
+
+  // Loading state
+  if (!allMenuItems || !categoriesList) {
+    return <div className="loading-spinner">Loading serving hours...</div>;
+  }
+
+  // Process data to match the component structure
+  const categories = categoriesList
+    .map((catName, index) => {
+      const metadata = categoryMetadata[catName] || {
+        icon: '🍽️',
+        time: 'All Day',
+        color: '#9E9E9E',
+        order: 99
+      };
+
+      return {
+        id: index, // Use index or generate stable ID
+        name: catName,
+        ...metadata,
+        items: allMenuItems.filter(item => item.category === catName)
+      };
+    })
+    .sort((a, b) => a.order - b.order)
+    .filter(cat => cat.items.length > 0); // Only show categories with items
 
   const toggleCategory = (categoryName) => {
     setExpandedCategory(expandedCategory === categoryName ? null : categoryName);
@@ -162,11 +93,11 @@ export default function ServingHours() {
           <div className="category-sections">
             {categories.map(category => {
               const isExpanded = expandedCategory === category.name;
-              
+
               return (
                 <div key={category.id} className="meal-category">
-                  <div 
-                    className="category-header-bar" 
+                  <div
+                    className="category-header-bar"
                     onClick={() => toggleCategory(category.name)}
                     style={{ background: category.color }}
                   >
@@ -182,10 +113,10 @@ export default function ServingHours() {
                   {isExpanded && (
                     <div className="category-items-grid">
                       {category.items.map(item => (
-                        <div key={item.id} className="meal-card">
-                          <img 
-                            src={item.image} 
-                            alt={item.name} 
+                        <div key={item._id} className="meal-card">
+                          <img
+                            src={item.image || '/image.png'}
+                            alt={item.name}
                             className="meal-card-image"
                             onError={(e) => e.target.src = '/image.png'}
                           />
@@ -193,26 +124,26 @@ export default function ServingHours() {
                             <h3 className="meal-card-title">{item.name}</h3>
                             <p className="meal-card-description">{item.description}</p>
                             <div className="meal-card-footer">
-                              <span className="meal-price">{item.price}</span>
-                              {getItemQuantity(item.id) === 0 ? (
-                                <button 
+                              <span className="meal-price">₹{item.fullPrice}</span>
+                              {getItemQuantity(item._id) === 0 ? (
+                                <button
                                   className="meal-add-btn"
-                                  onClick={() => handleAddToCart(item)}
+                                  onClick={() => handleAddToCart({ ...item, id: item._id })}
                                 >
                                   Add to Cart
                                 </button>
                               ) : (
                                 <div className="quantity-controls">
-                                  <button 
+                                  <button
                                     className="qty-btn"
-                                    onClick={() => handleUpdateQuantity(item.id, -1)}
+                                    onClick={() => handleUpdateQuantity(item._id, -1)}
                                   >
                                     −
                                   </button>
-                                  <span className="qty-number">{getItemQuantity(item.id)}</span>
-                                  <button 
+                                  <span className="qty-number">{getItemQuantity(item._id)}</span>
+                                  <button
                                     className="qty-btn"
-                                    onClick={() => handleUpdateQuantity(item.id, 1)}
+                                    onClick={() => handleUpdateQuantity(item._id, 1)}
                                   >
                                     +
                                   </button>

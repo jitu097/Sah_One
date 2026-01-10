@@ -5,7 +5,7 @@ import '../styles/navbar.css';
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Initialize restaurant status from localStorage or default to true (open)
   const [restaurantOpen, setRestaurantOpen] = useState(() => {
     const savedStatus = localStorage.getItem('restaurantOpen');
@@ -23,15 +23,15 @@ export default function Navbar() {
   const toggleRestaurant = () => {
     const newStatus = !restaurantOpen;
     setRestaurantOpen(newStatus);
-    
+
     // Save status to localStorage so it persists and is accessible to user side
     localStorage.setItem('restaurantOpen', newStatus.toString());
-    
+
     // Dispatch custom event to notify other parts of the app
-    window.dispatchEvent(new CustomEvent('restaurantStatusChanged', { 
-      detail: { isOpen: newStatus } 
+    window.dispatchEvent(new CustomEvent('restaurantStatusChanged', {
+      detail: { isOpen: newStatus }
     }));
-    
+
     // Show notification to admin
     if (newStatus) {
       alert('🟢 Restaurant is now OPEN. Users can browse and place orders.');
@@ -44,7 +44,7 @@ export default function Navbar() {
     <nav className="admin-navbar">
       <div className="admin-nav-left">
         <img src="/LOGO.png" alt="SAH_ONE Admin" className="admin-logo" />
-        <button 
+        <button
           className={`restaurant-toggle-btn ${restaurantOpen ? 'open' : 'closed'}`}
           onClick={toggleRestaurant}
           title={`Click to ${restaurantOpen ? 'close' : 'open'} restaurant`}
@@ -72,6 +72,9 @@ export default function Navbar() {
         </Link>
         <Link to="/admin/reports" className={`admin-nav-link ${isActive('/admin/reports')}`}>
           Reports
+        </Link>
+        <Link to="/admin/profile" className={`admin-nav-link ${isActive('/admin/profile')}`}>
+          Profile
         </Link>
       </div>
 

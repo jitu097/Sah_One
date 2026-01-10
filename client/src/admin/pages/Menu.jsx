@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import '../styles/menu.css';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 
 // Available images in public folder
 const PUBLIC_IMAGES = [
@@ -22,93 +24,44 @@ const PUBLIC_IMAGES = [
 ];
 
 export default function Menu() {
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'Rolls', isActive: true },
-    { id: 2, name: 'Chowmein', isActive: true },
-    { id: 3, name: 'Parathas', isActive: true },
-    { id: 4, name: 'Rice Items', isActive: true },
-    { id: 5, name: 'Breakfast', isActive: true },
-    { id: 6, name: 'Thali', isActive: true }
-  ]);
-
-  const [menuItems, setMenuItems] = useState([
-    {
-      id: 1,
-      name: 'Veg Roll',
-      description: 'Fresh vegetables wrapped in soft paratha',
-      image: 'hamburger.png',
-      category: 'Rolls',
-      priceHalf: 40,
-      priceFull: 80,
-      isActive: true,
-      hasHalfOption: true
-    },
-    {
-      id: 2,
-      name: 'Paneer Roll',
-      description: 'Cottage cheese with special sauce',
-      image: 'hamburger.png',
-      category: 'Rolls',
-      priceHalf: 60,
-      priceFull: 120,
-      isActive: true,
-      hasHalfOption: true
-    },
-    {
-      id: 3,
-      name: 'Veg Chowmein',
-      description: 'Stir-fried noodles with vegetables',
-      image: 'lunch.jpeg',
-      category: 'Chowmein',
-      priceHalf: 50,
-      priceFull: 100,
-      isActive: true,
-      hasHalfOption: true
-    },
-    {
-      id: 4,
-      name: 'Poha',
-      description: 'Traditional Indian breakfast',
-      image: 'poha.jpeg',
-      category: 'Breakfast',
-      priceHalf: 40,
-      priceFull: 80,
-      isActive: true,
-      hasHalfOption: true
-    },
-    {
-      id: 5,
-      name: 'Sattu Paratha',
-      description: 'Healthy roasted gram flour paratha',
-      image: 'sattu paratha.jpeg',
-      category: 'Parathas',
-      priceHalf: 30,
-      priceFull: 60,
-      isActive: true,
-      hasHalfOption: true
-    },
-    {
-      id: 6,
-      name: 'Rice Thali',
-      description: 'Complete meal with rice',
-      image: 'ricethali.jpeg',
-      category: 'Thali',
-      priceHalf: 0,
-      priceFull: 150,
-      isActive: true,
-      hasHalfOption: false
-    }
-  ]);
-
-  const [expandedCategories, setExpandedCategories] = useState({});
+  const [activeCategory, setActiveCategory] = useState('All');
   const [showModal, setShowModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
-  const [currentItem, setCurrentItem] = useState(null);
+  const [currentEditId, setCurrentEditId] = useState(null);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
-  const [uploadedImage, setUploadedImage] = useState(null);
   const [newCategoryName, setNewCategoryName] = useState('');
+
+  // Convex Queries
+  const categoriesRaw = useQuery(api.modules.menu.menu.getAllCategories) || [];
+  const menuItemsRaw = useQuery(api.modules.menu.menu.getAllMenuItems) || [];
+
+  // Normalize data for frontend if needed (Convex returns _id, we use it directly)
+  const categories = categoriesRaw.map(c => ({
+    ...c,
+    id: c._id, // Map _id to id for compatibility if needed, but best to use _id
+    active: c.isActive
+  }));
+
+  const menuItems = menuItemsRaw.map(i => ({
+    ...i,
+    id: i._id,
+    isActive: i.isAvailable, // Map backend isAvailable to frontend isActive
+    priceFull: i.fullPrice,
+    priceHalf: i.halfPrice,
+    hasHalfOption: i.hasHalfPortion
+  }));
+
+  // Convex Mutations
+  const createMenuItem = useMutation(api.modules.menu.menu.createMenuItem);
+  const updateMenuItem = useMutation(api.modules.menu.menu.updateMenuItem);
+  const deleteMenuItem = useMutation(api.modules.menu.menu.deleteMenuItem);
+  const toggleMenuItemAvailability = useMutation(api.modules.menu.menu.toggleMenuItemAvailability);
+
+  const createCategory = useMutation(api.modules.menu.menu.createCategory);
+  const deleteCategory = useMutation(api.modules.menu.menu.deleteCategory);
+  const toggleCategoryStatus = useMutation(api.modules.menu.menu.toggleCategoryStatus);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -117,25 +70,29 @@ export default function Menu() {
     category: '',
     priceHalf: '',
     priceFull: '',
-    hasHalfOption: true,
+    hasHalfOption: false,
     isActive: true
   });
 
+  // Local state for expanded categories in UI
+  const [expandedCategories, setExpandedCategories] = useState({});
+
   const handleAddNew = () => {
     setModalMode('add');
+    setCurrentEditId(null);
     setFormData({
       name: '',
       description: '',
       image: '',
-      category: categories[0]?.name || '',
+      category: categories.length > 0 ? categories[0].name : '',
       priceHalf: '',
       priceFull: '',
-      hasHalfOption: true,
+      hasHalfOption: false,
       isActive: true
     });
     setSelectedImage('');
-    setUploadedImage(null);
     setShowModal(true);
+    setShowImagePicker(false);
   };
 
   const toggleCategory = (categoryName) => {
@@ -145,38 +102,51 @@ export default function Menu() {
     }));
   };
 
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
     if (newCategoryName.trim()) {
-      const newCategory = {
-        id: Date.now(),
-        name: newCategoryName.trim(),
-        isActive: true
-      };
-      setCategories([...categories, newCategory]);
-      setNewCategoryName('');
-      setShowCategoryModal(false);
-      alert('Category added successfully!');
+      try {
+        await createCategory({
+          name: newCategoryName.trim(),
+          isActive: true
+        });
+        setNewCategoryName('');
+        setShowCategoryModal(false);
+        alert('Category added successfully!');
+      } catch (error) {
+        console.error("Error creating category:", error);
+        alert("Failed to create category");
+      }
     }
   };
 
-  const handleDeleteCategory = (categoryId) => {
-    const category = categories.find(c => c.id === categoryId);
-    const itemsInCategory = menuItems.filter(item => item.category === category.name);
-    
+  const handleDeleteCategory = async (categoryId, categoryName) => {
+    const itemsInCategory = menuItems.filter(item => item.category === categoryName);
+
     if (itemsInCategory.length > 0) {
-      alert(`Cannot delete category "${category.name}" because it has ${itemsInCategory.length} items. Please remove or move the items first.`);
+      alert(`Cannot delete category "${categoryName}" because it has ${itemsInCategory.length} items. Please remove or move the items first.`);
       return;
     }
-    
-    if (window.confirm(`Are you sure you want to delete "${category.name}" category?`)) {
-      setCategories(categories.filter(c => c.id !== categoryId));
+
+    if (window.confirm(`Are you sure you want to delete "${categoryName}" category?`)) {
+      try {
+        await deleteCategory({ categoryId });
+        alert('Category deleted successfully!');
+      } catch (error) {
+        console.error("Error deleting category:", error);
+        alert("Failed to delete category");
+      }
     }
   };
 
-  const toggleCategoryActive = (categoryId) => {
-    setCategories(categories.map(cat => 
-      cat.id === categoryId ? { ...cat, isActive: !cat.isActive } : cat
-    ));
+  const toggleCategoryActive = async (category) => {
+    try {
+      await toggleCategoryStatus({
+        categoryId: category._id,
+        isActive: !category.isActive
+      });
+    } catch (error) {
+      console.error("Error toggling category:", error);
+    }
   };
 
   const getItemsByCategory = (categoryName) => {
@@ -189,84 +159,96 @@ export default function Menu() {
 
   const handleEdit = (item) => {
     setModalMode('edit');
-    setCurrentItem(item);
+    setCurrentEditId(item._id);
     setFormData({
       name: item.name,
       description: item.description,
-      image: item.image,
+      image: item.image || '',
       category: item.category,
       priceHalf: item.priceHalf || '',
       priceFull: item.priceFull,
       hasHalfOption: item.hasHalfOption,
       isActive: item.isActive
     });
-    setSelectedImage(item.image);
+    setSelectedImage(item.image || '');
     setShowModal(true);
   };
 
-  const handleToggleActive = (id) => {
-    setMenuItems(menuItems.map(item => 
-      item.id === id ? { ...item, isActive: !item.isActive } : item
-    ));
+  const handleToggleActive = async (item) => {
+    try {
+      await toggleMenuItemAvailability({
+        itemId: item._id,
+        isAvailable: !item.isActive // toggle current state used in frontend
+      });
+    } catch (error) {
+      console.error("Error toggling item availability:", error);
+    }
   };
 
   const handleImageSelect = (imageName) => {
     setSelectedImage(imageName);
     setFormData({ ...formData, image: imageName });
-    setUploadedImage(null);
     setShowImagePicker(false);
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // In real implementation, you would upload to public folder
-      // For now, we'll just store the file name
-      const fileName = file.name;
-      setUploadedImage(fileName);
-      setSelectedImage(fileName);
-      setFormData({ ...formData, image: fileName });
-      alert(`Image "${fileName}" will be saved to public folder`);
+      alert("Image upload will be implemented with Cloudinary. Please select from available images for now.");
+      // In future: upload logic here
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.image) {
       alert('Please select or upload an image');
       return;
     }
-
-    if (modalMode === 'add') {
-      const newItem = {
-        id: Date.now(),
-        ...formData,
-        priceHalf: formData.hasHalfOption ? Number(formData.priceHalf) : 0,
-        priceFull: Number(formData.priceFull)
-      };
-      setMenuItems([...menuItems, newItem]);
-      alert('Menu item added successfully!');
-    } else {
-      setMenuItems(menuItems.map(item =>
-        item.id === currentItem.id
-          ? {
-              ...item,
-              ...formData,
-              priceHalf: formData.hasHalfOption ? Number(formData.priceHalf) : 0,
-              priceFull: Number(formData.priceFull)
-            }
-          : item
-      ));
-      alert('Menu item updated successfully!');
+    if (!formData.name || !formData.priceFull || !formData.category) {
+      alert('Please fill in required fields');
+      return;
     }
 
-    setShowModal(false);
+    const itemData = {
+      name: formData.name,
+      description: formData.description,
+      category: formData.category,
+      fullPrice: Number(formData.priceFull),
+      image: formData.image,
+      isAvailable: formData.isActive,
+      hasHalfPortion: formData.hasHalfOption,
+      halfPrice: formData.hasHalfOption ? Number(formData.priceHalf) : undefined,
+    };
+
+    try {
+      if (modalMode === 'add') {
+        await createMenuItem(itemData);
+        alert('Menu item added successfully!');
+      } else {
+        await updateMenuItem({
+          itemId: currentEditId,
+          ...itemData
+        });
+        alert('Menu item updated successfully!');
+      }
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error saving item:", error);
+      alert("Failed to save item.");
+    }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
-      setMenuItems(menuItems.filter(item => item.id !== id));
+      try {
+        await deleteMenuItem({ itemId: id });
+        alert('Item deleted successfully');
+      } catch (error) {
+        console.error("Error deleting item:", error);
+        alert("Failed to delete item");
+      }
     }
   };
 
@@ -298,7 +280,7 @@ export default function Menu() {
           {categories.map(category => {
             const categoryItems = getItemsByCategory(category.name);
             const isExpanded = expandedCategories[category.name];
-            
+
             return (
               <div key={category.id} className={`category-section ${!category.isActive ? 'inactive-category' : ''}`}>
                 <div className="category-header" onClick={() => toggleCategory(category.name)}>
@@ -310,10 +292,10 @@ export default function Menu() {
                   </div>
                   <div className="category-actions" onClick={(e) => e.stopPropagation()}>
                     <label className="toggle-switch" title="Show/Hide category">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={category.isActive}
-                        onChange={() => toggleCategoryActive(category.id)}
+                        onChange={() => toggleCategoryActive(category)}
                       />
                       <span className="toggle-slider"></span>
                     </label>
@@ -332,8 +314,8 @@ export default function Menu() {
                     ) : (
                       categoryItems.map(item => (
                         <div key={item.id} className={`admin-item ${!item.isActive ? 'inactive-item' : ''}`}>
-                          <img 
-                            src={`/${item.image}`} 
+                          <img
+                            src={`/${item.image}`}
                             alt={item.name}
                             className="item-image"
                             onError={(e) => e.target.src = '/image.png'}
@@ -355,10 +337,10 @@ export default function Menu() {
                           </div>
                           <div className="item-actions">
                             <label className="toggle-switch">
-                              <input 
-                                type="checkbox" 
+                              <input
+                                type="checkbox"
                                 checked={item.isActive}
-                                onChange={() => handleToggleActive(item.id)}
+                                onChange={() => handleToggleActive(item)}
                               />
                               <span className="toggle-slider"></span>
                             </label>
@@ -430,8 +412,8 @@ export default function Menu() {
                       </div>
                     )}
                     <div className="image-buttons">
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         className="select-existing-btn"
                         onClick={() => setShowImagePicker(!showImagePicker)}
                       >
@@ -439,8 +421,8 @@ export default function Menu() {
                       </button>
                       <label className="upload-new-btn">
                         📤 Upload New Image
-                        <input 
-                          type="file" 
+                        <input
+                          type="file"
                           accept="image/*"
                           onChange={handleImageUpload}
                           style={{ display: 'none' }}
@@ -452,7 +434,7 @@ export default function Menu() {
                       <div className="image-picker">
                         <div className="image-grid">
                           {PUBLIC_IMAGES.map((img) => (
-                            <div 
+                            <div
                               key={img}
                               className={`image-option ${selectedImage === img ? 'selected' : ''}`}
                               onClick={() => handleImageSelect(img)}
@@ -549,7 +531,6 @@ export default function Menu() {
                       onChange={(e) => setNewCategoryName(e.target.value)}
                       placeholder="Enter category name (e.g., Rolls, Pizza)"
                       style={{ flex: 1 }}
-                      onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
                     />
                     <button className="submit-btn" onClick={handleAddCategory}>
                       Add
@@ -569,16 +550,16 @@ export default function Menu() {
                       </div>
                       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                         <label className="toggle-switch">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             checked={category.isActive}
-                            onChange={() => toggleCategoryActive(category.id)}
+                            onChange={() => toggleCategoryActive(category)}
                           />
                           <span className="toggle-slider"></span>
                         </label>
-                        <button 
-                          className="delete-btn-small" 
-                          onClick={() => handleDeleteCategory(category.id)}
+                        <button
+                          className="delete-btn-small"
+                          onClick={() => handleDeleteCategory(category.id, category.name)}
                           title="Delete category"
                         >
                           🗑️

@@ -27,6 +27,7 @@ import AdminOrders from './admin/pages/Orders';
 import Offers from './admin/pages/Offers';
 import Reports from './admin/pages/Reports';
 import SpecialServingHours from './admin/pages/SpecialServingHours';
+import AdminProfile from './admin/pages/Profile';
 
 // Delivery Pages
 import AssignedOrders from './delivery/pages/AssignedOrders';
@@ -43,7 +44,7 @@ function AppContent() {
     <>
       {/* Restaurant Status Popup - Shows only on user pages */}
       {isUserRoute && <RestaurantStatus />}
-      
+
       <Routes>
         {/* Landing & Auth */}
         <Route path="/" element={<LandingPage />} />
@@ -62,6 +63,7 @@ function AppContent() {
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin/menu" element={<Menu />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/offers" element={<Offers />} />
