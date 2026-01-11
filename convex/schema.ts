@@ -116,19 +116,59 @@ export default defineSchema({
     .index("by_code", ["code"])
     .index("by_active", ["isActive"]),
 
-  // Special Serving Hours
-  specialServingHours: defineTable({
-    date: v.string(), // Format: "YYYY-MM-DD"
-    dayOfWeek: v.string(), // "monday", "tuesday", etc.
-    openingTime: v.string(), // Format: "HH:MM"
-    closingTime: v.string(), // Format: "HH:MM"
+  // Serving Hours Configuration (Global v3)
+  servingHoursConfig: defineTable({
     isClosed: v.boolean(),
-    reason: v.optional(v.string()), // e.g., "Holiday", "Special Event"
+    reason: v.optional(v.string()),
+
+    // Breakfast Slot
+    breakfast: v.optional(v.object({
+      isActive: v.boolean(),
+      startTime: v.string(),
+      endTime: v.string(),
+      items: v.array(v.object({
+        id: v.string(),
+        name: v.string(),
+        price: v.number(),
+        description: v.optional(v.string()),
+        image: v.optional(v.string()),
+        isActive: v.boolean() // New toggle for individual item
+      }))
+    })),
+
+    // Lunch Slot
+    lunch: v.optional(v.object({
+      isActive: v.boolean(),
+      startTime: v.string(),
+      endTime: v.string(),
+      items: v.array(v.object({
+        id: v.string(),
+        name: v.string(),
+        price: v.number(),
+        description: v.optional(v.string()),
+        image: v.optional(v.string()),
+        isActive: v.boolean()
+      }))
+    })),
+
+    // Dinner Slot
+    dinner: v.optional(v.object({
+      isActive: v.boolean(),
+      startTime: v.string(),
+      endTime: v.string(),
+      items: v.array(v.object({
+        id: v.string(),
+        name: v.string(),
+        price: v.number(),
+        description: v.optional(v.string()),
+        image: v.optional(v.string()),
+        isActive: v.boolean()
+      }))
+    })),
+
     createdAt: v.number(),
     updatedAt: v.number(),
-  })
-    .index("by_date", ["date"])
-    .index("by_day", ["dayOfWeek"]),
+  }),
 
   // Restaurant Settings
   restaurantSettings: defineTable({

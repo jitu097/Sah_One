@@ -155,7 +155,7 @@ export default function Home() {
           <h2 className="section-title">Special Serving Hours</h2>
           <div className="menu-grid">
             {getTimeStatus(9, 11).isActive ? (
-              <Link to="/user/serving-hours" className="menu-card">
+              <Link to="/user/serving-hours?slot=breakfast" className="menu-card">
                 <img src="/Breakfast.jpeg" alt="Breakfast" />
                 <p className="price active-time">
                   {getTimeStatus(9, 11).timeString}
@@ -176,7 +176,7 @@ export default function Home() {
             )}
 
             {getTimeStatus(13, 16).isActive ? (
-              <Link to="/user/serving-hours" className="menu-card">
+              <Link to="/user/serving-hours?slot=lunch" className="menu-card">
                 <img src="/lunch.jpeg" alt="Lunch" />
                 <p className="price active-time">
                   {getTimeStatus(13, 16).timeString}
@@ -197,7 +197,7 @@ export default function Home() {
             )}
 
             {getTimeStatus(19, 24).isActive ? (
-              <Link to="/user/serving-hours" className="menu-card">
+              <Link to="/user/serving-hours?slot=dinner" className="menu-card">
                 <img src="/Dinner.jpeg" alt="Dinner" />
                 <p className="price active-time">
                   {getTimeStatus(19, 24).timeString}
