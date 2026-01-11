@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import '../styles/offers.css';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 
-// Offer Templates (Client-side helpers)
+// Offer Templates with Theme Colors
 const OFFER_TEMPLATES = [
-  { id: 1, name: 'Buy 1 Get 1', type: 'bogo', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-  { id: 2, name: '50% Off', type: 'percentage', value: 50, gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)' },
-  { id: 3, name: 'Flat ₹100 Off', type: 'flat', value: 100, gradient: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)' },
-  { id: 4, name: 'Free Delivery', type: 'free_delivery', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }
+  { id: 1, name: 'Buy 1 Get 1', type: 'bogo', gradient: 'var(--primary-gradient, linear-gradient(135deg, #ff9933 0%, #ff5e3a 100%))' },
+  { id: 2, name: '50% Off', type: 'percentage', value: 50, gradient: 'var(--secondary-gradient, linear-gradient(135deg, #4facfe 0%, #00f2fe 100%))' },
+  { id: 3, name: 'Flat ₹100 Off', type: 'flat', value: 100, gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+  { id: 4, name: 'Free Delivery', type: 'free_delivery', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }
 ];
 
 export default function Offers() {
-  const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState('create'); // 'create', 'edit'
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState('create'); // 'create', 'edit'
   const [currentEditId, setCurrentEditId] = useState(null);
   const [activeTab, setActiveTab] = useState('active'); // 'active', 'expired'
+  const formRef = useRef(null);
 
   // Convex Hooks
   const offersRaw = useQuery(api.modules.offers.offers.getAllOffers) || [];
@@ -30,14 +30,13 @@ export default function Offers() {
   const offers = offersRaw.map(o => ({
     ...o,
     id: o._id,
-    name: o.title, // Backend uses title, frontend used name
+    name: o.title,
     type: o.discountType === 'percentage' && o.discountValue === 100 ? 'bogo' : (o.discountType === 'fixed' ? 'flat' : o.discountType),
     value: o.discountValue,
     minOrder: o.minOrderAmount,
     startDate: new Date(o.validFrom).toISOString().split('T')[0],
     endDate: new Date(o.validTo).toISOString().split('T')[0],
-    // Assign a gradient based on type or random (deterministic)
-    gradient: OFFER_TEMPLATES.find(t => t.type === o.discountType)?.gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    gradient: OFFER_TEMPLATES.find(t => t.type === o.discountType)?.gradient || 'var(--primary-gradient)'
   }));
 
   const [formData, setFormData] = useState({
@@ -53,8 +52,16 @@ export default function Offers() {
     isActive: true
   });
 
+  const scrollToForm = () => {
+    if (formRef.current) {
+      setTimeout(() => {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  };
+
   const handleCreateFromTemplate = (template) => {
-    setModalMode('create');
+    setFormMode('create');
     setCurrentEditId(null);
     const today = new Date().toISOString().split('T')[0];
     const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -71,11 +78,12 @@ export default function Offers() {
       validTo: nextMonth,
       isActive: true
     });
-    setShowModal(true);
+    setIsFormOpen(true);
+    scrollToForm();
   };
 
   const handleCreateCustom = () => {
-    setModalMode('create');
+    setFormMode('create');
     setCurrentEditId(null);
     const today = new Date().toISOString().split('T')[0];
     const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -92,14 +100,14 @@ export default function Offers() {
       validTo: nextMonth,
       isActive: true
     });
-    setShowModal(true);
+    setIsFormOpen(true);
+    scrollToForm();
   };
 
   const handleEdit = (offer) => {
-    setModalMode('edit');
+    setFormMode('edit');
     setCurrentEditId(offer.id);
 
-    // Map frontend/backend fields
     setFormData({
       title: offer.title,
       description: offer.description,
@@ -112,7 +120,8 @@ export default function Offers() {
       validTo: new Date(offer.validTo).toISOString().split('T')[0],
       isActive: offer.isActive
     });
-    setShowModal(true);
+    setIsFormOpen(true);
+    scrollToForm();
   };
 
   const handleToggleActive = async (offer) => {
@@ -153,7 +162,7 @@ export default function Offers() {
     };
 
     try {
-      if (modalMode === 'create') {
+      if (formMode === 'create') {
         await createOffer(offerData);
         alert('Offer created successfully!');
       } else {
@@ -163,7 +172,7 @@ export default function Offers() {
         });
         alert('Offer updated successfully!');
       }
-      setShowModal(false);
+      setIsFormOpen(false);
     } catch (error) {
       console.error("Error saving offer:", error);
       alert("Failed to save offer. Code might be duplicate.");
@@ -192,116 +201,53 @@ export default function Offers() {
     <>
       <Navbar />
       <div className="admin-container">
-        <div className="admin-header">
-          <h1>🎁 Manage Offers</h1>
-          <p style={{ color: '#666', marginTop: '5px' }}>
-            Active Offers: {offers.filter(o => o.isActive).length} | Total: {offers.length}
-          </p>
-        </div>
+        <header className="admin-header">
+          <div className="header-content">
+            <h1>🎟️ Manage Offers</h1>
+            <p>Create and manage discount coupons for your customers.</p>
+          </div>
+          <div className="header-actions">
+            <button
+              className="add-btn-primary"
+              onClick={handleCreateCustom}
+              disabled={isFormOpen && formMode === 'create'}
+            >
+              <span className="btn-icon">+</span> Create Custom Offer
+            </button>
+          </div>
+        </header>
 
-        {/* Quick Create from Template */}
-        <div className="templates-section">
-          <h3>🚀 Quick Create</h3>
-          <div className="templates-grid">
-            {OFFER_TEMPLATES.map(template => (
-              <div
-                key={template.id}
-                className="template-card"
-                style={{ background: template.gradient }}
-                onClick={() => handleCreateFromTemplate(template)}
-              >
-                <span className="template-icon">✨</span>
-                <h4>{template.name}</h4>
-                <p>Click to create</p>
-              </div>
-            ))}
-            <div className="template-card create-custom" onClick={handleCreateCustom}>
-              <span className="template-icon">➕</span>
-              <h4>Custom Offer</h4>
-              <p>Create from scratch</p>
+        {/* Quick Start Templates */}
+        {!isFormOpen && (
+          <div className="templates-section">
+            <h3>✨ Quick Templates</h3>
+            <div className="templates-grid">
+              {OFFER_TEMPLATES.map(template => (
+                <div
+                  key={template.id}
+                  className="template-card"
+                  style={{ background: template.gradient }}
+                  onClick={() => handleCreateFromTemplate(template)}
+                >
+                  <div className="template-icon-circle">✨</div>
+                  <h4>{template.name}</h4>
+                  <p>Click to Apply</p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Offers List */}
-        <div className="offers-section">
-          <div className="offers-tabs">
-            <button
-              className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
-              onClick={() => setActiveTab('active')}
-            >
-              Active Offers
-            </button>
-            <button
-              className={`tab-btn ${activeTab === 'expired' ? 'active' : ''}`}
-              onClick={() => setActiveTab('expired')}
-            >
-              Expired / Past
-            </button>
-          </div>
-
-          <div className="offers-grid">
-            {filteredOffers.length === 0 ? (
-              <div className="no-offers">
-                <p>No {activeTab} offers found.</p>
-              </div>
-            ) : (
-              filteredOffers.map(offer => (
-                <div key={offer.id} className={`offer-card ${!offer.isActive ? 'inactive' : ''}`}>
-                  <div className="offer-header" style={{ background: offer.gradient }}>
-                    <div className="offer-code">{offer.code}</div>
-                    <div className="offer-actions">
-                      <button className="icon-btn edit" onClick={() => handleEdit(offer)}>✏️</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(offer.id)}>🗑️</button>
-                    </div>
-                  </div>
-                  <div className="offer-body">
-                    <h3>{offer.name}</h3>
-                    <p>{offer.description}</p>
-                    <div className="offer-details">
-                      <div className="detail">
-                        <span className="label">Value:</span>
-                        <span className="value">
-                          {offer.discountType === 'fixed' ? `₹${offer.value}` : `${offer.value}%`}
-                        </span>
-                      </div>
-                      <div className="detail">
-                        <span className="label">Min Order:</span>
-                        <span className="value">{offer.minOrder ? `₹${offer.minOrder}` : 'None'}</span>
-                      </div>
-                      <div className="detail">
-                        <span className="label">Valid:</span>
-                        <span className="value">{offer.startDate} to {offer.endDate}</span>
-                      </div>
-                    </div>
-                    <div className="offer-footer">
-                      <label className="toggle-switch">
-                        <input
-                          type="checkbox"
-                          checked={offer.isActive}
-                          onChange={() => handleToggleActive(offer)}
-                        />
-                        <span className="toggle-slider"></span>
-                        <span className="toggle-label">{offer.isActive ? 'Active' : 'Inactive'}</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Modal */}
-        {showModal && (
-          <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-content offer-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>{modalMode === 'create' ? '✨ Create New Offer' : '✏️ Edit Offer'}</h2>
-                <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
+        {/* Inline Editor Form */}
+        {isFormOpen && (
+          <div className="offer-editor-container" ref={formRef}>
+            <div className="editor-card">
+              <div className="editor-header">
+                <h2>{formMode === 'create' ? '✨ Create New Offer' : '✏️ Edit Offer'}</h2>
+                <button className="close-editor-btn" onClick={() => setIsFormOpen(false)}>✕</button>
               </div>
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="editor-form">
                 <div className="form-row">
                   <div className="form-group">
                     <label>Offer Title *</label>
@@ -322,8 +268,9 @@ export default function Offers() {
                         onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                         placeholder="e.g. SUMMER50"
                         required
+                        className="code-input"
                       />
-                      <button type="button" className="generate-btn" onClick={generateOfferCode}>Generate</button>
+                      <button type="button" className="btn-secondary small" onClick={generateOfferCode}>Generate</button>
                     </div>
                   </div>
                 </div>
@@ -403,14 +350,97 @@ export default function Offers() {
                   </div>
                 </div>
 
-                <div className="modal-actions">
-                  <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="submit-btn">{modalMode === 'create' ? 'Create Offer' : 'Update Offer'}</button>
+                <div className="form-group checkbox-row">
+                  <label className="checkbox-container">
+                    <input
+                      type="checkbox"
+                      checked={formData.isActive}
+                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    />
+                    <span className="checkmark"></span>
+                    Active Immediately
+                  </label>
+                </div>
+
+                <div className="editor-footer">
+                  <button type="button" className="btn-secondary" onClick={() => setIsFormOpen(false)}>Cancel</button>
+                  <button type="submit" className="save-btn-primary">
+                    {formMode === 'create' ? 'Create Offer' : 'Update Offer'}
+                  </button>
                 </div>
               </form>
             </div>
           </div>
         )}
+
+        {/* Offers List */}
+        <div className="offers-section">
+          <div className="offers-tabs">
+            <button
+              className={`tab-filter-btn ${activeTab === 'active' ? 'active' : ''}`}
+              onClick={() => setActiveTab('active')}
+            >
+              Active Offers
+            </button>
+            <button
+              className={`tab-filter-btn ${activeTab === 'expired' ? 'active' : ''}`}
+              onClick={() => setActiveTab('expired')}
+            >
+              Expired / Past
+            </button>
+          </div>
+
+          <div className="offers-grid">
+            {filteredOffers.length === 0 ? (
+              <div className="no-offers-state">
+                <span className="empty-icon">🎟️</span>
+                <h3>No {activeTab} offers found</h3>
+                <p>Create a new offer to get started!</p>
+              </div>
+            ) : (
+              filteredOffers.map(offer => (
+                <div key={offer.id} className={`offer-ticket ${!offer.isActive ? 'inactive' : ''}`}>
+                  <div className="ticket-left" style={{ background: offer.gradient }}>
+                    <span className="ticket-hole top"></span>
+                    <span className="ticket-hole bottom"></span>
+                    <div className="ticket-content">
+                      <h2 className="offer-value-display">
+                        {offer.discountType === 'fixed' ? `₹${offer.value}` : `${offer.value}%`}
+                        <span className="off-text">OFF</span>
+                      </h2>
+                      <div className="ticket-code">{offer.code}</div>
+                    </div>
+                  </div>
+                  <div className="ticket-right">
+                    <div className="ticket-info">
+                      <h3>{offer.name}</h3>
+                      <p className="ticket-desc">{offer.description}</p>
+                      <div className="ticket-meta">
+                        <span className="meta-item">📅 {offer.startDate} - {offer.endDate}</span>
+                        <span className="meta-item">📦 Min: {offer.minOrder ? `₹${offer.minOrder}` : 'None'}</span>
+                      </div>
+                    </div>
+
+                    <div className="ticket-actions">
+                      <label className="toggle-switch small">
+                        <input
+                          type="checkbox"
+                          checked={offer.isActive}
+                          onChange={() => handleToggleActive(offer)}
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+                      <div className="action-buttons">
+                        <button className="icon-btn edit" onClick={() => handleEdit(offer)}>✏️</button>
+                        <button className="icon-btn delete" onClick={() => handleDelete(offer.id)}>🗑️</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </>
   );

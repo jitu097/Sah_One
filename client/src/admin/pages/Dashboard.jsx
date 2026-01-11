@@ -25,92 +25,125 @@ export default function Dashboard() {
     <>
       <Navbar />
       <div className="admin-container">
-        <div className="dashboard-header">
-          <h1>👋 Welcome, Admin</h1>
-          <p>Here's what's happening today.</p>
-        </div>
+        <header className="admin-header">
+          <div className="header-content">
+            <h1>Dashboard</h1>
+            <p>Welcome back, Admin! Here's your daily overview.</p>
+          </div>
+          <div className="header-actions">
+            <span className="date-badge">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          </div>
+        </header>
 
-        {/* Quick Stats Row */}
-        <div className="stats-row">
-          <div className="dashboard-card stat">
-            <div className="icon">💰</div>
-            <div className="info">
+        {/* Stats Grid */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon revenue-icon">💰</div>
+            <div className="stat-info">
               <h3>Total Revenue</h3>
-              <p>₹{stats.totalRevenue.toLocaleString()}</p>
+              <p className="stat-value">₹{stats.totalRevenue.toLocaleString()}</p>
+              <span className="stat-hint">Lifetime earnings</span>
             </div>
           </div>
-          <div className="dashboard-card stat">
-            <div className="icon">🥡</div>
-            <div className="info">
+
+          <div className="stat-card">
+            <div className="stat-icon orders-icon">🥡</div>
+            <div className="stat-info">
               <h3>Active Orders</h3>
-              <p>{activeOrdersCount}</p>
+              <p className="stat-value">{activeOrdersCount}</p>
+              <span className="stat-hint">In preparation or delivery</span>
             </div>
           </div>
-          <div className="dashboard-card stat">
-            <div className="icon">✅</div>
-            <div className="info">
-              <h3>Completed</h3>
-              <p>{stats.deliveredOrders}</p>
+
+          <div className="stat-card">
+            <div className="stat-icon success-icon">✅</div>
+            <div className="stat-info">
+              <h3>Delivered</h3>
+              <p className="stat-value">{stats.deliveredOrders}</p>
+              <span className="stat-hint">Successfully served</span>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon cancel-icon">❌</div>
+            <div className="stat-info">
+              <h3>Cancelled</h3>
+              <p className="stat-value">{stats.cancelledOrders}</p>
+              <span className="stat-hint">Total cancellations</span>
             </div>
           </div>
         </div>
 
-        <div className="dashboard-content">
+        <div className="dashboard-content-grid">
           {/* Recent Orders Panel */}
           <div className="dashboard-panel recent-orders">
             <div className="panel-header">
               <h2>Recent Orders</h2>
-              <Link to="/admin/orders">View All</Link>
+              <Link to="/admin/orders" className="view-all-link">View All Orders</Link>
             </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Status</th>
-                  <th>Amount</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.length === 0 ? (
-                  <tr><td colSpan="4">No recent orders</td></tr>
-                ) : (
-                  recentOrders.slice(0, 5).map(order => (
-                    <tr key={order._id}>
-                      <td>#{order._id.substring(0, 8)}...</td>
-                      <td>
-                        <span className={`status-badge ${order.status}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td>₹{order.totalAmount}</td>
-                      <td>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            <div className="table-responsive">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentOrders.length === 0 ? (
+                    <tr><td colSpan="4" className="empty-state">No recent orders found</td></tr>
+                  ) : (
+                    recentOrders.slice(0, 5).map(order => (
+                      <tr key={order._id}>
+                        <td className="order-id">#{order._id.substring(0, 8)}...</td>
+                        <td>
+                          <span className={`status-badge ${order.status.toLowerCase()}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="amount">₹{order.totalAmount}</td>
+                        <td className="time">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Quick Actions Panel */}
-          <div className="dashboard-panel quick-actions">
+          <div className="dashboard-panel quick-actions-panel">
             <h2>Quick Actions</h2>
             <div className="actions-grid">
               <Link to="/admin/menu" className="action-card">
-                <span className="icon">🍔</span>
-                <span>Manage Menu</span>
+                <span className="action-icon">🍔</span>
+                <div className="action-details">
+                  <h3>Manage Menu</h3>
+                  <p>Add or edit items</p>
+                </div>
               </Link>
               <Link to="/admin/orders" className="action-card">
-                <span className="icon">📦</span>
-                <span>View Orders</span>
+                <span className="action-icon">📦</span>
+                <div className="action-details">
+                  <h3>View Orders</h3>
+                  <p>Track delivery status</p>
+                </div>
               </Link>
               <Link to="/admin/offers" className="action-card">
-                <span className="icon">🏷️</span>
-                <span>Create Offer</span>
+                <span className="action-icon">🏷️</span>
+                <div className="action-details">
+                  <h3>Create Offer</h3>
+                  <p>Boost sales now</p>
+                </div>
               </Link>
               <Link to="/admin/reports" className="action-card">
-                <span className="icon">📈</span>
-                <span>View Reports</span>
+                <span className="action-icon">📈</span>
+                <div className="action-details">
+                  <h3>View Reports</h3>
+                  <p>Check analytics</p>
+                </div>
               </Link>
             </div>
           </div>

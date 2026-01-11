@@ -164,30 +164,32 @@ export default function SpecialServingHours() {
   };
 
   // Helper to render a Slot Section (Accordion Item)
-  const renderSlotSection = (slotName, label, color) => {
+  // Helper to render a Slot Section (Accordion Item)
+  const renderSlotSection = (slotName, label, colorClass) => {
     const slot = formData[slotName];
     const isOpen = activeAccordion === slotName;
 
     return (
-      <div className={`category-section ${!slot.isActive ? 'inactive-category' : ''}`}>
+      <div className={`slot-card ${colorClass} ${!slot.isActive ? 'inactive' : ''} ${isOpen ? 'open' : ''}`}>
         <div
-          className="category-header"
-          style={{ backgroundColor: color }}
+          className="slot-header"
           onClick={() => toggleAccordion(slotName)}
         >
-          <div className="category-title">
-            <span className="category-icon">{isOpen ? '▼' : '▶'}</span>
+          <div className="slot-title-group">
+            <span className="slot-icon">{isOpen ? '▼' : '▶'}</span>
             <h2>{label}</h2>
-            {slot.isActive && (
-              <span className="time-badge">
+            {slot.isActive ? (
+              <span className="time-pill">
                 {slot.startTime} - {slot.endTime}
               </span>
+            ) : (
+              <span className="status-pill inactive">Inactive</span>
             )}
-            {!slot.isActive && <span className="category-inactive-badge">Inactive</span>}
           </div>
 
-          <div className="category-actions" onClick={(e) => e.stopPropagation()}>
-            <label className="toggle-switch">
+          <div className="slot-header-actions" onClick={(e) => e.stopPropagation()}>
+            <span className="item-count-badge">{slot.items.length} Items</span>
+            <label className="toggle-switch small">
               <input
                 type="checkbox"
                 checked={slot.isActive}
@@ -195,7 +197,6 @@ export default function SpecialServingHours() {
               />
               <span className="toggle-slider"></span>
             </label>
-            <span className="item-count">{slot.items.length} items</span>
           </div>
         </div>
 
@@ -350,53 +351,56 @@ export default function SpecialServingHours() {
     <>
       <Navbar />
       <div className="admin-container">
-        <div className="admin-header">
-          <h1>✨ Serving Hours Manager (Global)</h1>
-          <p style={{ color: '#666' }}>Manage default daily serving hours and menu.</p>
-        </div>
+        <header className="admin-header">
+          <div className="header-content">
+            <h1>🕰️ Serving Hours & Special Menu</h1>
+            <p>Configure your restaurant's daily schedule and special menu items.</p>
+          </div>
+          <div className="header-actions">
+            <button className="save-btn-primary" onClick={handleSubmit}>
+              <span className="btn-icon">💾</span> Save Changes
+            </button>
+          </div>
+        </header>
 
-        <div className="hours-layout" style={{ display: 'block' }}>
-          {/* Removed Date Selection, now just one main list */}
-
-          <div className="list-section" style={{ maxWidth: '800px', margin: '0 auto' }}>
-            {/* Global Closed Toggle */}
-            <div className="global-settings-card">
-              <div className="form-group checkbox-label">
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={formData.isClosed}
-                    onChange={(e) => setFormData({ ...formData, isClosed: e.target.checked })}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-                <span style={{ fontSize: '1.2rem', marginLeft: '15px' }}>Restaurant Closed Today?</span>
+        <div className="hours-layout-single">
+          <div className="global-settings-card">
+            <div className="settings-row">
+              <div className="setting-info">
+                <h3>Restaurant Status</h3>
+                <p>Toggle to temporarily close the restaurant for the day.</p>
               </div>
-              {formData.isClosed && (
-                <div className="form-group" style={{ marginTop: '15px' }}>
-                  <input
-                    type="text"
-                    placeholder="Reason for closure (e.g. Weekly Off, Holiday)"
-                    value={formData.reason}
-                    onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                    style={{ width: '100%', padding: '10px' }}
-                  />
-                </div>
-              )}
+              <label className="toggle-switch large">
+                <input
+                  type="checkbox"
+                  checked={formData.isClosed}
+                  onChange={(e) => setFormData({ ...formData, isClosed: e.target.checked })}
+                />
+                <span className="toggle-slider"></span>
+                <span className="toggle-label-side">{formData.isClosed ? 'CLOSED 🔴' : 'OPEN 🟢'}</span>
+              </label>
             </div>
 
-            {!formData.isClosed && (
-              <div className="category-list">
-                {renderSlotSection('breakfast', 'Breakfast', '#FF9800')}
-                {renderSlotSection('lunch', 'Lunch', '#4CAF50')}
-                {renderSlotSection('dinner', 'Dinner', '#2196F3')}
+            {formData.isClosed && (
+              <div className="closure-reason-input">
+                <label>Reason for Closure</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Weekly Off, Public Holiday, Maintenance"
+                  value={formData.reason}
+                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                />
               </div>
             )}
-
-            <div className="action-buttons">
-              <button className="save-btn" onClick={handleSubmit}>Save Configuration</button>
-            </div>
           </div>
+
+          {!formData.isClosed && (
+            <div className="slots-container">
+              {renderSlotSection('breakfast', 'Breakfast', 'slot-breakfast')}
+              {renderSlotSection('lunch', 'Lunch', 'slot-lunch')}
+              {renderSlotSection('dinner', 'Dinner', 'slot-dinner')}
+            </div>
+          )}
         </div>
       </div>
     </>

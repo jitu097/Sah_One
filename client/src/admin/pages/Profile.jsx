@@ -68,91 +68,96 @@ export default function AdminProfile() {
         <div className="admin-container">
             <Navbar />
             <div className="admin-content">
-                <div className="profile-container">
-                    <div className="profile-header">
-                        <h1>Admin Profile</h1>
+                <header className="admin-header">
+                    <div className="header-content">
+                        <h1>👤 Admin Profile</h1>
+                        <p>Manage your account settings and personal details.</p>
+                    </div>
+                    <div className="header-actions">
                         {!isEditing && (
                             <button
                                 className="edit-profile-btn"
                                 onClick={() => setIsEditing(true)}
                             >
-                                Edit Profile
+                                ✏️ Edit Profile
                             </button>
                         )}
                     </div>
+                </header>
 
+                <div className="profile-container">
                     <div className="profile-card">
-                        <div className="profile-avatar">
-                            <div className="avatar-placeholder">
+                        <div className="profile-avatar-section">
+                            <div className="avatar-circle">
                                 {formData.name ? formData.name.charAt(0).toUpperCase() : 'A'}
                             </div>
+                            <span className="role-badge">Administrator</span>
                         </div>
 
                         {isEditing ? (
                             <form onSubmit={handleSubmit} className="profile-form">
                                 <div className="form-group">
-                                    <label>Name</label>
+                                    <label>Full Name</label>
                                     <input
                                         type="text"
                                         name="name"
                                         value={formData.name}
                                         onChange={handleChange}
                                         required
+                                        className="form-input"
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Phone</label>
+                                    <label>Phone Number</label>
                                     <input
                                         type="tel"
                                         name="phone"
                                         value={formData.phone}
                                         onChange={handleChange}
                                         placeholder="Enter phone number"
+                                        className="form-input"
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Email (Read-only)</label>
+                                    <label>Email Address</label>
                                     <input
                                         type="email"
                                         value={formData.email}
                                         disabled
-                                        className="disabled-input"
+                                        className="form-input disabled"
                                     />
+                                    <small>Email cannot be changed.</small>
                                 </div>
 
                                 <div className="form-actions">
-                                    <button type="button" className="cancel-btn" onClick={() => setIsEditing(false)}>
+                                    <button type="button" className="btn-secondary" onClick={() => setIsEditing(false)}>
                                         Cancel
                                     </button>
-                                    <button type="submit" className="save-btn">
+                                    <button type="submit" className="btn-primary">
                                         Save Changes
                                     </button>
                                 </div>
                             </form>
                         ) : (
                             <div className="profile-details">
-                                <div className="detail-item">
-                                    <span className="detail-label">Name</span>
+                                <div className="detail-row">
+                                    <span className="detail-label">Full Name</span>
                                     <span className="detail-value">{adminProfile.name}</span>
                                 </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">Email</span>
+                                <div className="detail-row">
+                                    <span className="detail-label">Email Address</span>
                                     <span className="detail-value">{adminProfile.email}</span>
                                 </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">Phone</span>
+                                <div className="detail-row">
+                                    <span className="detail-label">Phone Number</span>
                                     <span className="detail-value">{adminProfile.phone || 'Not set'}</span>
                                 </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">Role</span>
-                                    <span className="detail-value badge admin">Administrator</span>
-                                </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">Joined</span>
+                                <div className="detail-row">
+                                    <span className="detail-label">Date Joined</span>
                                     <span className="detail-value">
-                                        {new Date(adminProfile.createdAt).toLocaleDateString()}
+                                        {new Date(adminProfile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                                     </span>
                                 </div>
                             </div>

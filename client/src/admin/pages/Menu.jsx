@@ -177,7 +177,7 @@ export default function Menu() {
     try {
       setUploading(true);
       setUploadProgress(0);
-      
+
       // Upload to Cloudinary
       const cloudinaryUrl = await uploadImageToCloudinary(file, (progress) => {
         setUploadProgress(progress);
@@ -188,7 +188,7 @@ export default function Menu() {
       setFormData({ ...formData, image: cloudinaryUrl });
       setUploading(false);
       setUploadProgress(0);
-      
+
       alert('Image uploaded successfully!');
     } catch (error) {
       console.error('Upload error:', error);
@@ -255,22 +255,25 @@ export default function Menu() {
     <>
       <Navbar />
       <div className="admin-container">
-        <div className="admin-header">
-          <h1>🍽️ Manage Menu</h1>
-          <p style={{ color: '#666', marginTop: '5px' }}>
-            Total Items: {menuItems.length} | Active: {menuItems.filter(i => i.isActive).length} | Categories: {categories.length}
-          </p>
-        </div>
+        <header className="admin-header">
+          <div className="header-content">
+            <h1>🍽️ Manage Menu</h1>
+            <p>Overview: {menuItems.length} Items | {menuItems.filter(i => i.isActive).length} Active | {categories.length} Categories</p>
+          </div>
+          <div className="header-actions">
+            {/* Optional: Add date or other info here if needed to match dashboard */}
+          </div>
+        </header>
 
-        <div className="menu-actions">
+        <div className="menu-actions-bar">
           <button className="add-item-btn" onClick={handleAddNew}>
-            + Add New Item
+            <span className="btn-icon">+</span> Add New Item
           </button>
           <button className="add-category-btn" onClick={() => setShowCategoryModal(true)}>
-            📁 Manage Categories
+            <span className="btn-icon">📁</span> Manage Categories
           </button>
           <Link to="/admin/special-serving-hours" className="special-hours-btn">
-            🕐 Special Serving Hours
+            <span className="btn-icon">🕐</span> Special Serving Hours
           </Link>
         </div>
 
@@ -284,10 +287,10 @@ export default function Menu() {
               <div key={category.id} className={`category-section ${!category.isActive ? 'inactive-category' : ''}`}>
                 <div className="category-header" onClick={() => toggleCategory(category.name)}>
                   <div className="category-title">
-                    <span className="category-icon">{isExpanded ? '▼' : '▶'}</span>
+                    <span className={`category-icon ${isExpanded ? 'expanded' : ''}`}>▶</span>
                     <h2>{category.name}</h2>
-                    <span className="item-count">({categoryItems.length} items)</span>
-                    {!category.isActive && <span className="category-inactive-badge">Hidden</span>}
+                    <span className="item-count-badge">{categoryItems.length} items</span>
+                    {!category.isActive && <span className="status-label inactive">Hidden</span>}
                   </div>
                   <div className="category-actions" onClick={(e) => e.stopPropagation()}>
                     <label className="toggle-switch" title="Show/Hide category">
@@ -302,9 +305,9 @@ export default function Menu() {
                 </div>
 
                 {isExpanded && (
-                  <div className="category-items">
+                  <div className="category-items-grid">
                     {categoryItems.length === 0 ? (
-                      <div className="empty-category">
+                      <div className="empty-category-state">
                         <p>No items in this category yet</p>
                         <button className="add-item-btn-small" onClick={handleAddNew}>
                           + Add First Item
@@ -312,30 +315,33 @@ export default function Menu() {
                       </div>
                     ) : (
                       categoryItems.map(item => (
-                        <div key={item.id} className={`admin-item ${!item.isActive ? 'inactive-item' : ''}`}>
-                          <img
-                            src={item.image || '/image.png'}
-                            alt={item.name}
-                            className="item-image"
-                            onError={(e) => e.target.src = '/image.png'}
-                          />
-                          <div className="item-details">
-                            <h3>
-                              {item.name}
-                              <span className={`status-badge ${item.isActive ? 'active' : 'inactive'}`}>
-                                {item.isActive ? 'Active' : 'Inactive'}
-                              </span>
-                            </h3>
-                            <p>{item.description}</p>
-                            <div className="item-pricing">
+                        <div key={item.id} className={`menu-item-card ${!item.isActive ? 'inactive' : ''}`}>
+                          <div className="card-image-container">
+                            <img
+                              src={item.image || '/image.png'}
+                              alt={item.name}
+                              className="item-image"
+                              onError={(e) => e.target.src = '/image.png'}
+                            />
+                            <span className={`status-pill ${item.isActive ? 'active' : 'inactive'}`}>
+                              {item.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+
+                          <div className="item-card-details">
+                            <h3>{item.name}</h3>
+                            <p className="item-desc">{item.description}</p>
+
+                            <div className="item-pricing-tags">
                               {item.hasHalfOption && (
-                                <span className="item-price">Half: ₹{item.priceHalf}</span>
+                                <span className="price-tag half">Half: ₹{item.priceHalf}</span>
                               )}
-                              <span className="item-price">Full: ₹{item.priceFull}</span>
+                              <span className="price-tag full">Full: ₹{item.priceFull}</span>
                             </div>
                           </div>
-                          <div className="item-actions">
-                            <label className="toggle-switch">
+
+                          <div className="item-card-actions">
+                            <label className="toggle-switch small">
                               <input
                                 type="checkbox"
                                 checked={item.isActive}
@@ -343,8 +349,10 @@ export default function Menu() {
                               />
                               <span className="toggle-slider"></span>
                             </label>
-                            <button className="edit-btn" onClick={() => handleEdit(item)}>Edit</button>
-                            <button className="delete-btn" onClick={() => handleDelete(item.id)}>Delete</button>
+                            <div className="action-buttons">
+                              <button className="icon-btn edit" onClick={() => handleEdit(item)} title="Edit">✏️</button>
+                              <button className="icon-btn delete" onClick={() => handleDelete(item.id)} title="Delete">🗑️</button>
+                            </div>
                           </div>
                         </div>
                       ))
@@ -359,21 +367,21 @@ export default function Menu() {
         {/* Modal for Add/Edit */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content slide-in" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h2>{modalMode === 'add' ? '➕ Add New Menu Item' : '✏️ Edit Menu Item'}</h2>
+                <h2>{modalMode === 'add' ? 'Add New Item' : 'Edit Item'}</h2>
                 <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
               </div>
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="modal-form">
                 <div className="form-group">
-                  <label>Item Name *</label>
+                  <label>Item Name</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
-                    placeholder="Enter item name"
+                    placeholder="e.g. Butter Chicken"
                   />
                 </div>
 
@@ -382,123 +390,115 @@ export default function Menu() {
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Enter item description"
+                    placeholder="Short description of the item"
                     rows="3"
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Category *</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.name}>{cat.name}</option>
-                    ))}
-                  </select>
+                <div className="form-row">
+                  <div className="form-group half">
+                    <label>Category</label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group half checkbox-group centered">
+                    <label className="checkbox-container">
+                      <input
+                        type="checkbox"
+                        checked={formData.hasHalfOption}
+                        onChange={(e) => setFormData({ ...formData, hasHalfOption: e.target.checked })}
+                      />
+                      <span className="checkmark"></span>
+                      Enable Half Portion
+                    </label>
+                  </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Image *</label>
-                  <div className="image-upload-section">
-                    {selectedImage && (
-                      <div className="selected-image-preview">
-                        <img src={selectedImage} alt="Selected" onError={(e) => e.target.src = '/image.png'} />
-                        <button 
-                          type="button" 
+                  <label>Image</label>
+                  <div className="image-upload-area">
+                    {selectedImage ? (
+                      <div className="image-preview-wrapper">
+                        <img src={selectedImage} alt="Preview" />
+                        <button
+                          type="button"
                           className="remove-image-btn"
                           onClick={() => {
                             setSelectedImage('');
                             setFormData({ ...formData, image: '' });
                           }}
                         >
-                          ✕ Remove
+                          ✕
                         </button>
                       </div>
-                    )}
-                    
-                    {!selectedImage && (
-                      <label className="upload-btn">
+                    ) : (
+                      <label className="upload-trigger">
                         <input
                           type="file"
                           accept="image/*"
                           onChange={handleImageUpload}
                           disabled={uploading}
-                          style={{ display: 'none' }}
                         />
-                        <span>
-                          {uploading ? `📤 Uploading... ${uploadProgress}%` : '📤 Upload Image to Cloudinary'}
-                        </span>
+                        <div className="upload-content">
+                          <span className="upload-icon">☁️</span>
+                          <span>{uploading ? `Uploading ${uploadProgress}%...` : 'Click to Upload Image'}</span>
+                        </div>
                       </label>
-                    )}
-                    
-                    {uploading && (
-                      <div className="upload-progress-bar">
-                        <div className="upload-progress-fill" style={{ width: `${uploadProgress}%` }}></div>
-                      </div>
                     )}
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={formData.hasHalfOption}
-                      onChange={(e) => setFormData({ ...formData, hasHalfOption: e.target.checked })}
-                    />
-                    <span>Has Half Portion Option</span>
-                  </label>
-                </div>
-
-                <div className="price-row">
+                <div className="form-row">
                   {formData.hasHalfOption && (
-                    <div className="form-group">
-                      <label>Half Price (₹) *</label>
+                    <div className="form-group half">
+                      <label>Half Price (₹)</label>
                       <input
                         type="number"
                         value={formData.priceHalf}
                         onChange={(e) => setFormData({ ...formData, priceHalf: e.target.value })}
                         required={formData.hasHalfOption}
                         min="0"
-                        placeholder="0"
                       />
                     </div>
                   )}
-
-                  <div className="form-group">
-                    <label>Full Price (₹) *</label>
+                  <div className="form-group half">
+                    <label>Full Price (₹)</label>
                     <input
                       type="number"
                       value={formData.priceFull}
                       onChange={(e) => setFormData({ ...formData, priceFull: e.target.value })}
                       required
                       min="0"
-                      placeholder="0"
                     />
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label className="checkbox-label">
+                  <label className="checkbox-container">
                     <input
                       type="checkbox"
                       checked={formData.isActive}
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                     />
-                    <span>Active (Show to users)</span>
+                    <span className="checkmark"></span>
+                    Active (Visible to users)
                   </label>
                 </div>
 
-                <div className="modal-actions">
-                  <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>
+                <div className="modal-footer">
+                  <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="submit-btn">
-                    {modalMode === 'add' ? 'Add Item' : 'Update Item'}
+                  <button type="submit" className="btn-primary">
+                    {modalMode === 'add' ? 'Create Item' : 'Save Changes'}
                   </button>
                 </div>
               </form>
@@ -509,58 +509,55 @@ export default function Menu() {
         {/* Category Management Modal */}
         {showCategoryModal && (
           <div className="modal-overlay" onClick={() => setShowCategoryModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content standard-modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h2>📁 Manage Categories</h2>
+                <h2>Manage Categories</h2>
                 <button className="modal-close" onClick={() => setShowCategoryModal(false)}>×</button>
               </div>
 
-              <div style={{ padding: '25px' }}>
-                <div className="form-group">
-                  <label>Add New Category</label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                      type="text"
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      placeholder="Enter category name (e.g., Rolls, Pizza)"
-                      style={{ flex: 1 }}
-                    />
-                    <button className="submit-btn" onClick={handleAddCategory}>
-                      Add
-                    </button>
-                  </div>
+              <div className="modal-body">
+                <div className="add-category-row">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="New category name"
+                    className="input-field"
+                  />
+                  <button className="btn-primary slim" onClick={handleAddCategory}>
+                    Add
+                  </button>
                 </div>
 
-                <div className="category-manage-list">
-                  <h3 style={{ marginBottom: '15px', color: '#333' }}>Existing Categories</h3>
-                  {categories.map(category => (
-                    <div key={category.id} className="category-manage-item">
-                      <div>
-                        <strong>{category.name}</strong>
-                        <span style={{ color: '#666', fontSize: '0.9rem', marginLeft: '10px' }}>
-                          ({getCategoryItemCount(category.name)} items)
-                        </span>
+                <div className="categories-manage-list">
+                  <h3>Existing Categories</h3>
+                  <div className="categories-scroll-area">
+                    {categories.map(category => (
+                      <div key={category.id} className="category-manage-row">
+                        <div className="cat-info">
+                          <strong>{category.name}</strong>
+                          <span className="sub-text">({getCategoryItemCount(category.name)} items)</span>
+                        </div>
+                        <div className="cat-actions">
+                          <label className="toggle-switch small">
+                            <input
+                              type="checkbox"
+                              checked={category.isActive}
+                              onChange={() => toggleCategoryActive(category)}
+                            />
+                            <span className="toggle-slider"></span>
+                          </label>
+                          <button
+                            className="icon-btn delete"
+                            onClick={() => handleDeleteCategory(category.id, category.name)}
+                            title="Delete category"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={category.isActive}
-                            onChange={() => toggleCategoryActive(category)}
-                          />
-                          <span className="toggle-slider"></span>
-                        </label>
-                        <button
-                          className="delete-btn-small"
-                          onClick={() => handleDeleteCategory(category.id, category.name)}
-                          title="Delete category"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

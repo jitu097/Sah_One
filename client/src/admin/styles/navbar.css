@@ -114,9 +114,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.1);
   }
@@ -257,40 +260,5 @@
   .admin-logout-btn {
     padding: 8px 20px;
     font-size: 0.9rem;
-  }
-}
-  }
-
-  .nav-text {
-    font-size: 0.7rem;
-  }
-
-  .logout-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 0.625rem;
-  }
-
-  .brand-text {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .nav-text {
-    display: none;
-  }
-
-  .logout-text {
-    display: none;
-  }
-
-  .navbar-links {
-    gap: 0.5rem;
-  }
-
-  .nav-link {
-    padding: 0.625rem;
-    min-width: 50px;
   }
 }
