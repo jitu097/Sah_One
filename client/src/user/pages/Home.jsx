@@ -13,6 +13,8 @@ export default function Home() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showPartyModal, setShowPartyModal] = useState(false);
   const [showCategoryPopup, setShowCategoryPopup] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
   const [partyForm, setPartyForm] = useState({
     name: '',
     phone: '',
@@ -28,6 +30,15 @@ export default function Home() {
   const filteredItems = menuItems?.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Auto-advance carousel every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -96,6 +107,33 @@ export default function Home() {
     setCurrentSlide(index);
   };
 
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      nextSlide();
+    }
+    if (isRightSwipe) {
+      prevSlide();
+    }
+  };
+
   const handlePartyFormChange = (e) => {
     setPartyForm({
       ...partyForm,
@@ -125,6 +163,9 @@ export default function Home() {
               style={slides[currentSlide].type === 'original' ? {
                 backgroundImage: `url('${slides[currentSlide].backgroundImage}')`
               } : {}}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
             >
               <button className="carousel-btn prev" onClick={prevSlide}>
                 ←
@@ -163,6 +204,7 @@ export default function Home() {
             <section className="menu-section">
               <h2 className="section-title">Special Serving Hours</h2>
               <div className="menu-grid">
+     
                 {getTimeStatus(9, 11).isActive ? (
                   <Link to="/user/serving-hours?slot=breakfast" className="menu-card">
                     <img src="/Breakfast.jpeg" alt="Breakfast" />

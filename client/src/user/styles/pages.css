@@ -15,6 +15,8 @@
   padding: 60px 20px;
   overflow: hidden;
   transition: background 0.5s ease;
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .carousel-content {
@@ -23,13 +25,13 @@
   justify-content: center;
   max-width: 1400px;
   width: 100%;
+  transition: transform 0.5s ease-in-out;
 }
 
 .full-image-slide {
   width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  transition: opacity 0.5s ease-in-out;
 }
 
 .full-image-slide img {
@@ -37,6 +39,7 @@
   max-height: 500px;
   height: auto;
   object-fit: contain;
+  transition: transform 0.5s ease-in-out;
 }
 
 .slide-third {
@@ -1438,6 +1441,7 @@
 
   .parties-background-image {
     max-width: 35%;
+    
   }
 
   .parties-button-image {
@@ -1494,26 +1498,33 @@
   }
 
   .menu-grid {
-    flex-direction: column;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    justify-items: center;
     margin-left: 0;
     gap: 25px;
     padding: 0 20px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .menu-card:nth-child(3) {
+    grid-column: 1 / -1;
   }
 
   .menu-card {
-    width: 200px;
-    height: 200px;
+    width: 160px;
+    height: 160px;
     padding: 15px;
   }
 
   .menu-card img {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
   }
 
   .menu-card h3 {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .lock-icon {
@@ -1526,22 +1537,9 @@
     font-size: 1.2rem;
   }
 
-  .carousel-btn.prev {
-    left: 10px;
-    right: auto;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
+  .carousel-btn.prev,
   .carousel-btn.next {
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  .carousel-btn.prev:hover,
-  .carousel-btn.next:hover {
-    transform: translateY(-50%) scale(1.1);
+    display: none;
   }
 
   .carousel-indicators {
