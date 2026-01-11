@@ -430,7 +430,7 @@
 
 .parties-background-image {
   position: absolute;
-  top: -7%;
+  top: -11%;
   left: 50%;
   transform: translate(-50%, -50%);
   max-width: 30%;
@@ -642,41 +642,64 @@
 
 .bestsellers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
+/* Old bestseller-card styles - now using MenuItemCard component */
+/*
 .bestseller-card {
   background: white;
-  border-radius: 15px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .bestseller-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(226, 55, 68, 0.15);
+  border-color: rgba(226, 55, 68, 0.2);
 }
 
 .bestseller-card img {
   width: 100%;
-  height: 200px;
+  height: 250px;
   object-fit: cover;
+  background: #f8f9fa;
 }
 
 .bestseller-card h3 {
-  padding: 15px;
-  font-size: 1.3rem;
-  color: #333;
+  padding: 20px 20px 10px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2c3e50;
   margin: 0;
+  line-height: 1.4;
 }
 
 .bestseller-card .rating {
-  padding: 0 15px 15px;
+  padding: 0 20px;
   color: #ffc107;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 2px;
 }
+
+.bestseller-card .price {
+  padding: 0 20px 20px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e23744;
+  margin: 0;
+}
+*/
 
 .page-header {
   background: white;
@@ -1453,7 +1476,7 @@
   }
 
   .bestsellers-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
 }
@@ -1570,13 +1593,14 @@
 
   .parties-background-image {
     max-width: 40%;
-    top: -5%;
+    top: -9%;
   }
 
   .parties-button-image {
-    max-width: 150px;
-    bottom: 20px;
-    left: 50%;
+    max-width: 90px;
+    bottom: 10px;
+    left: 70%;
+    transform: translateX(-30%);
     margin-right: 0;
   }
 
@@ -1598,6 +1622,28 @@
     grid-template-columns: 1fr;
     gap: 20px;
   }
+
+  /* Old bestseller-card responsive styles - now using MenuItemCard component */
+  /*
+  .bestseller-card img {
+    height: 220px;
+  }
+
+  .bestseller-card h3 {
+    font-size: 1.2rem;
+    padding: 16px 16px 8px;
+  }
+
+  .bestseller-card .rating {
+    padding: 0 16px;
+    font-size: 1rem;
+  }
+
+  .bestseller-card .price {
+    padding: 0 16px 16px;
+    font-size: 1.3rem;
+  }
+  */
 
   .page-header {
     padding: 15px;
@@ -1700,11 +1746,14 @@
 
   .parties-background-image {
     max-width: 45%;
+    top: -8%;
   }
 
   .parties-button-image {
-    max-width: 120px;
-    bottom: 15px;
+    max-width: 72px;
+    bottom: 8px;
+    left: 68%;
+    transform: translateX(-30%);
   }
 
   .delivery-steps {

@@ -93,11 +93,13 @@
 /* Menu Items Grid */
 .menu-items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
   margin-bottom: 3rem;
 }
 
+/* Old menu-item-card styles removed - now using MenuItemCard component */
+/*
 .menu-item-card {
   background: white;
   border-radius: 15px;
@@ -217,6 +219,7 @@
   min-width: 25px;
   text-align: center;
 }
+*/
 
 /* Show/Hide Desktop and Mobile Views */
 .mobile-only {

@@ -3,7 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
+import MenuItemCard from '../components/MenuItemCard';
 import { useCart } from '../../context/CartContext';
+import '../styles/MenuItemCard.css';
 import '../styles/pages.css';
 import '../styles/UserMenu.css';
 
@@ -119,7 +121,7 @@ export default function UserMenu() {
     <>
       <Navbar />
       <div className="page-container">
-        <div className="menu-page-container">
+        <section className="bestsellers-section">
           <div className="menu-page-header">
             <h1>🍽️ Our Menu</h1>
             <p>Browse our complete menu selection</p>
@@ -139,48 +141,16 @@ export default function UserMenu() {
           </div>
 
           {/* Desktop Menu Items Grid */}
-          <div className="menu-items-grid desktop-only">
+          <div className="bestsellers-grid desktop-only">
             {filteredItems.map(item => (
-              <div key={item._id} className="menu-item-card">
-                <div className="category-badge">{item.category}</div>
-                <img
-                  src={item.image || '/image.png'}
-                  alt={item.name}
-                  className="menu-item-image"
-                  onError={(e) => e.target.src = '/image.png'}
-                />
-                <div className="menu-item-content">
-                  <h3 className="menu-item-title">{item.name}</h3>
-                  <p className="menu-item-description">{item.description}</p>
-                  <div className="menu-item-footer">
-                    <span className="menu-item-price">₹{item.fullPrice}</span>
-                    {getItemQuantity(item._id) === 0 ? (
-                      <button
-                        className="menu-add-btn"
-                        onClick={() => handleAddToCart(item)}
-                      >
-                        Add to Cart
-                      </button>
-                    ) : (
-                      <div className="quantity-controls">
-                        <button
-                          className="qty-btn"
-                          onClick={() => handleUpdateQuantity(item._id, -1)}
-                        >
-                          −
-                        </button>
-                        <span className="qty-number">{getItemQuantity(item._id)}</span>
-                        <button
-                          className="qty-btn"
-                          onClick={() => handleUpdateQuantity(item._id, 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <MenuItemCard
+                key={item._id}
+                item={item}
+                onAddToCart={handleAddToCart}
+                quantity={getItemQuantity(item._id)}
+                onUpdateQuantity={handleUpdateQuantity}
+                showCategory={selectedCategory === 'All'}
+              />
             ))}
           </div>
 
@@ -254,7 +224,7 @@ export default function UserMenu() {
               );
             })}
           </div>
-        </div>
+        </section>
       </div>
     </>
   );

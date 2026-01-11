@@ -3,12 +3,15 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
+import MenuItemCard from '../components/MenuItemCard';
+import { useCart } from '../../context/CartContext';
 import '../styles/pages.css';
 import '../styles/Home.css';
 
 import CategoryPopup from '../components/CategoryPopup';
 
 export default function Home() {
+  const { addToCart } = useCart();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showPartyModal, setShowPartyModal] = useState(false);
@@ -22,6 +25,15 @@ export default function Home() {
     date: '',
     time: ''
   });
+
+  const handleAddToCart = (item) => {
+    const isRestaurantOpen = localStorage.getItem('restaurantOpen');
+    if (isRestaurantOpen === 'false') {
+      alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
+      return;
+    }
+    addToCart({ ...item, id: item._id });
+  };
 
   const menuItems = useQuery(api.modules.menu.menu.getAvailableMenuItems);
   const [searchParams] = useSearchParams();
@@ -403,16 +415,11 @@ export default function Home() {
             <div className="bestsellers-grid">
               {filteredItems && filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
-                  <div key={item._id} className="bestseller-card">
-                    <img
-                      src={item.image || '/image.png'}
-                      alt={item.name}
-                      onError={(e) => e.target.src = '/image.png'}
-                    />
-                    <h3>{item.name}</h3>
-                    <div className="rating">★★★★★</div>
-                    <p className="price">₹{item.fullPrice}</p>
-                  </div>
+                  <MenuItemCard 
+                    key={item._id} 
+                    item={item}
+                    onAddToCart={handleAddToCart}
+                  />
                 ))
               ) : (
                 <div className="no-results">
@@ -428,16 +435,11 @@ export default function Home() {
             <div className="bestsellers-grid">
               {menuItems ? (
                 menuItems.slice(0, 4).map((item) => (
-                  <div key={item._id} className="bestseller-card">
-                    <img
-                      src={item.image || '/image.png'}
-                      alt={item.name}
-                      onError={(e) => e.target.src = '/image.png'}
-                    />
-                    <h3>{item.name}</h3>
-                    <div className="rating">★★★★★</div>
-                    <p className="price">₹{item.fullPrice}</p>
-                  </div>
+                  <MenuItemCard 
+                    key={item._id} 
+                    item={item}
+                    onAddToCart={handleAddToCart}
+                  />
                 ))
               ) : (
                 <div className="loading-text">Loading delicious items...</div>
