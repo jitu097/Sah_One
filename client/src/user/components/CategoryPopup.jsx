@@ -4,7 +4,7 @@ import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import '../styles/CategoryPopup.css';
 
-export default function CategoryPopup({ isOpen, onClose }) {
+export default function CategoryPopup({ isOpen, onClose, onOpenPartyModal }) {
     const navigate = useNavigate();
     const categories = useQuery(api.modules.menu.menu.getAllCategories);
 
@@ -32,21 +32,22 @@ export default function CategoryPopup({ isOpen, onClose }) {
             <div className="category-popup-content" onClick={(e) => e.stopPropagation()}>
                 <div className="popup-header">
                     <div className="popup-title">
-                        <h3>Your Orders and</h3>
-                        <span>Collections</span>
+                        <h3>Menu</h3>
                     </div>
-                    <div className="item-count-badge">1</div>
-                    {/* Note: In a real app the count '1' effectively represents active orders or similar. 
-             For now hardcoding or leaving as placeholder based on mockup unless we have order data. 
-             If '1' refers to selected category count, it might differ. 
-             Mockup shows '1', assuming it's 'Your Orders'. */}
                 </div>
 
                 <div className="category-list">
-                    {/* Recommended - Static or dynamic if available */}
-                    <button className="category-item" onClick={() => handleCategoryClick('All')}>
-                        <span className="category-name">Recommended for you</span>
-                        <span className="category-count">25</span>
+                    {/* Book Table / Party Option */}
+                    <button
+                        className="category-item highlight-item"
+                        onClick={() => {
+                            onOpenPartyModal();
+                            onClose();
+                        }}
+                        style={{ fontWeight: 'bold' }}
+                    >
+                        <span className="category-name">🎉 Book your Table / Party</span>
+                        <span className="arrow-right">→</span>
                     </button>
 
                     {/* Dynamic Categories */}
@@ -66,10 +67,7 @@ export default function CategoryPopup({ isOpen, onClose }) {
                     )}
 
                     {/* Special Static Item from Mockup */}
-                    <div className="category-item special-item">
-                        <span className="category-name">LARGE ORDER MENU</span>
-                        <span className="arrow-down">▼</span>
-                    </div>
+
                 </div>
 
                 <div className="popup-footer">

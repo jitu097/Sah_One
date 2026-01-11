@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
+import CategoryPopup from '../components/CategoryPopup';
 import '../styles/pages.css';
 
 export default function Cart() {
   const { cartItems, updateQuantity } = useCart();
   const { currentUser } = useAuth();
+  const [showCategoryPopup, setShowCategoryPopup] = useState(false);
 
   const user = useQuery(api.modules.users.users.getUserByFirebaseUid,
     currentUser ? { firebaseUid: currentUser.uid } : "skip"
@@ -79,7 +81,7 @@ export default function Cart() {
               <p>Add some delicious items from our menu!</p>
               <button
                 className="browse-menu-btn"
-                onClick={() => navigate('/user')}
+                onClick={() => setShowCategoryPopup(true)}
               >
                 Browse Menu
               </button>
@@ -140,6 +142,13 @@ export default function Cart() {
           </div>
         )}
       </div>
+
+      {/* Reused Category Popup */}
+      <CategoryPopup
+        isOpen={showCategoryPopup}
+        onClose={() => setShowCategoryPopup(false)}
+        onOpenPartyModal={() => navigate('/user')}
+      />
     </>
   );
 }
