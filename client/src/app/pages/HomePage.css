@@ -6,7 +6,7 @@
 
 .homepage-container {
   height: 100vh;
-  background: linear-gradient(to right, #ffffff 55%, #2c3e50 55%);
+  background: linear-gradient(to right,  #ffffff 55%, #c13737 55%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow: hidden;
 }
@@ -19,12 +19,12 @@
   padding: 1.5rem 4rem;
   background: transparent;
   position: relative;
-  z-index: 100;
+  margin-top: -35px;
 }
 
 .navbar-left .nav-logo {
-  height: 100px;
-  width: auto;
+  height: 180px;
+  width: 200px;
   margin-left: -20px;
 }
 
@@ -103,7 +103,10 @@
 .signin-btn {
   background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
   color: #000;
-  font-weight: 600;
+  font-weight: 700;
+  min-width: 150px;
+  padding: 0.9rem 1.8rem;
+  border-radius: 9px;
   box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
 }
 
@@ -116,6 +119,7 @@
   background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
   color: #000;
   font-weight: 600;
+  width: 100px;
   box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
 }
 
@@ -190,6 +194,7 @@
 .order-controls {
   display: flex;
   gap: 1.5rem;
+  width: 200px;;
   align-items: center;
 }
 
@@ -488,6 +493,12 @@
     padding: 1rem 2rem;
   }
 
+  .navbar-left .nav-logo {
+    height: 150px;
+    width: 150px;
+    margin-left: -65px;
+  }
+
   .navbar-center {
     display: none;
   }
@@ -495,14 +506,32 @@
   .main-content {
     grid-template-columns: 1fr;
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
   }
 
   .content-right {
-    display: none;
+    order: -1;
+    margin-bottom: 2rem;
+    margin-top: -80px;
+    background-color: #c13737;
+  }
+
+  .content-left {
+    order: 1;
+    margin-bottom: 0;
   }
 
   .main-heading {
     font-size: 3rem;
+  }
+
+  .hero-food-image {
+    width: 350px;
+    height: 350px;
+    margin-bottom: -100px;
+    width: 550px;
+    margin-right: 80px;
   }
 }
 

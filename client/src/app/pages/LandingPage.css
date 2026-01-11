@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e23744 0%, #ff6b6b 100%);;
+  background: linear-gradient(135deg, #e2df37 0%, #ff6b6b 100%);;
   overflow: hidden;
 }
 
@@ -40,7 +40,7 @@
 }
 
 .landing-subtitle {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(40, 24, 4, 0.9);
   font-weight: 300;
   margin-bottom: 3rem;
   font-size: 1.5rem;

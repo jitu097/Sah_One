@@ -27,16 +27,13 @@ const HomePage = () => {
           <a href="#home" className="nav-item active">Home</a>
           <a href="#menu" className="nav-item">Menu</a>
           <a href="#service" className="nav-item">Service</a>
-          <a href="#shop" className="nav-item">Shop</a>
+         
         </div>
 
         <div className="navbar-right">
          
           <button className="auth-btn signin-btn" onClick={() => navigate('/signup')}>
-            ➜ sing up
-          </button>
-          <button className="auth-btn login-btn" onClick={() => navigate('/login')}>
-            ➜ login
+             SIGN UP
           </button>
         </div>
       </nav>
@@ -51,24 +48,14 @@ const HomePage = () => {
           </h1>
           
           <p className="description">
-            Fresh and tasty seafood curry sit amet, consectetur<br />
-            Curabitur accumsan auctor pulvinar proin <strong>sit amet.</strong>
+           Freshly cooked, perfectly seasoned, and served with love.<br />
+            Every dish is crafted to delight your <strong>taste buds.</strong>
           </p>
 
           <div className="order-section">
-            <div className="total-order">
-              <span className="label">Total order:</span>
-              <span className="price">${totalPrice}</span>
-            </div>
-
             <div className="order-controls">
-              <div className="quantity-selector">
-                <button onClick={decrementQuantity} className="qty-btn">▼</button>
-                <span className="quantity">{quantity}</span>
-                <button onClick={incrementQuantity} className="qty-btn">▲</button>
-              </div>
-              <button className="buy-now-btn">
-                🛒 Buy Now
+              <button className="auth-btn login-btn" onClick={() => navigate('/login')}>
+                 LOGIN
               </button>
             </div>
           </div>
@@ -87,6 +74,8 @@ const HomePage = () => {
             <div className="floating-item tomato">🌿</div>
             <div className="floating-item pepper">🌿</div>
             <div className="floating-item herb">🌿</div>
+          
+            
           </div>
         </div>
       </div>
