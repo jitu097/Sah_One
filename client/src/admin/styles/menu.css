@@ -196,6 +196,59 @@
   filter: grayscale(0);
 }
 
+/* Add Item Card */
+.add-item-card {
+  background: linear-gradient(135deg, #fff5f2 0%, #ffffff 100%);
+  border-radius: 15px;
+  border: 2px dashed var(--primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: 15px;
+}
+
+.add-item-card:hover {
+  background: linear-gradient(135deg, #ffede8 0%, #fff5f2 100%);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.15);
+  border-color: #ff5722;
+}
+
+.add-item-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 300;
+  transition: all 0.3s;
+}
+
+.add-item-card:hover .add-item-icon {
+  transform: rotate(90deg) scale(1.1);
+  background: #ff5722;
+}
+
+.add-item-card p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary);
+  transition: color 0.3s;
+}
+
+.add-item-card:hover p {
+  color: #ff5722;
+}
+
 .card-image-container {
   height: 160px;
   position: relative;
@@ -335,6 +388,8 @@
   overflow: hidden;
   max-width: 600px;
   width: 90%;
+  background: white;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
 @keyframes slideUp {
@@ -359,6 +414,7 @@
   padding: 25px;
   max-height: 70vh;
   overflow-y: auto;
+  background: white;
 }
 
 .form-row {
@@ -423,6 +479,7 @@
   padding: 5px;
   text-align: center;
   transition: border-color 0.3s;
+  background: #fafafa;
 }
 
 .image-upload-area:hover {
@@ -471,7 +528,7 @@
 
 .modal-footer {
   padding: 20px 25px;
-  background: #fcfcfc;
+  background: white;
   border-top: 1px solid #eee;
   display: flex;
   justify-content: flex-end;

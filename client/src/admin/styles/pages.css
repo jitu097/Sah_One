@@ -385,7 +385,7 @@
 }
 
 .modal-content {
-  background: white;
+  background: white !important;
   border-radius: 20px;
   max-width: 600px;
   width: 100%;
@@ -447,6 +447,7 @@
   font-size: 1rem;
   transition: border-color 0.3s;
   box-sizing: border-box;
+  background: white;
 }
 
 .form-group input:focus,

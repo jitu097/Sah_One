@@ -314,48 +314,76 @@ export default function Menu() {
                         </button>
                       </div>
                     ) : (
-                      categoryItems.map(item => (
-                        <div key={item.id} className={`menu-item-card ${!item.isActive ? 'inactive' : ''}`}>
-                          <div className="card-image-container">
-                            <img
-                              src={item.image || '/image.png'}
-                              alt={item.name}
-                              className="item-image"
-                              onError={(e) => e.target.src = '/image.png'}
-                            />
-                            <span className={`status-pill ${item.isActive ? 'active' : 'inactive'}`}>
-                              {item.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                          </div>
-
-                          <div className="item-card-details">
-                            <h3>{item.name}</h3>
-                            <p className="item-desc">{item.description}</p>
-
-                            <div className="item-pricing-tags">
-                              {item.hasHalfOption && (
-                                <span className="price-tag half">Half: ₹{item.priceHalf}</span>
-                              )}
-                              <span className="price-tag full">Full: ₹{item.priceFull}</span>
-                            </div>
-                          </div>
-
-                          <div className="item-card-actions">
-                            <label className="toggle-switch small">
-                              <input
-                                type="checkbox"
-                                checked={item.isActive}
-                                onChange={() => handleToggleActive(item)}
+                      <>
+                        {categoryItems.map(item => (
+                          <div key={item.id} className={`menu-item-card ${!item.isActive ? 'inactive' : ''}`}>
+                            <div className="card-image-container">
+                              <img
+                                src={item.image || '/image.png'}
+                                alt={item.name}
+                                className="item-image"
+                                onError={(e) => e.target.src = '/image.png'}
                               />
-                              <span className="toggle-slider"></span>
-                            </label>
-                            <div className="action-buttons">
-                              <button className="icon-btn edit" onClick={() => handleEdit(item)} title="Edit">✏️</button>
-                              <button className="icon-btn delete" onClick={() => handleDelete(item.id)} title="Delete">🗑️</button>
+                              <span className={`status-pill ${item.isActive ? 'active' : 'inactive'}`}>
+                                {item.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
+
+                            <div className="item-card-details">
+                              <h3>{item.name}</h3>
+                              <p className="item-desc">{item.description}</p>
+
+                              <div className="item-pricing-tags">
+                                {item.hasHalfOption && (
+                                  <span className="price-tag half">Half: ₹{item.priceHalf}</span>
+                                )}
+                                <span className="price-tag full">Full: ₹{item.priceFull}</span>
+                              </div>
+                            </div>
+
+                            <div className="item-card-actions">
+                              <label className="toggle-switch small">
+                                <input
+                                  type="checkbox"
+                                  checked={item.isActive}
+                                  onChange={() => handleToggleActive(item)}
+                                />
+                                <span className="toggle-slider"></span>
+                              </label>
+                              <div className="action-buttons">
+                                <button className="icon-btn edit" onClick={() => handleEdit(item)} title="Edit">✏️</button>
+                                <button className="icon-btn delete" onClick={() => handleDelete(item.id)} title="Delete">🗑️</button>
+                              </div>
                             </div>
                           </div>
+                        ))}
+                        
+                        {/* Add New Item Card */}
+                        <div 
+                          className="add-item-card" 
+                          onClick={() => {
+                            setModalMode('add');
+                            setCurrentEditId(null);
+                            setFormData({
+                              name: '',
+                              description: '',
+                              image: '',
+                              category: category.name,
+                              priceHalf: '',
+                              priceFull: '',
+                              hasHalfOption: false,
+                              isActive: true
+                            });
+                            setSelectedImage('');
+                            setShowModal(true);
+                            setUploading(false);
+                            setUploadProgress(0);
+                          }}
+                        >
+                          <div className="add-item-icon">+</div>
+                          <p>Add New Item</p>
                         </div>
-                      ))
+                      </>
                     )}
                   </div>
                 )}
