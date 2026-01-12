@@ -3,9 +3,12 @@ import { useState, useEffect } from "react";
 import "../styles/navbar.css";
 import SideBar from "./SideBar";
 import { useCart } from "../../context/CartContext";
+import AddressModal from "./AddressModal";
 
 export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState("Your City");
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
@@ -14,6 +17,22 @@ export default function Navbar() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  const handleSaveAddress = (addressData) => {
+    // Save address to localStorage or backend
+    const locationText = `${addressData.city}, ${addressData.locality}`;
+    setUserLocation(locationText);
+    localStorage.setItem('userLocation', locationText);
+    localStorage.setItem('userAddress', JSON.stringify(addressData));
+  };
+
+  // Load saved location on mount
+  useEffect(() => {
+    const savedLocation = localStorage.getItem('userLocation');
+    if (savedLocation) {
+      setUserLocation(savedLocation);
+    }
+  }, []);
 
   // Sync internal state with URL params (e.g. on back button)
   useEffect(() => {
@@ -48,7 +67,12 @@ export default function Navbar() {
           <Link to="/user">
             <img src="/LOGO.png" alt="SAH_ONE" className="logo-img" />
           </Link>
-          <span className="location">📍 Your City</span>
+          <button 
+            className="location" 
+            onClick={() => setIsAddressModalOpen(true)}
+          >
+            📍 {userLocation}
+          </button>
         </div>
 
         <div className="nav-center">
@@ -95,6 +119,11 @@ export default function Navbar() {
         </div>
       </nav>
       <SideBar isOpen={isSidebarOpen} onClose={toggleSidebar} />
+      <AddressModal 
+        isOpen={isAddressModalOpen} 
+        onClose={() => setIsAddressModalOpen(false)}
+        onSave={handleSaveAddress}
+      />
     </>
   );
 }

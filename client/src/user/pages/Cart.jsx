@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import CategoryPopup from '../components/CategoryPopup';
+import PaymentModal from '../components/PaymentModal';
 import '../styles/pages.css';
 import '../styles/cart.css';
 
@@ -13,6 +14,7 @@ export default function Cart() {
   const { currentUser } = useAuth();
   const [showCategoryPopup, setShowCategoryPopup] = useState(false);
   const [selectedItems, setSelectedItems] = useState(new Set(cartItems.map(item => item.id)));
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const user = useQuery(api.modules.users.users.getUserByFirebaseUid,
     currentUser ? { firebaseUid: currentUser.uid } : "skip"
@@ -75,17 +77,29 @@ export default function Cart() {
       return;
     }
 
-    if (!user) return; // Loading state
-
-    if (!user.phone || !user.address) {
-      alert("Please complete your profile (Phone Number and Address) to proceed with delivery.");
-      navigate('/user/profile');
+    // Check for saved address from AddressModal
+    const savedAddress = localStorage.getItem('userAddress');
+    
+    if (!savedAddress) {
+      alert("Please add your delivery address by clicking the location button in the navbar.");
       return;
     }
 
-    // Process checkout (currently just an alert or placeholder)
-    alert("Order placed successfully! (This is a demo)");
-    // navigate('/user/orders');
+    const addressData = JSON.parse(savedAddress);
+    
+    // Validate that required fields are filled
+    if (!addressData.mobileNumber || !addressData.city || !addressData.deliveryArea) {
+      alert("Please complete your delivery address with all required fields.");
+      return;
+    }
+
+    // Open payment modal
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    alert('✅ Payment successful! Order placed.');
+    navigate('/user/orders');
   };
 
   return (
@@ -199,6 +213,14 @@ export default function Cart() {
         isOpen={showCategoryPopup}
         onClose={() => setShowCategoryPopup(false)}
         onOpenPartyModal={() => navigate('/user')}
+      />
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        totalAmount={calculateTotal()}
+        onPaymentSuccess={handlePaymentSuccess}
       />
     </>
   );

@@ -27,9 +27,20 @@ export default function Profile() {
   // Initialize form data when user data is loaded
   useEffect(() => {
     if (user) {
+      // Check for saved address from AddressModal
+      const savedAddress = localStorage.getItem('userAddress');
+      let addressText = user.address || '';
+      let phoneNumber = user.phone || '';
+      
+      if (savedAddress) {
+        const addressData = JSON.parse(savedAddress);
+        addressText = `${addressData.deliveryArea}, ${addressData.locality}, ${addressData.city}`;
+        phoneNumber = addressData.mobileNumber || user.phone || '';
+      }
+      
       setFormData({
-        phone: user.phone || '',
-        address: user.address || '',
+        phone: phoneNumber,
+        address: addressText,
         name: user.name || ''
       });
     }

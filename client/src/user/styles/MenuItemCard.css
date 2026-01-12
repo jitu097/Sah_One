@@ -388,10 +388,10 @@
 }
 
 .portion-option:hover {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  border-color: #6366f1;
+  background: linear-gradient(135deg, #ff3b30 0%, #e53935 100%);
+  border-color: #e23744;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 6px 20px rgba(226, 55, 68, 0.3);
 }
 
 .portion-option:hover .portion-label,
@@ -401,7 +401,7 @@
 
 .portion-label {
   font-weight: 600;
-  color: #2c3e50;
+  color: #f35e0f;
 }
 
 .portion-price {

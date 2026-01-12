@@ -129,18 +129,12 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
             <>
               <p className="menu-item-price">₹{item.fullPrice}</p>
               
-              {quantity !== undefined && onUpdateQuantity ? (
-                quantity === 0 ? (
-                  <button className="add-to-cart-btn" onClick={() => handlePortionAdd('full')}>
-                    Add to Cart
-                  </button>
-                ) : (
-                  <div className="quantity-controls">
-                    <button className="qty-btn" onClick={() => onUpdateQuantity(item._id, -1)}>−</button>
-                    <span className="qty-number">{quantity}</span>
-                    <button className="qty-btn" onClick={() => onUpdateQuantity(item._id, 1)}>+</button>
-                  </div>
-                )
+              {fullQty > 0 ? (
+                <div className="quantity-controls">
+                  <button className="qty-btn" onClick={() => handlePortionUpdate('full', -1)}>−</button>
+                  <span className="qty-number">{fullQty}</span>
+                  <button className="qty-btn" onClick={() => handlePortionUpdate('full', 1)}>+</button>
+                </div>
               ) : (
                 <button className="add-to-cart-btn" onClick={() => handlePortionAdd('full')}>
                   Add to Cart
