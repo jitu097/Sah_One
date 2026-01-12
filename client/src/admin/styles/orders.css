@@ -214,11 +214,12 @@
 
 .order-item-row {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 8px;
   font-size: 0.9rem;
   border-bottom: 1px dashed #eee;
-  padding-bottom: 5px;
+  padding-bottom: 8px;
 }
 
 .order-item-row:last-child {
@@ -227,27 +228,63 @@
   padding-bottom: 0;
 }
 
+.item-thumbnail {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.item-details {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
 .qty-badge {
   font-weight: 700;
   color: var(--primary);
-  margin-right: 8px;
   min-width: 25px;
 }
 
 .item-name {
-  flex: 1;
   color: #333;
+  font-weight: 500;
+}
+
+.item-portion {
+  color: #999;
+  font-size: 0.85rem;
+  font-style: italic;
 }
 
 .item-price {
   font-weight: 600;
   color: #666;
+  margin-left: auto;
+}
+
+.order-summary-section {
+  border-top: 2px solid #f0f0f0;
+  padding-top: 12px;
+  margin-top: 12px;
 }
 
 .order-summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.order-summary-row.total-row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+}
   margin-top: 15px;
   padding-top: 10px;
   border-top: 2px solid #f0f0f0;

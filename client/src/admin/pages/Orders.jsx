@@ -142,31 +142,59 @@ export default function Orders() {
                   <div className="customer-details">
                     <div className="detail-row">
                       <span className="icon">👤</span>
-                      <span className="text-bold">{order.user?.name || 'Guest User'}</span>
+                      <span className="text-bold">{order.customerName || order.user?.name || 'Guest User'}</span>
                     </div>
                     <div className="detail-row">
                       <span className="icon">📞</span>
-                      <span>{order.user?.phone || 'N/A'}</span>
+                      <span>{order.customerPhone || order.user?.phone || 'N/A'}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="icon">📧</span>
+                      <span>{order.customerEmail || order.user?.email || 'N/A'}</span>
                     </div>
                     <div className="detail-row address">
                       <span className="icon">📍</span>
                       <span>{order.deliveryAddress || 'Pick up'}</span>
                     </div>
+                    {order.paymentMethod && (
+                      <div className="detail-row">
+                        <span className="icon">💳</span>
+                        <span>Payment: {order.paymentMethod}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="order-items-list">
                     {order.items.map((item, idx) => (
                       <div key={idx} className="order-item-row">
-                        <span className="qty-badge">{item.quantity}x</span>
-                        <span className="item-name">{item.name}</span>
+                        {item.image && <img src={item.image} alt={item.name} className="item-thumbnail" />}
+                        <div className="item-details">
+                          <span className="qty-badge">{item.quantity}x</span>
+                          <span className="item-name">{item.name}</span>
+                          {item.portion && <span className="item-portion">({item.portion})</span>}
+                        </div>
                         <span className="item-price">₹{item.price}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="order-summary-row">
-                    <span>Total Amount</span>
-                    <span className="total-price">₹{order.totalAmount}</span>
+                  <div className="order-summary-section">
+                    {order.subtotal && (
+                      <div className="order-summary-row">
+                        <span>Subtotal</span>
+                        <span>₹{order.subtotal}</span>
+                      </div>
+                    )}
+                    {order.deliveryCharge !== undefined && (
+                      <div className="order-summary-row">
+                        <span>Delivery Charge</span>
+                        <span>₹{order.deliveryCharge}</span>
+                      </div>
+                    )}
+                    <div className="order-summary-row total-row">
+                      <span>Total Amount</span>
+                      <span className="total-price">₹{order.totalAmount}</span>
+                    </div>
                   </div>
 
                   <div className="delivery-partner-section">

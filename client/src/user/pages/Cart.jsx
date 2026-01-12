@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import CategoryPopup from '../components/CategoryPopup';
 import PaymentModal from '../components/PaymentModal';
@@ -19,6 +19,8 @@ export default function Cart() {
   const user = useQuery(api.modules.users.users.getUserByFirebaseUid,
     currentUser ? { firebaseUid: currentUser.uid } : "skip"
   );
+
+  const createOrder = useMutation(api.modules.orders.orders.createOrder);
 
   // Check if restaurant is open
   const isRestaurantOpen = () => {
@@ -97,9 +99,48 @@ export default function Cart() {
     setShowPaymentModal(true);
   };
 
-  const handlePaymentSuccess = () => {
-    alert('✅ Payment successful! Order placed.');
-    navigate('/user/orders');
+  const handlePaymentSuccess = async () => {
+    try {
+      // Get saved address
+      const savedAddress = localStorage.getItem('userAddress');
+      const addressData = savedAddress ? JSON.parse(savedAddress) : {};
+      
+      // Format address string
+      const deliveryAddress = `${addressData.deliveryArea || ''}, ${addressData.company || ''}, Floor: ${addressData.floor || ''}, ${addressData.locality || ''}, ${addressData.city || ''}, Mobile: ${addressData.mobileNumber || ''}`;
+      
+      // Prepare order items
+      const orderItems = cartItems.map(item => ({
+        itemId: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        portion: item.selectedPortion || 'Full',
+        image: item.image || ''
+      }));
+      
+      // Create order in database
+      await createOrder({
+        userId: user._id,
+        items: orderItems,
+        totalAmount: calculateTotal(),
+        deliveryAddress: deliveryAddress,
+        customerName: user.name || '',
+        customerPhone: addressData.mobileNumber || user.phone || '',
+        customerEmail: user.email || '',
+        paymentMethod: 'Online',
+        deliveryCharge: deliveryCharge,
+        subtotal: calculateSubtotal()
+      });
+      
+      // Clear cart after successful order
+      cartItems.forEach(item => removeFromCart(item.id));
+      
+      alert('✅ Payment successful! Order placed.');
+      navigate('/user/orders');
+    } catch (error) {
+      console.error('Error creating order:', error);
+      alert('❌ Failed to place order. Please try again.');
+    }
   };
 
   return (
