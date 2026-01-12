@@ -11,7 +11,7 @@ import '../styles/Home.css';
 import CategoryPopup from '../components/CategoryPopup';
 
 export default function Home() {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems, updateQuantity } = useCart();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showPartyModal, setShowPartyModal] = useState(false);
@@ -26,13 +26,35 @@ export default function Home() {
     time: ''
   });
 
-  const handleAddToCart = (item) => {
+  const handleAddToCart = (item, portionType = 'full') => {
     const isRestaurantOpen = localStorage.getItem('restaurantOpen');
     if (isRestaurantOpen === 'false') {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
-    addToCart({ ...item, id: item._id });
+    
+    const price = portionType === 'half' && item.halfPrice ? item.halfPrice : item.fullPrice;
+    const uniqueId = `${item._id}_${portionType}`;
+    
+    addToCart({ 
+      ...item, 
+      id: uniqueId,
+      originalId: item._id,
+      portionType: portionType,
+      price: price,
+      name: portionType === 'half' ? `${item.name} (Half)` : item.name
+    });
+  };
+
+  const getItemQuantity = (itemId, portionType = 'full') => {
+    const uniqueId = `${itemId}_${portionType}`;
+    const cartItem = cartItems.find(item => item.id === uniqueId);
+    return cartItem ? cartItem.quantity : 0;
+  };
+
+  const handleUpdateQuantity = (itemId, portionType, change) => {
+    const uniqueId = `${itemId}_${portionType}`;
+    updateQuantity(uniqueId, change);
   };
 
   const menuItems = useQuery(api.modules.menu.menu.getAvailableMenuItems);
@@ -419,6 +441,8 @@ export default function Home() {
                     key={item._id} 
                     item={item}
                     onAddToCart={handleAddToCart}
+                    quantity={getItemQuantity(item._id)}
+                    onUpdateQuantity={(id, change) => handleUpdateQuantity(item._id, 'full', change)}
                   />
                 ))
               ) : (
@@ -439,6 +463,8 @@ export default function Home() {
                     key={item._id} 
                     item={item}
                     onAddToCart={handleAddToCart}
+                    quantity={getItemQuantity(item._id)}
+                    onUpdateQuantity={(id, change) => handleUpdateQuantity(item._id, 'full', change)}
                   />
                 ))
               ) : (

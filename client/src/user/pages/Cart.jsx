@@ -6,11 +6,13 @@ import { useQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import CategoryPopup from '../components/CategoryPopup';
 import '../styles/pages.css';
+import '../styles/cart.css';
 
 export default function Cart() {
-  const { cartItems, updateQuantity } = useCart();
+  const { cartItems, updateQuantity, removeFromCart } = useCart();
   const { currentUser } = useAuth();
   const [showCategoryPopup, setShowCategoryPopup] = useState(false);
+  const [selectedItems, setSelectedItems] = useState(new Set(cartItems.map(item => item.id)));
 
   const user = useQuery(api.modules.users.users.getUserByFirebaseUid,
     currentUser ? { firebaseUid: currentUser.uid } : "skip"
@@ -33,11 +35,32 @@ export default function Cart() {
   const navigate = useNavigate();
   const deliveryCharge = 50;
 
+  const toggleSelectAll = () => {
+    if (selectedItems.size === cartItems.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(cartItems.map(item => item.id)));
+    }
+  };
+
+  const toggleSelectItem = (itemId) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(itemId)) {
+      newSelected.delete(itemId);
+    } else {
+      newSelected.add(itemId);
+    }
+    setSelectedItems(newSelected);
+  };
+
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => {
-      const price = typeof item.price === 'string' ?
-        parseInt(item.price.replace('₹', '')) : item.price;
-      return total + (price * item.quantity);
+      if (selectedItems.has(item.id)) {
+        const price = typeof item.price === 'string' ?
+          parseInt(item.price.replace('₹', '')) : item.price;
+        return total + (price * item.quantity);
+      }
+      return total;
     }, 0);
   };
 
@@ -70,9 +93,22 @@ export default function Cart() {
       <div className="cart-backdrop" onClick={() => navigate(-1)}></div>
       <div className="cart-sidebar">
         <div className="cart-sidebar-header">
-          <h1>🛒 My Cart</h1>
-          <button className="close-cart-btn" onClick={() => navigate(-1)}>✕</button>
+          <button className="back-btn" onClick={() => navigate(-1)}>←</button>
+          <h1>My Cart</h1>
+          <button className="menu-btn">⋮</button>
         </div>
+
+        {cartItems.length > 0 && (
+          <div className="cart-select-all">
+            <span>{cartItems.length} items</span>
+            <button 
+              className="select-all-btn"
+              onClick={toggleSelectAll}
+            >
+              <span className="select-icon"></span> Select all
+            </button>
+          </div>
+        )}
 
         <div className="cart-items">
           {cartItems.length === 0 ? (
@@ -88,37 +124,52 @@ export default function Cart() {
             </div>
           ) : (
             cartItems.map(item => (
-              <div key={item.id} className="cart-item">
-                <div className="item-info">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="cart-item-image"
+              <div key={item.id} className="cart-item-card">
+                <div className="cart-item-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.has(item.id)}
+                    onChange={() => toggleSelectItem(item.id)}
                   />
-                  <div>
-                    <h3>{item.name}</h3>
-                    <p>{item.description}</p>
+                </div>
+                <img
+                  src={item.image || '/image.png'}
+                  alt={item.name}
+                  className="cart-item-image"
+                  onError={(e) => e.target.src = '/image.png'}
+                />
+                <div className="cart-item-details">
+                  <h3 className="cart-item-name">{item.name}</h3>
+                  <p className="cart-item-portion">
+                    {item.portionType === 'half' ? 'Half Portion' : 'Full Portion'}
+                  </p>
+                  <div className="cart-item-price-row">
+                    <span className="cart-item-price">
+                      ₹{typeof item.price === 'string' ? item.price : item.price}
+                    </span>
+                    <div className="cart-item-controls">
+                      <button
+                        className="cart-qty-btn minus"
+                        onClick={() => handleUpdateQuantity(item.id, -1)}
+                      >
+                        −
+                      </button>
+                      <span className="cart-qty">{item.quantity}</span>
+                      <button
+                        className="cart-qty-btn plus"
+                        onClick={() => handleUpdateQuantity(item.id, 1)}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="item-actions">
-                  <button
-                    className="qty-btn"
-                    onClick={() => handleUpdateQuantity(item.id, -1)}
-                  >
-                    -
-                  </button>
-                  <span className="qty">{item.quantity}</span>
-                  <button
-                    className="qty-btn"
-                    onClick={() => handleUpdateQuantity(item.id, 1)}
-                  >
-                    +
-                  </button>
-                  <span className="item-price">
-                    ₹{(typeof item.price === 'string' ?
-                      parseInt(item.price.replace('₹', '')) : item.price) * item.quantity}
-                  </span>
-                </div>
+                <button 
+                  className="cart-item-delete"
+                  onClick={() => removeFromCart(item.id)}
+                >
+                  ✕
+                </button>
               </div>
             ))
           )}

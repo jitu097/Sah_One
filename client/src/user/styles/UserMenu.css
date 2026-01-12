@@ -42,18 +42,57 @@
 .menu-page-header {
   text-align: center;
   margin-bottom: 3rem;
+  background: url('/Goodfood.png'), url('/mirch.png'), linear-gradient(135deg, #ff3b30 0%, #e53935 100%);
+  background-size: auto 110%, auto 110%, cover;
+  background-position: left -20px top -35px, right -7px top 6px, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  padding: 1.5rem 1rem;
+  border-radius: 0 0 20px 20px;
 }
 
 .menu-page-header h1 {
-  font-size: 3rem;
-  color: #333;
+  font-size: 1.8rem;
+  color: white;
   margin-bottom: 0.5rem;
   font-weight: 700;
 }
 
 .menu-page-header p {
-  font-size: 1.2rem;
-  color: #666;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Desktop: Make menu header fixed */
+@media (min-width: 1024px) {
+  .bestsellers-section {
+    padding-top: 340px;
+  }
+
+  .menu-page-header {
+    position: fixed;
+    top: 100px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: url('/Goodfood.png'), linear-gradient(135deg, #ff3b30 0%, #e53935 100%);
+    background-size: auto 160%, cover;
+    background-position: left 610px bottom -15px, center;
+    
+    background-repeat: no-repeat, no-repeat;
+    color: white;
+    padding: 2rem 2rem 1.5rem;
+    margin: 0;
+    box-shadow: 0 4px 20px rgba(255, 59, 48, 0.3);
+  }
+
+  .menu-page-header h1 {
+    color: white;
+    font-size: 2.5rem;
+  }
+
+  .menu-page-header p {
+    color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 /* Category Filter */
@@ -63,6 +102,27 @@
   gap: 1rem;
   margin-bottom: 3rem;
   flex-wrap: wrap;
+}
+
+/* Desktop: Make category filter fixed */
+@media (min-width: 1024px) {
+  .category-filter {
+    position: fixed;
+    top: 240px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem 2rem;
+    margin: 0;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+    gap: 0.3rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+  }
 }
 
 .filter-btn {
@@ -245,17 +305,19 @@
 
 .accordion-category-header {
   padding: 1.25rem;
-  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  background: linear-gradient(135deg, #e6992d 0%, #e39b0b 100%);
   color: white;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
 }
 
 .accordion-category-header:active {
-  background: linear-gradient(135deg, #FF8E53, #FF6B6B);
+  background: linear-gradient(135deg, #e53935 0%, #ff3b30 100%);
+  box-shadow: 0 1px 4px rgba(255, 59, 48, 0.3);
 }
 
 .category-info {
@@ -323,12 +385,89 @@
 .mobile-item-description {
   font-size: 0.85rem;
   color: #666;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.mobile-initial-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.mobile-price-display {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.mobile-price-item {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.mobile-price-item strong {
+  color: #FF6B6B;
+  font-size: 1.1rem;
+}
+
+.mobile-price-item.single-price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #FF6B6B;
+}
+
+.mobile-add-to-cart-btn {
+  width: auto;
+  min-width: 120px;
+  padding: 0.6rem 1.25rem;
+  background: linear-gradient(135deg, #ff3b30 0%, #e53935 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(255, 59, 48, 0.25);
+}
+
+.mobile-add-to-cart-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 6px rgba(255, 59, 48, 0.3);
+}
+
+.mobile-item-portion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+.mobile-item-portion:first-of-type {
+  padding-top: 0.5rem;
+}
+
+.mobile-portion-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mobile-portion-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
 }
 
 .mobile-item-footer {
@@ -346,7 +485,7 @@
 
 .mobile-add-btn {
   padding: 0.5rem 1.25rem;
-  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  background: linear-gradient(135deg, #ff3b30 0%, #e53935 100%);
   color: white;
   border: none;
   border-radius: 20px;
@@ -367,7 +506,7 @@
   background: #f8f9fa;
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
-  border: 2px solid #FF6B6B;
+  border: 2px solid #ff3b30;
 }
 
 .mobile-qty-btn {
@@ -375,7 +514,7 @@
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  background: linear-gradient(135deg, #ff3b30 0%, #e53935 100%);
   color: white;
   font-size: 1.1rem;
   font-weight: bold;

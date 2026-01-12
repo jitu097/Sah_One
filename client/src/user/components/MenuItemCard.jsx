@@ -1,7 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useCart } from '../../context/CartContext';
 import '../styles/MenuItemCard.css';
 
 export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuantity, showCategory = true }) {
+  const { cartItems, updateQuantity: updateCartQuantity } = useCart();
+  const [showPortionControls, setShowPortionControls] = useState(false);
+
+  const getPortionQuantity = (portionType) => {
+    const uniqueId = `${item._id}_${portionType}`;
+    const cartItem = cartItems.find(i => i.id === uniqueId);
+    return cartItem ? cartItem.quantity : 0;
+  };
+
+  const handlePortionAdd = (portionType) => {
+    onAddToCart && onAddToCart(item, portionType);
+  };
+
+  const handlePortionUpdate = (portionType, change) => {
+    const uniqueId = `${item._id}_${portionType}`;
+    const currentQty = getPortionQuantity(portionType);
+    
+    // Update quantity
+    updateCartQuantity(uniqueId, change);
+    
+    // If we're reducing to 0, check if both portions will be 0
+    if (change < 0 && currentQty === 1) {
+      const otherPortionType = portionType === 'half' ? 'full' : 'half';
+      const otherQty = getPortionQuantity(otherPortionType);
+      if (otherQty === 0) {
+        setShowPortionControls(false);
+      }
+    }
+  };
+
+  const handleAddToCartClick = () => {
+    if (item.hasHalfPortion && item.halfPrice) {
+      setShowPortionControls(true);
+    } else {
+      handlePortionAdd('full');
+    }
+  };
+
+  const halfQty = getPortionQuantity('half');
+  const fullQty = getPortionQuantity('full');
+  const hasAnyInCart = halfQty > 0 || fullQty > 0;
+
+  // If any portion is in cart, always show controls
+  const shouldShowControls = showPortionControls || hasAnyInCart;
+
   return (
     <div className="menu-item-card menu-card-v2">
       <div className="menu-item-image-wrapper">
@@ -24,42 +70,83 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
         )}
         
         <div className="menu-item-footer">
-          <p className="menu-item-price">₹{item.fullPrice}</p>
-          
-          {quantity !== undefined && onUpdateQuantity ? (
-            // Show quantity controls if quantity is provided
-            quantity === 0 ? (
-              <button 
-                className="add-to-cart-btn"
-                onClick={() => onAddToCart && onAddToCart(item)}
-              >
-                Add to Cart
-              </button>
+          {item.hasHalfPortion && item.halfPrice ? (
+            shouldShowControls ? (
+              // Show both portion types with quantity controls
+              <div className="portion-controls-container">
+                <div className="portion-row">
+                  <div className="portion-info">
+                    <span className="portion-label-small">Half</span>
+                    <span className="portion-price-small">₹{item.halfPrice}</span>
+                  </div>
+                  {halfQty > 0 ? (
+                    <div className="quantity-controls">
+                      <button className="qty-btn" onClick={() => handlePortionUpdate('half', -1)}>−</button>
+                      <span className="qty-number">{halfQty}</span>
+                      <button className="qty-btn" onClick={() => handlePortionUpdate('half', 1)}>+</button>
+                    </div>
+                  ) : (
+                    <button className="add-portion-btn-text" onClick={() => handlePortionAdd('half')}>Add</button>
+                  )}
+                </div>
+                
+                <div className="portion-row">
+                  <div className="portion-info">
+                    <span className="portion-label-small">Full</span>
+                    <span className="portion-price-small">₹{item.fullPrice}</span>
+                  </div>
+                  {fullQty > 0 ? (
+                    <div className="quantity-controls">
+                      <button className="qty-btn" onClick={() => handlePortionUpdate('full', -1)}>−</button>
+                      <span className="qty-number">{fullQty}</span>
+                      <button className="qty-btn" onClick={() => handlePortionUpdate('full', 1)}>+</button>
+                    </div>
+                  ) : (
+                    <button className="add-portion-btn-text" onClick={() => handlePortionAdd('full')}>Add</button>
+                  )}
+                </div>
+              </div>
             ) : (
-              <div className="quantity-controls">
-                <button
-                  className="qty-btn"
-                  onClick={() => onUpdateQuantity(item._id, -1)}
-                >
-                  −
-                </button>
-                <span className="qty-number">{quantity}</span>
-                <button
-                  className="qty-btn"
-                  onClick={() => onUpdateQuantity(item._id, 1)}
-                >
-                  +
+              // Show prices and Add to Cart button initially
+              <div className="initial-price-display">
+                <div className="price-info-section">
+                  <div className="price-item">
+                    <span className="price-label">Half:</span>
+                    <span className="price-value">₹{item.halfPrice}</span>
+                  </div>
+                  <div className="price-item">
+                    <span className="price-label">Full:</span>
+                    <span className="price-value">₹{item.fullPrice}</span>
+                  </div>
+                </div>
+                <button className="add-to-cart-btn" onClick={handleAddToCartClick}>
+                  Add to Cart
                 </button>
               </div>
             )
           ) : (
-            // Simple add to cart button
-            <button 
-              className="add-to-cart-btn"
-              onClick={() => onAddToCart && onAddToCart(item)}
-            >
-              Add to Cart
-            </button>
+            // Single price item
+            <>
+              <p className="menu-item-price">₹{item.fullPrice}</p>
+              
+              {quantity !== undefined && onUpdateQuantity ? (
+                quantity === 0 ? (
+                  <button className="add-to-cart-btn" onClick={() => handlePortionAdd('full')}>
+                    Add to Cart
+                  </button>
+                ) : (
+                  <div className="quantity-controls">
+                    <button className="qty-btn" onClick={() => onUpdateQuantity(item._id, -1)}>−</button>
+                    <span className="qty-number">{quantity}</span>
+                    <button className="qty-btn" onClick={() => onUpdateQuantity(item._id, 1)}>+</button>
+                  </div>
+                )
+              ) : (
+                <button className="add-to-cart-btn" onClick={() => handlePortionAdd('full')}>
+                  Add to Cart
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>

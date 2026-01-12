@@ -2,12 +2,14 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "../styles/navbar.css";
 import SideBar from "./SideBar";
+import { useCart } from "../../context/CartContext";
 
 export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const { cartItems } = useCart();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -76,7 +78,13 @@ export default function Navbar() {
 
         <div className="nav-right">
           <Link to="/user/cart" className="cart-btn">
-            <img src="/basket.png" alt="Cart" />
+            <svg className="cart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <span className="cart-text">Cart</span>
+            <span className="cart-count">{cartItems.length}</span>
           </Link>
           <img
             src="/hamburger.png"

@@ -13,7 +13,6 @@ export default function SideBar({ isOpen, onClose }) {
     { path: "/user/orders", icon: "📦", label: "Orders" },
     { path: "/user/cart", icon: "🛒", label: "Cart" },
     { path: "/user/profile", icon: "👤", label: "Profile" },
-    { path: "/user/profile", icon: "⚙️", label: "Settings" },
   ];
 
   const handleLogout = async () => {
@@ -34,24 +33,26 @@ export default function SideBar({ isOpen, onClose }) {
       {/* Sidebar */}
       <aside className={`sidebar ${isOpen ? "open" : ""}` }>
         <div className="sidebar-header">
-          <div className="profile-section">
-            <div className="profile-icon">
-              <img src="/user.png" alt="Profile" />
-            </div>
-            <div className="profile-info">
-              <h3>Welcome{currentUser?.displayName ? `, ${currentUser.displayName}` : ''}!</h3>
-              <p>Enjoy your meal</p>
-            </div>
-          </div>
           <button className="close-btn" onClick={onClose}>
             ✕
           </button>
         </div>
 
+        <div className="profile-card">
+          <div className="profile-avatar">
+            <img src="/user.png" alt="Profile" />
+          </div>
+          <div className="profile-details">
+            <h3>Welcome,</h3>
+            <h2>{currentUser?.displayName || 'Guest'}!</h2>
+            <p>Enjoy your meal</p>
+          </div>
+        </div>
+
         <nav className="sidebar-menu">
-          {menu.map((item) => (
+          {menu.map((item, index) => (
             <Link
-              key={item.path}
+              key={item.path + index}
               to={item.path}
               className={`menu-item ${
                 location.pathname === item.path ? "active" : ""
@@ -65,8 +66,13 @@ export default function SideBar({ isOpen, onClose }) {
         </nav>
 
         <div className="sidebar-footer">
+          <Link to="/user/profile" className="settings-btn" onClick={onClose}>
+            <span>⚙️</span>
+            <span>Settings</span>
+          </Link>
           <button className="logout-btn" onClick={handleLogout}>
-            <span>🚪</span> Logout
+            <span>🚪</span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>

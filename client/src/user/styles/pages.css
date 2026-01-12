@@ -2,7 +2,6 @@
   min-height: 100vh;
   background: #ffffff;
   padding-bottom: 80px;
-  overflow-y: auto;
 }
 
 /* Hero Carousel */
@@ -17,6 +16,7 @@
   transition: background 0.5s ease;
   touch-action: pan-y;
   user-select: none;
+
 }
 
 .carousel-content {
@@ -35,11 +35,19 @@
 }
 
 .full-image-slide img {
-  max-width: 100%;
-  max-height: 500px;
+  max-width: 150%;
+  max-height: 800px;
   height: auto;
   object-fit: contain;
   transition: transform 0.5s ease-in-out;
+}
+
+/* Tablet responsiveness */
+@media (max-width: 768px) {
+  .full-image-slide img {
+    max-width: 100%;
+    max-height: 400px;
+  }
 }
 
 .slide-third {
@@ -208,6 +216,7 @@
   justify-content: center;
   padding: 80px 20px;
   position: relative;
+ 
 }
 
 .hero-section::before {
@@ -648,6 +657,22 @@
   margin: 0 auto;
 }
 
+/* Desktop: 5 Column Grid Layout */
+@media (min-width: 1024px) {
+  .bestsellers-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 24px !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  .bestsellers-grid {
+    gap: 32px !important;
+  }
+}
+
 /* Old bestseller-card styles - now using MenuItemCard component */
 /*
 .bestseller-card {
@@ -922,17 +947,26 @@
 .cart-item {
   background: white;
   border-radius: 15px;
-  padding: 20px;
+  padding: 15px;
   margin-bottom: 15px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 15px;
   align-items: center;
+  min-height: 100px;
 }
 
 .item-info {
   display: flex;
   align-items: center;
   gap: 15px;
+  flex: 1;
+  min-width: 0;
+}
+
+.item-info > div {
+  flex: 1;
+  min-width: 0;
 }
 
 .item-icon {
@@ -942,6 +976,9 @@
 .item-info h3 {
   margin: 0 0 5px 0;
   color: #333;
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .item-info p {
@@ -950,29 +987,53 @@
   font-size: 0.9rem;
 }
 
+.item-info .portion-type {
+  color: #ff6b35;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
 .item-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
+  background: #f9f9f9;
+  padding: 8px 12px;
+  border-radius: 25px;
 }
 
 .qty-btn {
   background: #f0f0f0;
   border: none;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+  color: #333;
+  font-weight: 600;
+}
+
+.qty-btn:hover {
+  background: #e0e0e0;
+  transform: scale(1.05);
+}
+
+.qty-btn:active {
+  transform: scale(0.95);
 }
 
 .qty {
   font-weight: 600;
   min-width: 30px;
   text-align: center;
+  font-size: 1rem;
 }
 
 .item-price {
@@ -980,6 +1041,7 @@
   color: #ff6b35;
   min-width: 80px;
   text-align: right;
+  font-size: 1.1rem;
 }
 
 .cart-summary {
@@ -1004,14 +1066,15 @@
   }
   
   .cart-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 15px;
   }
   
   .item-actions {
     width: 100%;
     justify-content: space-between;
+    padding: 10px 15px;
   }
 }
 
@@ -1470,7 +1533,6 @@
   .parties-button-image {
     max-width: 180px;
   }
-
   .section-title {
     font-size: 2rem;
   }
@@ -1620,7 +1682,7 @@
 
   .bestsellers-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 12px;
   }
 
   /* Old bestseller-card responsive styles - now using MenuItemCard component */
@@ -1757,8 +1819,14 @@
   }
 
   .delivery-steps {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 25px;
+    max-width: 100%;
+  }
+
+  .step {
+    max-width: 100%;
   }
 
   .step-icon {
@@ -1791,7 +1859,8 @@
   }
 
   .full-image-slide img {
-    max-height: 280px;
+    max-width: 452px !important;
+    max-height: 980px !important;
   }
 
   .slide-third {
