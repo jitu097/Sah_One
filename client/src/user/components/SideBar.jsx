@@ -11,6 +11,7 @@ export default function SideBar({ isOpen, onClose }) {
     { path: "/user", icon: "🏠", label: "Home" },
     { path: "/user/offers", icon: "🎁", label: "Offers" },
     { path: "/user/orders", icon: "📦", label: "Orders" },
+    { path: "/user/bookings", icon: "📅", label: "My Bookings" },
     { path: "/user/cart", icon: "🛒", label: "Cart" },
     { path: "/user/profile", icon: "👤", label: "Profile" },
   ];

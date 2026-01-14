@@ -203,4 +203,20 @@ export default defineSchema({
   })
     .index("by_type", ["reportType"])
     .index("by_date", ["date"]),
+
+  // Table Bookings
+  bookings: defineTable({
+    userId: v.string(), // Reference to users._id
+    name: v.string(),
+    phone: v.string(),
+    guests: v.number(),
+    date: v.string(),
+    time: v.string(),
+    status: v.string(), // "pending", "accepted", "rejected", "cancelled"
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_date", ["date"]),
 });

@@ -67,6 +67,9 @@ export default function Navbar() {
         <Link to="/admin/orders" className={`admin-nav-link ${isActive('/admin/orders')}`}>
           Orders
         </Link>
+        <Link to="/admin/bookings" className={`admin-nav-link ${isActive('/admin/bookings')}`}>
+          Bookings
+        </Link>
         <Link to="/admin/offers" className={`admin-nav-link ${isActive('/admin/offers')}`}>
           Offers
         </Link>

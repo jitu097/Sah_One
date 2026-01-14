@@ -1,0 +1,284 @@
+.user-bookings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-top: 80px;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+}
+
+.bookings-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.bookings-header h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.bookings-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.bookings-list {
+  display: grid;
+  gap: 25px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.user-booking-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.user-booking-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  border-color: #667eea;
+}
+
+.booking-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.booking-date-time {
+  flex: 1;
+}
+
+.booking-date-large {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.booking-time-large {
+  font-size: 1.2rem;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+  color: #856404;
+}
+
+.status-accepted {
+  background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
+  color: #155724;
+}
+
+.status-rejected {
+  background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+  color: white;
+}
+
+.status-cancelled {
+  background: linear-gradient(135deg, #b2bec3 0%, #636e72 100%);
+  color: white;
+}
+
+.booking-details-user {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.detail-row:hover {
+  background: #e9ecef;
+}
+
+.detail-icon {
+  font-size: 1.3rem;
+}
+
+.detail-text {
+  font-size: 1.05rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.booking-status-message {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.status-message {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.status-message.pending {
+  color: #856404;
+}
+
+.status-message.accepted {
+  color: #155724;
+}
+
+.status-message.rejected {
+  color: #721c24;
+}
+
+.status-message.cancelled {
+  color: #383d41;
+}
+
+.booking-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.booking-created {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.loading,
+.no-bookings {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.loading {
+  color: #666;
+  font-size: 1.2rem;
+}
+
+.no-bookings {
+  background: white;
+  border-radius: 15px;
+  padding: 60px 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.no-bookings-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.no-bookings h3 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.no-bookings p {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .user-bookings-container {
+    padding: 15px;
+    padding-top: 70px;
+  }
+
+  .bookings-header h1 {
+    font-size: 2rem;
+  }
+
+  .bookings-subtitle {
+    font-size: 1rem;
+  }
+
+  .user-booking-card {
+    padding: 20px;
+  }
+
+  .booking-card-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .booking-date-large {
+    font-size: 1.2rem;
+  }
+
+  .booking-time-large {
+    font-size: 1rem;
+  }
+
+  .status-badge {
+    align-self: flex-start;
+  }
+
+  .detail-text {
+    font-size: 0.95rem;
+  }
+
+  .no-bookings {
+    padding: 40px 20px;
+  }
+
+  .no-bookings-icon {
+    font-size: 3rem;
+  }
+
+  .no-bookings h3 {
+    font-size: 1.5rem;
+  }
+
+  .no-bookings p {
+    font-size: 1rem;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-booking-card {
+  animation: fadeIn 0.5s ease-out;
+}

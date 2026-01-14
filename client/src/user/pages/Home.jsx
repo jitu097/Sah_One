@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
 import MenuItemCard from '../components/MenuItemCard';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import '../styles/pages.css';
 import '../styles/Home.css';
 
@@ -12,6 +13,7 @@ import CategoryPopup from '../components/CategoryPopup';
 
 export default function Home() {
   const { addToCart, cartItems, updateQuantity } = useCart();
+  const { currentUser } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showPartyModal, setShowPartyModal] = useState(false);
@@ -25,6 +27,13 @@ export default function Home() {
     date: '',
     time: ''
   });
+
+  // Convex queries and mutations
+  const createBooking = useMutation(api.modules.bookings.bookings.createBooking);
+  const getUserByFirebaseUid = useQuery(
+    api.modules.users.users.getUserByFirebaseUid,
+    currentUser ? { firebaseUid: currentUser.uid } : "skip"
+  );
 
   const handleAddToCart = (item, portionType = 'full') => {
     const isRestaurantOpen = localStorage.getItem('restaurantOpen');
@@ -175,13 +184,36 @@ export default function Home() {
     });
   };
 
-  const handlePartyFormSubmit = (e) => {
+  const handlePartyFormSubmit = async (e) => {
     e.preventDefault();
-    console.log('Party Booking:', partyForm);
-    // Add your form submission logic here (API call, etc.)
-    alert(`Booking submitted for ${partyForm.name}!`);
-    setShowPartyModal(false);
-    setPartyForm({ name: '', phone: '', guests: '', date: '', time: '' });
+    
+    if (!currentUser) {
+      alert('Please login to book a table!');
+      return;
+    }
+
+    if (!getUserByFirebaseUid) {
+      alert('Please wait, loading user data...');
+      return;
+    }
+
+    try {
+      await createBooking({
+        userId: getUserByFirebaseUid._id,
+        name: partyForm.name,
+        phone: partyForm.phone,
+        guests: parseInt(partyForm.guests),
+        date: partyForm.date,
+        time: partyForm.time,
+      });
+
+      alert('Table booking submitted successfully! We will notify you once it is confirmed.');
+      setShowPartyModal(false);
+      setPartyForm({ name: '', phone: '', guests: '', date: '', time: '' });
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      alert('Failed to submit booking. Please try again.');
+    }
   };
 
   return (

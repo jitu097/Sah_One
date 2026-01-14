@@ -15,6 +15,7 @@ import Signup from './auth/Signup';
 import UserHome from './user/pages/Home';
 import Cart from './user/pages/Cart';
 import UserOrders from './user/pages/Orders';
+import UserBookings from './user/pages/UserBookings';
 import Profile from './user/pages/Profile';
 import UserOffers from './user/pages/Offers';
 import ServingHours from './user/pages/ServingHours';
@@ -24,6 +25,7 @@ import UserMenu from './user/pages/UserMenu';
 import AdminDashboard from './admin/pages/Dashboard';
 import Menu from './admin/pages/Menu';
 import AdminOrders from './admin/pages/Orders';
+import Bookings from './admin/pages/Bookings';
 import Offers from './admin/pages/Offers';
 import Reports from './admin/pages/Reports';
 import SpecialServingHours from './admin/pages/SpecialServingHours';
@@ -56,6 +58,7 @@ function AppContent() {
         <Route path="/user" element={<UserHome />} />
         <Route path="/user/cart" element={<Cart />} />
         <Route path="/user/orders" element={<UserOrders />} />
+        <Route path="/user/bookings" element={<UserBookings />} />
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/offers" element={<UserOffers />} />
         <Route path="/user/serving-hours" element={<ServingHours />} />
@@ -66,6 +69,7 @@ function AppContent() {
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin/menu" element={<Menu />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/bookings" element={<Bookings />} />
         <Route path="/admin/offers" element={<Offers />} />
         <Route path="/admin/reports" element={<Reports />} />
         <Route path="/admin/special-serving-hours" element={<SpecialServingHours />} />
