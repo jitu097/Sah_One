@@ -37,10 +37,17 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <button className="logout-btn" onClick={handleLogout}>
-          <span className="logout-icon">🚪</span>
-          <span className="logout-text">Logout</span>
-        </button>
+        <div className="navbar-actions">
+          {/* Profile Link (reusing nav-link style for consistency, or adding a specific profile class) */}
+          <Link to="/delivery/profile" className="nav-link profile-link">
+            <span className="nav-icon">👤</span>
+            <span className="nav-text">Profile</span>
+          </Link>
+          <button className="logout-btn" onClick={handleLogout}>
+            <span className="logout-icon">🚪</span>
+            <span className="logout-text">Logout</span>
+          </button>
+        </div>
       </div>
     </nav>
   );

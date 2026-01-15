@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
   const createOrUpdateUser = useMutation(api.modules.users.users.createOrUpdateUser);
   const createOrUpdateAdmin = useMutation(api.modules.auth.admins.createOrUpdateAdmin);
-  const createOrUpdateDelivery = useMutation(api.modules.delivery.deliveryPersonnel.createOrUpdateDelivery);
+  const createOrUpdateDelivery = useMutation(api.modules.delivery.delivery.createOrUpdateDeliveryPerson);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -56,8 +56,7 @@ export const AuthProvider = ({ children }) => {
               firebaseUid: user.uid,
               email: user.email,
               name: user.displayName || 'Delivery Person',
-              phone: user.phoneNumber || '',
-              role: 'delivery',
+              phone: user.phoneNumber || '9999999999',
               isAvailable: true,
             });
           } else {

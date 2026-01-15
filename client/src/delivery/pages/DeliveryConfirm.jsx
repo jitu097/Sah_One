@@ -1,9 +1,38 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import '../styles/pages.css';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 
 export default function DeliveryConfirm() {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Fetch Order
+  const order = useQuery(api.modules.orders.orders.getOrderById, { orderId: orderId });
+  const updateStatus = useMutation(api.modules.orders.orders.updateOrderStatus);
+
+  if (order === undefined) return <div className="delivery-loading">Loading order details...</div>;
+  if (order === null) return <div className="delivery-error">Order not found.</div>;
+
+  const handleComplete = async () => {
+    try {
+      setIsUpdating(true);
+      await updateStatus({
+        orderId: order._id,
+        status: 'delivered'
+      });
+      navigate('/delivery');
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to complete delivery. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -12,28 +41,52 @@ export default function DeliveryConfirm() {
           <h1>✅ Confirm Delivery</h1>
         </div>
 
-      <div className="confirm-details">
-        <div className="detail-card">
-          <h3>Order #12345</h3>
-          <div className="detail-row">
-            <span className="label">Customer:</span>
-            <span className="value">👤 John Doe</span>
+        <div className="confirm-details">
+          <div className="detail-card">
+            <h3 className="section-title">Order #{order._id.substring(0, 8)}</h3>
+
+            <div className="detail-row">
+              <span className="label">Customer:</span>
+              <span className="value">👤 {order.customerName || 'Guest'}</span>
+            </div>
+
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.deliveryAddress)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="detail-row address-link"
+            >
+              <span className="label">Address:</span>
+              <span className="value" style={{ textDecoration: 'underline', color: '#007bff' }}>📍 {order.deliveryAddress}</span>
+            </a>
+
+            <div className="detail-row">
+              <span className="label">Amount to Collect:</span>
+              <span className="value">₹{order.totalAmount}</span>
+            </div>
+
+            <div className="detail-row">
+              <span className="label">Payment:</span>
+              <span className="value">💳 {order.paymentMethod}</span>
+            </div>
+
+            {order.paymentMethod === 'Cash on Delivery' && (
+              <div className="cod-alert">
+                ⚠️ Please collect cash from customer
+              </div>
+            )}
+
+            <div className="action-row">
+              <button
+                className="btn-complete-delivery"
+                onClick={handleComplete}
+                disabled={isUpdating}
+              >
+                {isUpdating ? 'Completing...' : 'Complete Delivery'}
+              </button>
+            </div>
           </div>
-          <div className="detail-row">
-            <span className="label">Address:</span>
-            <span className="value">📍 123 Main St, City</span>
-          </div>
-          <div className="detail-row">
-            <span className="label">Amount:</span>
-            <span className="value">₹847</span>
-          </div>
-          <div className="detail-row">
-            <span className="label">Payment:</span>
-            <span className="value">💳 Online Paid</span>
-          </div>
-          <button className="btn-complete-delivery">Complete Delivery</button>
         </div>
-      </div>
       </div>
     </>
   );

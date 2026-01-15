@@ -1,156 +1,261 @@
+/* Global Clean Layout */
 .delivery-container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background-color: #f8f9fa;
+  /* Light grey background */
+  font-family: 'Inter', sans-serif;
   padding-bottom: 80px;
 }
 
+/* Header / Navbar Extension */
 .delivery-header {
-  background: white;
-  padding: 20px;
+  background: #ffffff;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eaeaea;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  margin-bottom: 20px;
+  height: 70px;
+  /* Fixed height for consistency */
 }
 
 .delivery-header h1 {
   margin: 0;
-  color: #333;
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
-.delivery-list {
-  padding: 20px;
+/* Tabs */
+.delivery-tabs {
+  display: flex;
+  gap: 12px;
+  background: #f1f3f5;
+  padding: 4px;
+  border-radius: 12px;
 }
 
-.delivery-card {
-  background: white;
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.order-info h3 {
-  margin: 0 0 15px 0;
-  color: #333;
-  font-size: 1.3rem;
-}
-
-.order-info p {
-  margin: 8px 0;
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
   color: #666;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
 }
 
-.restaurant, .customer, .address {
-  padding-left: 5px;
+.tab-btn.active {
+  background: #ffffff;
+  color: #d90429;
+  /* Brand Red/Pink accent */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-weight: 600;
 }
 
+/* List Container */
+.delivery-list {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Card Styling */
+.delivery-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.delivery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.order-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.order-header-row h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.preparing {
+  background: #fff8e1;
+  color: #f59f00;
+}
+
+.status-badge.out-for-delivery {
+  background: #e6fcf5;
+  color: #0ca678;
+}
+
+.status-badge.delivered {
+  background: #e7f5ff;
+  color: #1c7ed6;
+}
+
+.status-badge.cancelled {
+  background: #fff5f5;
+  color: #e03131;
+}
+
+/* Information Details */
+.order-info p {
+  margin: 10px 0;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+.order-info p .icon {
+  width: 20px;
+  text-align: center;
+}
+
+.amount {
+  font-size: 1.1rem !important;
+  color: #1a1a1a !important;
+  font-weight: 700;
+  margin-top: 15px !important;
+}
+
+/* Action Buttons */
 .order-actions {
-  margin-top: 15px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-pickup,
+.btn-confirm {
+  padding: 12px 24px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-pickup {
-  background: #00d9ff;
-  color: #333;
-  padding: 10px 25px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  display: inline-block;
-  transition: all 0.3s ease;
+  background: #e7f5ff;
+  color: #1c7ed6;
 }
 
 .btn-pickup:hover {
-  background: #00c3e6;
+  background: #d0ebff;
 }
 
-.pickup-details, .confirm-details {
-  padding: 20px;
+.btn-confirm {
+  background: #d90429;
+  color: white;
+  box-shadow: 0 4px 12px rgba(217, 4, 41, 0.2);
 }
 
+.btn-confirm:hover {
+  background: #c90325;
+  transform: translateY(-1px);
+}
+
+/* Profile / Pickup / Confirm Details */
 .detail-card {
   background: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.detail-card h3 {
-  margin: 0 0 20px 0;
-  color: #333;
-  font-size: 1.5rem;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  max-width: 600px;
+  margin: 30px auto;
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
 }
 
 .detail-row .label {
-  color: #666;
-  font-weight: 600;
+  color: #888;
+  font-weight: 500;
 }
 
 .detail-row .value {
   color: #333;
-}
-
-.btn-confirm-pickup, .btn-complete-delivery {
-  width: 100%;
-  background: #00d9ff;
-  color: #333;
-  border: none;
-  padding: 15px;
-  border-radius: 10px;
-  font-size: 1.1rem;
   font-weight: 600;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: all 0.3s ease;
 }
 
-.btn-confirm-pickup:hover, .btn-complete-delivery:hover {
-  background: #00c3e6;
+/* Items List */
+.items-list {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
 }
 
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
+.item-row {
   display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  justify-content: space-between;
+  padding: 8px 0;
 }
 
-.nav-item {
+.item-qty {
+  color: #d90429;
+  font-weight: 700;
+  margin-right: 12px;
+}
+
+/* Loading States */
+.delivery-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-decoration: none;
-  color: #999;
-  padding: 5px 15px;
-  transition: all 0.3s ease;
+  justify-content: center;
+  height: 60vh;
+  color: #888;
 }
 
-.nav-item.active {
-  color: #00d9ff;
-}
-
-.nav-icon {
-  font-size: 1.5rem;
-  margin-bottom: 3px;
-}
-
-.nav-item span:last-child {
-  font-size: 0.75rem;
-  font-weight: 600;
+.delivery-error {
+  background: #fff5f5;
+  color: #e03131;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 30px auto;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid #ffc9c9;
 }

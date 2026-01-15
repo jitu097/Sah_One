@@ -13,3 +13,4 @@ client/.env.local
 # Convex
 .convex/
 convex/_generated/
+

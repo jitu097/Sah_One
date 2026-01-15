@@ -35,6 +35,7 @@ import AdminProfile from './admin/pages/Profile';
 import AssignedOrders from './delivery/pages/AssignedOrders';
 import Pickup from './delivery/pages/Pickup';
 import DeliveryConfirm from './delivery/pages/DeliveryConfirm';
+import DeliveryProfile from './delivery/pages/Profile';
 
 function AppContent() {
   const location = useLocation();
@@ -76,8 +77,9 @@ function AppContent() {
 
         {/* Delivery Routes */}
         <Route path="/delivery" element={<AssignedOrders />} />
-        <Route path="/delivery/pickup" element={<Pickup />} />
-        <Route path="/delivery/confirm" element={<DeliveryConfirm />} />
+        <Route path="/delivery/pickup/:orderId" element={<Pickup />} />
+        <Route path="/delivery/confirm/:orderId" element={<DeliveryConfirm />} />
+        <Route path="/delivery/profile" element={<DeliveryProfile />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
