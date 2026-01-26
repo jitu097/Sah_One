@@ -118,6 +118,8 @@ export default defineSchema({
     validFrom: v.number(),
     validTo: v.number(),
     isActive: v.boolean(),
+    category: v.optional(v.string()), // category name or id
+    items: v.optional(v.array(v.string())), // array of item ids
     createdAt: v.number(),
     updatedAt: v.number(),
   })

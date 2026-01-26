@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
@@ -12,6 +12,10 @@ import '../styles/Home.css';
 import CategoryPopup from '../components/CategoryPopup';
 
 export default function Home() {
+  const navigate = useNavigate();
+  // Fetch active offers for hero carousel (must be inside component)
+  const activeOffers = useQuery(api.modules.offers.offers.getActiveOffers) || [];
+  console.log('Active offers:', activeOffers);
   const { addToCart, cartItems, updateQuantity } = useCart();
   const { currentUser } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -120,7 +124,16 @@ export default function Home() {
     }
   };
 
-  const slides = [
+  // Build slides: if there are active offers, show them; else show default slides
+  const offerSlides = activeOffers.length > 0
+    ? activeOffers.map((offer, idx) => ({
+        id: `offer-${offer._id}`,
+        type: 'offer',
+        offer,
+      }))
+    : [];
+
+  const defaultSlides = [
     {
       id: 1,
       type: 'original',
@@ -137,6 +150,11 @@ export default function Home() {
       image: '/last.png'
     }
   ];
+
+  const slides = offerSlides.length > 0 ? offerSlides : defaultSlides;
+  // Debug: print slides array and currentSlide
+  console.log('Slides array:', slides);
+  console.log('Slides length:', slides.length, 'Current slide:', currentSlide);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -238,7 +256,40 @@ export default function Home() {
               </button>
 
               <div className="carousel-content">
-                {slides[currentSlide].type === 'original' ? (
+                {slides[currentSlide].type === 'offer' ? (
+                  <button
+                    className="hero-offer-slide"
+                    style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, width: '100%' }}
+                    onClick={() => {
+                      const offer = slides[currentSlide].offer;
+                      if (offer.category) {
+                        navigate('/user/menu', { state: { category: offer.category } });
+                      } else if (offer.items && offer.items.length > 0) {
+                        navigate('/user/menu', { state: { item: offer.items[0] } });
+                      } else {
+                        navigate('/user/menu');
+                      }
+                    }}
+                  >
+                    {/* Debug info for inspection */}
+                    <div style={{fontSize: '14px', color: '#1976d2', background: '#e3f2fd', padding: '2px 8px', marginBottom: '4px', borderRadius: '4px', width: 'fit-content'}}>
+                      Slide index: {currentSlide} / Offer ID: {slides[currentSlide].offer?._id}
+                    </div>
+                    <div className="offer-card-hero">
+                      <div className="offer-discount">
+                        {slides[currentSlide].offer.discountValue}
+                        {slides[currentSlide].offer.discountType === 'percentage' ? '% OFF' : ' OFF'}
+                      </div>
+                      <div className="offer-title">{slides[currentSlide].offer.title}</div>
+                      <div className="offer-desc">{slides[currentSlide].offer.description}</div>
+                      <div className="offer-code">{slides[currentSlide].offer.code}</div>
+                      <div className="offer-valid">
+                        {new Date(slides[currentSlide].offer.validFrom).toLocaleDateString()} - {new Date(slides[currentSlide].offer.validTo).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </button>
+                ) : slides[currentSlide].type === 'original' ? (
+                  // Add a highlight-offer class for flash effect
                   <>
                     <div className="hero-content">
                       <img src="/34.png" alt="Hero" className="hero-image" />
@@ -284,7 +335,7 @@ export default function Home() {
                     <div className="lock-overlay">
                       <span className="lock-icon">🔒</span>
                     </div>
-                    <img src="/Breakfast.jpeg" alt="Breakfast" />
+                    <img src="/Breeakfast.png" alt="Breakfast" />
                     <p className="price inactive-time">
                       {getTimeStatus(7, 11).timeString}
                     </p>
@@ -469,13 +520,14 @@ export default function Home() {
             <div className="bestsellers-grid">
               {filteredItems && filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
-                  <MenuItemCard 
-                    key={item._id} 
-                    item={item}
-                    onAddToCart={handleAddToCart}
-                    quantity={getItemQuantity(item._id)}
-                    onUpdateQuantity={(id, change) => handleUpdateQuantity(item._id, 'full', change)}
-                  />
+                  <div id={`menuitem-${item._id}`} key={item._id}>
+                    <MenuItemCard 
+                      item={item}
+                      onAddToCart={handleAddToCart}
+                      quantity={getItemQuantity(item._id)}
+                      onUpdateQuantity={(id, change) => handleUpdateQuantity(item._id, 'full', change)}
+                    />
+                  </div>
                 ))
               ) : (
                 <div className="no-results">

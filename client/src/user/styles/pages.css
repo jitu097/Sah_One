@@ -1,3 +1,12 @@
+/* Debug border for offer slides */
+.hero-offer-slide {
+  border: 2px dashed #2196f3 !important;
+}
+/* Highlight effect for offer target */
+.highlight-offer {
+  box-shadow: 0 0 0 4px #ffb300, 0 0 16px 8px #ffe082;
+  transition: box-shadow 0.2s;
+}
 .page-container {
   min-height: 100vh;
   background: #ffffff;

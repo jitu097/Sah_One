@@ -26,17 +26,19 @@ self.addEventListener('activate', (event) => {
 
 // Fetch - Network first, cache fallback (better for development)
 self.addEventListener('fetch', (event) => {
+  // Only cache GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
   event.respondWith(
     fetch(event.request)
       .then((response) => {
         // Clone the response
         const responseClone = response.clone();
-        
         // Cache the new response
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseClone);
         });
-        
         return response;
       })
       .catch(() => {

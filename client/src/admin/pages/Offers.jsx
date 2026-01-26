@@ -26,6 +26,23 @@ export default function Offers() {
   const deleteOffer = useMutation(api.modules.offers.offers.deleteOffer);
   const toggleOfferStatus = useMutation(api.modules.offers.offers.toggleOfferStatus);
 
+
+  // Fetch categories and menu items for offer targeting
+  const categoriesRaw = useQuery(api.modules.menu.menu.getAllCategories) || [];
+  const menuItemsRaw = useQuery(api.modules.menu.menu.getAllMenuItems) || [];
+
+  const categories = categoriesRaw.map(c => ({
+    ...c,
+    id: c._id,
+    name: c.name
+  }));
+  const menuItems = menuItemsRaw.map(i => ({
+    ...i,
+    id: i._id,
+    name: i.name,
+    category: i.category
+  }));
+
   // Map backend offers to frontend display format
   const offers = offersRaw.map(o => ({
     ...o,
@@ -158,7 +175,9 @@ export default function Offers() {
       maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : undefined,
       validFrom: new Date(formData.validFrom).getTime(),
       validTo: new Date(formData.validTo).getTime(),
-      isActive: formData.isActive
+      isActive: formData.isActive,
+      category: formData.category,
+      items: formData.items
     };
 
     try {
@@ -275,6 +294,7 @@ export default function Offers() {
                   </div>
                 </div>
 
+
                 <div className="form-group">
                   <label>Description</label>
                   <textarea
@@ -283,6 +303,41 @@ export default function Offers() {
                     placeholder="Brief description of the offer"
                     rows="2"
                   />
+                </div>
+
+                {/* Category Selector */}
+                <div className="form-group">
+                  <label>Apply to Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={e => setFormData({ ...formData, category: e.target.value, items: [] })}
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Item Selector */}
+                <div className="form-group">
+                  <label>Apply to Items</label>
+                  <select
+                    multiple
+                    value={formData.items}
+                    onChange={e => {
+                      const selected = Array.from(e.target.selectedOptions, opt => opt.value);
+                      setFormData({ ...formData, items: selected });
+                    }}
+                  >
+                    {(formData.category
+                      ? menuItems.filter(item => item.category === formData.category)
+                      : menuItems
+                    ).map(item => (
+                      <option key={item.id} value={item.id}>{item.name}</option>
+                    ))}
+                  </select>
+                  <small>Select one or more items (hold Ctrl/Cmd)</small>
                 </div>
 
                 <div className="form-row">
