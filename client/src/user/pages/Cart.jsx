@@ -227,10 +227,17 @@ export default function Cart() {
             {/* Coupon Section */}
             <div className="coupon-section">
               {appliedCoupon && !appliedCoupon.isInvalid ? (
-                <div className="applied-coupon">
-                  <span className="coupon-code">🏷️ {appliedCoupon.code}</span>
-                  <span className="coupon-discount">-₹{appliedCoupon.discountAmount}</span>
-                  <button onClick={handleRemoveCoupon} className="remove-coupon-btn">✕</button>
+                <div className="applied-coupon-container">
+                  <div className="applied-coupon">
+                    <span className="coupon-code">🏷️ {appliedCoupon.code}</span>
+                    <span className="coupon-discount">-₹{appliedCoupon.discountAmount}</span>
+                    <button onClick={handleRemoveCoupon} className="remove-coupon-btn">✕</button>
+                  </div>
+                  {(appliedCoupon.description || appliedCoupon.title) && (
+                    <div className="coupon-description">
+                      {appliedCoupon.description || appliedCoupon.title}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="coupon-input-group">

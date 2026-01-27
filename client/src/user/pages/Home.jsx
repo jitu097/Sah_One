@@ -299,13 +299,20 @@ export default function Home() {
                     style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, width: '100%' }}
                     onClick={() => {
                       const offer = slides[currentSlide].offer;
-                      if (offer.category) {
-                        navigate('/user/menu', { state: { category: offer.category } });
-                      } else if (offer.items && offer.items.length > 0) {
-                        navigate('/user/menu', { state: { item: offer.items[0] } });
-                      } else {
-                        navigate('/user/menu');
-                      }
+                      // Collect constraints
+                      const categories = [...(offer.categories || [])]; // Create a copy to avoid mutating frozen object
+                      if (offer.category) categories.push(offer.category); // Legacy
+
+                      const items = offer.items || [];
+
+                      navigate('/user/menu', {
+                        state: {
+                          filterMode: 'coupon',
+                          couponCode: offer.code,
+                          allowedCategories: categories,
+                          allowedItems: items
+                        }
+                      });
                     }}
                   >
                     {/* Debug info for inspection */}

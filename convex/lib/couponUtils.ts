@@ -60,12 +60,8 @@ export function validateCoupon(
             const isItemEligible = hasItemRestrictions && coupon.items?.includes(item.itemId);
             const isCategoryEligible = hasCategoryRestrictions && coupon.categories?.includes(item.category);
 
-            if (isItemEligible || isCategoryEligible) { // OR logic: matches item ID OR matches category
-                // Note: If both restrictions exist, usually it's strict (must be in list). 
-                // If a coupon says "Pizzas" AND "Burger King", it's usually additive. 
-                // So if it matches ANY criterion, it's eligible.
-                // BUT if I have a list of specific items AND specific categories, logically it might mean "These items + Any item from these categories".
-                // The prompt says: "specific items OR specific categories".
+            if ((hasItemRestrictions && isItemEligible) || (hasCategoryRestrictions && isCategoryEligible) || (!hasItemRestrictions && !hasCategoryRestrictions)) {
+                // Compatible with "Specific items OR Specific categories"
                 eligibleItemsSubtotal += item.price * item.quantity;
             }
         });
@@ -86,6 +82,23 @@ export function validateCoupon(
         discount = (eligibleItemsSubtotal * coupon.discountValue) / 100;
     } else if (coupon.discountType === "fixed") {
         discount = coupon.discountValue;
+    } else if (coupon.discountType === "bogo") {
+        // BOGO Logic: Buy X Get Y Free
+        // Defaults: Buy 1 Get 1
+        const buyQty = coupon.buyQuantity || 1;
+        const getQty = coupon.getQuantity || 1;
+
+        cartItems.forEach((item) => {
+            // Check eligibility per item
+            const isItemEligible = hasItemRestrictions && coupon.items?.includes(item.itemId);
+            const isCategoryEligible = hasCategoryRestrictions && coupon.categories?.includes(item.category);
+            const isEligible = (hasItemRestrictions && isItemEligible) || (hasCategoryRestrictions && isCategoryEligible) || (!hasItemRestrictions && !hasCategoryRestrictions);
+
+            if (isEligible) {
+                const freeQty = Math.floor(item.quantity / (buyQty + getQty)) * getQty;
+                discount += freeQty * item.price;
+            }
+        });
     }
 
     // 4. Cap Discount

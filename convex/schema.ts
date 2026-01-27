@@ -115,6 +115,8 @@ export default defineSchema({
     discountValue: v.number(),
     minOrderAmount: v.optional(v.number()),
     maxDiscount: v.optional(v.number()),
+    buyQuantity: v.optional(v.number()), // For BOGO: Buy X
+    getQuantity: v.optional(v.number()), // For BOGO: Get Y
     validFrom: v.number(),
     validTo: v.number(),
     isActive: v.boolean(),

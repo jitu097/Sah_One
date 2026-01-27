@@ -462,14 +462,32 @@
   color: white;
 }
 
-.applied-coupon {
+/* Container wrapping code + description */
+.applied-coupon-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
   background: #f0fff4;
   border: 1px dashed #4caf50;
   padding: 12px 15px;
   border-radius: 10px;
+}
+
+/* Inner row with code and discount */
+.applied-coupon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* Removed border/bg/padding as container handles it now */
+  width: 100%;
+}
+
+.coupon-description {
+  font-size: 0.85rem;
+  color: #2e7d32;
+  font-weight: 500;
+  border-top: 1px dashed #c8e6c9;
+  padding-top: 6px;
 }
 
 .coupon-code {

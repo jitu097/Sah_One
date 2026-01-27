@@ -15,17 +15,27 @@ export default function UserMenu() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [expandedCategories, setExpandedCategories] = useState({});
   const [expandedMobileItems, setExpandedMobileItems] = useState({});
+  const [couponFilter, setCouponFilter] = useState(null);
 
   useEffect(() => {
-    if (location.state?.category) {
+    if (location.state?.filterMode === 'coupon') {
+      setCouponFilter({
+        code: location.state.couponCode,
+        categories: location.state.allowedCategories || [],
+        items: location.state.allowedItems || []
+      });
+      setSelectedCategory('All'); // Reset category selection
+    } else if (location.state?.category) {
       const category = location.state.category;
       setSelectedCategory(category);
       setExpandedCategories(prev => ({
         ...prev,
         [category]: true
       }));
-      // Clear state so it doesn't persist on refresh if desired, or keep it.
-      // optional: window.history.replaceState({}, document.title) or similar if needed.
+      setCouponFilter(null);
+    } else {
+      // Clean navigation
+      setCouponFilter(null);
     }
   }, [location.state]);
 
@@ -94,6 +104,33 @@ export default function UserMenu() {
     }
   };
 
+  // Calculate filtered items (moved up to avoid "more hooks rendered" error)
+  const filteredItems = React.useMemo(() => {
+    let items = allMenuItems || [];
+
+    // 1. Apply Coupon Filter if active
+    if (couponFilter) {
+      items = items.filter(item => {
+        const hasCatRest = couponFilter.categories.length > 0;
+        const hasItemRest = couponFilter.items.length > 0;
+
+        if (!hasCatRest && !hasItemRest) return true; // Coupon valid for all
+
+        const isCat = hasCatRest && couponFilter.categories.includes(item.category);
+        const isItem = hasItemRest && couponFilter.items.includes(item._id);
+
+        return isCat || isItem;
+      });
+    }
+
+    // 2. Apply Category Tab Filter
+    if (selectedCategory !== 'All') {
+      items = items.filter(item => item.category === selectedCategory);
+    }
+
+    return items;
+  }, [allMenuItems, couponFilter, selectedCategory]);
+
   // Better loading state with error detection
   if (allMenuItems === undefined || categoriesList === undefined) {
     return (
@@ -128,9 +165,12 @@ export default function UserMenu() {
 
   const categories = ['All', ...categoriesList];
 
-  const filteredItems = selectedCategory === 'All'
-    ? allMenuItems
-    : allMenuItems.filter(item => item.category === selectedCategory);
+
+
+  const clearCouponFilter = () => {
+    setCouponFilter(null);
+    setSelectedCategory('All');
+  };
 
   // Toggle category expansion for mobile
   const toggleCategory = (category) => {
@@ -158,6 +198,37 @@ export default function UserMenu() {
             <h1>Good Food Starts Here</h1>
             <p>Order what you love</p>
           </div>
+
+          {couponFilter && (
+            <div className="coupon-filter-banner" style={{
+              background: '#e3f2fd',
+              padding: '10px 15px',
+              borderRadius: '8px',
+              marginBottom: '15px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              border: '1px solid #90caf9'
+            }}>
+              <span style={{ color: '#0d47a1', fontWeight: '500' }}>
+                🏷️ Showing items eligible for <strong>{couponFilter.code}</strong>
+              </span>
+              <button
+                onClick={clearCouponFilter}
+                style={{
+                  background: 'white',
+                  border: '1px solid #1976d2',
+                  color: '#1976d2',
+                  padding: '4px 10px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem'
+                }}
+              >
+                Clear Filter ✕
+              </button>
+            </div>
+          )}
 
           {/* Desktop Category Filter */}
           <div className="category-filter desktop-only">
