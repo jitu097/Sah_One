@@ -6,25 +6,50 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
   const { cartItems, updateQuantity: updateCartQuantity } = useCart();
   const [showPortionControls, setShowPortionControls] = useState(false);
 
-  const getPortionQuantity = (portionType) => {
-    const uniqueId = `${item._id}_${portionType}`;
-    const cartItem = cartItems.find(i => i.id === uniqueId);
-    return cartItem ? cartItem.quantity : 0;
-  };
-
   const handlePortionAdd = (portionType) => {
-    onAddToCart && onAddToCart(item, portionType);
+    console.log(`[MenuItemCard] Adding portion: ${portionType} for item: ${item._id}`);
+    if (onAddToCart) {
+      onAddToCart(item, portionType);
+    } else {
+      console.error('[MenuItemCard] onAddToCart prop is missing!');
+    }
   };
 
   const handlePortionUpdate = (portionType, change) => {
-    const uniqueId = `${item._id}_${portionType}`;
-    const currentQty = getPortionQuantity(portionType);
-    
-    // Update quantity
-    updateCartQuantity(uniqueId, change);
-    
-    // If we're reducing to 0, check if both portions will be 0
-    if (change < 0 && currentQty === 1) {
+    // Construct the unique ID matching how it's stored in CartContext
+    // This MUST match what Home.jsx/UserMenu.jsx uses if they store composite IDs.
+    // However, CartContext now tracks items by `itemId` (menu item) if strict.
+    // Wait, if CartContext tracks items by CartItem ID (db ID) returned from server,
+    // then `cartItems.find` by `${item._id}_${portionType}` might fail if `item.id` is the DB ID.
+    // Backend `getCart` returns items with `id` = `cartItem._id` (DB ID).
+    // Frontend `addToCart` generates a local optimistic update or relies on server refetch?
+    // Reviewing CartContext: it fetches `cartData` from server. `item.id` is `cartItem._id`.
+    // BUT `UserMenu`/`Home` logic tries to find item by constructed ID `${item._id}_${portionType}`.
+    // THIS IS THE BUG. Server returns DB IDs (e.g., "cartItemId123"), but UI looks for "menuItemId_full".
+
+    // We need to fix `getPortionQuantity` to find item by `itemId` and `selectedPortion` 
+    // instead of relying on the `id` field matching the composite key.
+
+    const qty = getPortionQuantity(portionType);
+
+    // For update, we need the actual cartItem._id to call `updateCartQuantity`.
+    // We need to find the cart item first.
+    const cartItem = cartItems.find(i => i.itemId === item._id && (i.selectedPortion || 'full') === portionType);
+
+    if (cartItem) {
+      console.log(`[MenuItemCard] Updating qty for cartItem: ${cartItem.id} (Database ID)`);
+      if (onUpdateQuantity) {
+        // Pass the Menu ID and Portion to the parent handler
+        onUpdateQuantity(item._id, portionType, change);
+      } else {
+        updateCartQuantity(cartItem.id, change);
+      }
+    } else {
+      console.error(`[MenuItemCard] Cannot find cart item to update for ${item._id} ${portionType}`);
+    }
+
+    // Logic to hide controls if qty becomes 0
+    if (change < 0 && qty === 1) {
       const otherPortionType = portionType === 'half' ? 'full' : 'half';
       const otherQty = getPortionQuantity(otherPortionType);
       if (otherQty === 0) {
@@ -33,7 +58,14 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
     }
   };
 
+  const getPortionQuantity = (portionType) => {
+    // FIX: Match by itemId and portion, NOT by `id` string match
+    const cartItem = cartItems.find(i => i.itemId === item._id && (i.selectedPortion || 'full') === portionType);
+    return cartItem ? cartItem.quantity : 0;
+  };
+
   const handleAddToCartClick = () => {
+    console.log('[MenuItemCard] Add to Cart Clicked');
     if (item.hasHalfPortion && item.halfPrice) {
       setShowPortionControls(true);
     } else {
@@ -57,18 +89,18 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
           onError={(e) => e.target.src = '/image.png'}
         />
       </div>
-      
+
       <div className="menu-item-content">
         <h3 className="menu-item-name">{item.name}</h3>
-        
+
         {showCategory && item.category && (
           <p className="menu-item-category">{item.category}</p>
         )}
-        
+
         {item.description && (
           <p className="menu-item-description">{item.description}</p>
         )}
-        
+
         <div className="menu-item-footer">
           {item.hasHalfPortion && item.halfPrice ? (
             shouldShowControls ? (
@@ -89,7 +121,7 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
                     <button className="add-portion-btn-text" onClick={() => handlePortionAdd('half')}>Add</button>
                   )}
                 </div>
-                
+
                 <div className="portion-row">
                   <div className="portion-info">
                     <span className="portion-label-small">Full</span>
@@ -128,7 +160,7 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
             // Single price item
             <>
               <p className="menu-item-price">₹{item.fullPrice}</p>
-              
+
               {fullQty > 0 ? (
                 <div className="quantity-controls">
                   <button className="qty-btn" onClick={() => handlePortionUpdate('full', -1)}>−</button>

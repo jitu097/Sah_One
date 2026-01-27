@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as cart from "../cart.js";
 import type * as debugDelivery from "../debugDelivery.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_couponUtils from "../lib/couponUtils.js";
 import type * as lib_role from "../lib/role.js";
 import type * as modules_auth_admins from "../modules/auth/admins.js";
 import type * as modules_auth_auth from "../modules/auth/auth.js";
@@ -31,8 +33,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  cart: typeof cart;
   debugDelivery: typeof debugDelivery;
   "lib/auth": typeof lib_auth;
+  "lib/couponUtils": typeof lib_couponUtils;
   "lib/role": typeof lib_role;
   "modules/auth/admins": typeof modules_auth_admins;
   "modules/auth/auth": typeof modules_auth_auth;

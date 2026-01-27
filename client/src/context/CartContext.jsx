@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
@@ -7,67 +10,129 @@ export function useCart() {
 }
 
 export function CartProvider({ children }) {
-  // Initialize cart items from localStorage
-  const [cartItems, setCartItems] = useState(() => {
-    try {
-      const savedCart = localStorage.getItem('cartItems');
-      return savedCart ? JSON.parse(savedCart) : [];
-    } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
-      return [];
-    }
-  });
+  const { currentUser } = useAuth();
 
-  // Save cart items to localStorage whenever they change
-  useEffect(() => {
-    try {
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error('Error saving cart to localStorage:', error);
-    }
-  }, [cartItems]);
+  // Fetch cart from server
+  // Pass userId explicitly since we are managing auth manually
+  const cartData = useQuery(api.cart.getCart,
+    currentUser ? { userId: currentUser.uid } : "skip"
+  );
 
-  const addToCart = (item) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(i => i.id === item.id);
-      
-      if (existingItem) {
-        return prevItems.map(i =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
+  const addToCartMutation = useMutation(api.cart.addToCart);
+  const updateQuantityMutation = useMutation(api.cart.updateQuantity);
+  const clearCartMutation = useMutation(api.cart.clearCart);
+
+  // Helper to map strict menu item ID to cart operations
+  // The backend addToCart expects itemId.
+  const addToCart = async (item) => {
+    console.log('[CartContext] addToCart called with item:', item);
+    if (!currentUser) {
+      console.warn('[CartContext] User not logged in, cannot add to cart');
+      alert("Please login to add to cart");
+      return;
+    }
+
+    // Resolve the correct Menu Item ID
+    // UserMenu passes: { ...item, id: `${item._id}_${portionType}`, originalId: item._id, ... }
+    const menuItemId = item.originalId || (item.id && item.id.includes('_') ? item.id.split('_')[0] : item.id);
+
+    // Fallback if menuItemId is still ambiguous or missing (should be a valid ID string)
+    if (!menuItemId) {
+      console.error('[CartContext] Failed to resolve menuItemId from item:', item);
+      alert("System Error: Could not identify item. Please try again.");
+      return;
+    }
+
+    const payload = {
+      userId: currentUser.uid,
+      itemId: menuItemId,
+      quantity: 1,
+      selectedPortion: item.portionType || 'full'
+    };
+
+    console.log('[CartContext] Sending payload to database:', payload);
+
+    try {
+      await addToCartMutation(payload);
+      console.log('[CartContext] Successfully added to cart');
+    } catch (err) {
+      console.error("[CartContext] Failed to add to cart:", err);
+      alert(`Failed to add to cart: ${err.message}`);
+    }
+  };
+
+  const removeFromCart = async (cartItemId) => {
+    // In the new system, we remove by CartItem ID, NOT Menu Item ID.
+    // However, existing frontend calls might be passing Menu Item ID or Cart Item ID.
+    // My getCart returns items with `id` as CartItem ID.
+    // So if the UI iterates over `cartItems`, it uses `item.id`.
+    try {
+      await updateQuantityMutation({ cartItemId: cartItemId, quantity: 0 });
+    } catch (err) {
+      console.error("Failed to remove from cart:", err);
+    }
+  };
+
+  const updateQuantity = async (cartItemId, change) => {
+    // We need the current quantity to calculate new quantity.
+    // But `updateQuantity` backend mutation takes absolute `quantity`.
+    // The frontend helper `updateQuantity` takes `change` (+1 / -1).
+    if (!cartData) return;
+
+    const item = cartData.items.find(i => i.id === cartItemId);
+    if (!item) return;
+
+    const newQuantity = item.quantity + change;
+    try {
+      if (newQuantity <= 0) {
+        await updateQuantityMutation({ cartItemId: cartItemId, quantity: 0 }); // Delete
       } else {
-        return [...prevItems, { ...item, quantity: 1 }];
+        await updateQuantityMutation({ cartItemId: cartItemId, quantity: newQuantity });
       }
-    });
+    } catch (err) {
+      console.error("Failed to update quantity:", err);
+    }
   };
 
-  const removeFromCart = (id) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+  const clearCart = async () => {
+    if (!currentUser) return;
+    try {
+      await clearCartMutation({ userId: currentUser.uid });
+    } catch (err) {
+      console.error("Failed to clear cart:", err);
+    }
   };
 
-  const updateQuantity = (id, change) => {
-    setCartItems(prevItems => {
-      return prevItems.map(item => {
-        if (item.id === id) {
-          const newQuantity = item.quantity + change;
-          return { ...item, quantity: Math.max(0, newQuantity) };
-        }
-        return item;
-      }).filter(item => item.quantity > 0);
-    });
+  const cartItems = cartData?.items || [];
+
+  const applyCouponMutation = useMutation(api.cart.applyCoupon);
+  const removeCouponMutation = useMutation(api.cart.removeCoupon);
+
+  const applyCoupon = async (code) => {
+    if (!currentUser) return { success: false, error: 'Please login' };
+    try {
+      await applyCouponMutation({ code, userId: currentUser.uid });
+      return { success: true };
+    } catch (err) {
+      console.error("Failed to apply coupon:", err);
+      return { success: false, error: err.message };
+    }
   };
 
-  const clearCart = () => {
-    setCartItems([]);
+  const removeCoupon = async () => {
+    if (!currentUser) return;
+    try {
+      await removeCouponMutation({ userId: currentUser.uid });
+    } catch (err) {
+      console.error("Failed to remove coupon:", err);
+    }
   };
 
-  const getCartTotal = () => {
-    return cartItems.reduce((total, item) => {
-      const price = typeof item.price === 'string' ? 
-        parseInt(item.price.replace('₹', '')) : item.price;
-      return total + (price * item.quantity);
-    }, 0);
-  };
+  // Calculations come from server now
+  const getCartTotal = () => cartData?.total || 0;
+  const getCartSubtotal = () => cartData?.subtotal || 0;
+  const getCartDiscount = () => cartData?.discount || 0;
+  const getCartCoupon = () => cartData?.coupon || null;
 
   const value = {
     cartItems,
@@ -75,7 +140,13 @@ export function CartProvider({ children }) {
     removeFromCart,
     updateQuantity,
     clearCart,
-    getCartTotal
+    applyCoupon,
+    removeCoupon,
+    getCartTotal,
+    getCartSubtotal,
+    getCartDiscount,
+    getCartCoupon,
+    isLoading: !cartData && currentUser
   };
 
   return (

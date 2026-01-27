@@ -258,7 +258,11 @@ export default function Menu() {
         <header className="admin-header">
           <div className="header-content">
             <h1>🍽️ Manage Menu</h1>
-            <p>Overview: {menuItems.length} Items | {menuItems.filter(i => i.isActive).length} Active | {categories.length} Categories</p>
+            <p>
+              <span style={{fontWeight: '700', color: '#ff6b35'}}>{menuItems.length}</span> Total Items • {' '}
+              <span style={{fontWeight: '700', color: '#10b981'}}>{menuItems.filter(i => i.isActive).length}</span> Active • {' '}
+              <span style={{fontWeight: '700', color: '#667eea'}}>{categories.length}</span> Categories
+            </p>
           </div>
           <div className="header-actions">
             {/* Optional: Add date or other info here if needed to match dashboard */}

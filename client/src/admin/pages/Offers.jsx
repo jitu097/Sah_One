@@ -66,7 +66,9 @@ export default function Offers() {
     maxDiscount: '',
     validFrom: '',
     validTo: '',
-    isActive: true
+    isActive: true,
+    categories: [],
+    items: []
   });
 
   const scrollToForm = () => {
@@ -93,7 +95,9 @@ export default function Offers() {
       maxDiscount: '',
       validFrom: today,
       validTo: nextMonth,
-      isActive: true
+      isActive: true,
+      categories: [],
+      items: []
     });
     setIsFormOpen(true);
     scrollToForm();
@@ -115,7 +119,9 @@ export default function Offers() {
       maxDiscount: '',
       validFrom: today,
       validTo: nextMonth,
-      isActive: true
+      isActive: true,
+      categories: [],
+      items: []
     });
     setIsFormOpen(true);
     scrollToForm();
@@ -135,7 +141,9 @@ export default function Offers() {
       maxDiscount: offer.maxDiscount || '',
       validFrom: new Date(offer.validFrom).toISOString().split('T')[0],
       validTo: new Date(offer.validTo).toISOString().split('T')[0],
-      isActive: offer.isActive
+      isActive: offer.isActive,
+      categories: offer.categories || [],
+      items: offer.items || []
     });
     setIsFormOpen(true);
     scrollToForm();
@@ -176,8 +184,8 @@ export default function Offers() {
       validFrom: new Date(formData.validFrom).getTime(),
       validTo: new Date(formData.validTo).getTime(),
       isActive: formData.isActive,
-      category: formData.category,
-      items: formData.items
+      categories: formData.categories.length > 0 ? formData.categories : undefined,
+      items: formData.items.length > 0 ? formData.items : undefined
     };
 
     try {
@@ -305,39 +313,88 @@ export default function Offers() {
                   />
                 </div>
 
-                {/* Category Selector */}
+                {/* Category Selector - Multiple */}
                 <div className="form-group">
-                  <label>Apply to Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={e => setFormData({ ...formData, category: e.target.value, items: [] })}
-                  >
-                    <option value="">All Categories</option>
+                  <label>Apply to Categories (Optional)</label>
+                  <div className="selection-info">
+                    {formData.categories.length === 0 ? (
+                      <small>No categories selected - Offer applies to all categories</small>
+                    ) : (
+                      <small>{formData.categories.length} category(ies) selected</small>
+                    )}
+                  </div>
+                  <div className="checkbox-grid">
                     {categories.map(cat => (
-                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      <label key={cat.id} className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={formData.categories.includes(cat.name)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({ 
+                                ...formData, 
+                                categories: [...formData.categories, cat.name]
+                              });
+                            } else {
+                              setFormData({ 
+                                ...formData, 
+                                categories: formData.categories.filter(c => c !== cat.name)
+                              });
+                            }
+                          }}
+                        />
+                        <span>{cat.name}</span>
+                      </label>
                     ))}
-                  </select>
+                  </div>
                 </div>
 
-                {/* Item Selector */}
+                {/* Item Selector - Multiple with better UX */}
                 <div className="form-group">
-                  <label>Apply to Items</label>
-                  <select
-                    multiple
-                    value={formData.items}
-                    onChange={e => {
-                      const selected = Array.from(e.target.selectedOptions, opt => opt.value);
-                      setFormData({ ...formData, items: selected });
-                    }}
-                  >
-                    {(formData.category
-                      ? menuItems.filter(item => item.category === formData.category)
+                  <label>Apply to Specific Items (Optional)</label>
+                  <div className="selection-info">
+                    {formData.items.length === 0 ? (
+                      <small>No items selected - Offer applies to all items {formData.categories.length > 0 ? 'in selected categories' : ''}</small>
+                    ) : (
+                      <small>{formData.items.length} item(s) selected</small>
+                    )}
+                  </div>
+                  <div className="items-selection-container">
+                    {(formData.categories.length > 0
+                      ? menuItems.filter(item => formData.categories.includes(item.category))
                       : menuItems
-                    ).map(item => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))}
-                  </select>
-                  <small>Select one or more items (hold Ctrl/Cmd)</small>
+                    ).length === 0 ? (
+                      <p className="no-items-message">No items available {formData.categories.length > 0 ? 'in selected categories' : ''}</p>
+                    ) : (
+                      <div className="checkbox-grid">
+                        {(formData.categories.length > 0
+                          ? menuItems.filter(item => formData.categories.includes(item.category))
+                          : menuItems
+                        ).map(item => (
+                          <label key={item.id} className="checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={formData.items.includes(item.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFormData({ 
+                                    ...formData, 
+                                    items: [...formData.items, item.id]
+                                  });
+                                } else {
+                                  setFormData({ 
+                                    ...formData, 
+                                    items: formData.items.filter(i => i !== item.id)
+                                  });
+                                }
+                              }}
+                            />
+                            <span>{item.name} <small className="item-category">({item.category})</small></span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="form-row">

@@ -80,6 +80,7 @@ export const createOffer = mutation({
     validTo: v.number(),
     isActive: v.boolean(),
     category: v.optional(v.string()),
+    categories: v.optional(v.array(v.string())),
     items: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
@@ -121,6 +122,7 @@ export const updateOffer = mutation({
     validTo: v.optional(v.number()),
     isActive: v.optional(v.boolean()),
     category: v.optional(v.string()),
+    categories: v.optional(v.array(v.string())),
     items: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {

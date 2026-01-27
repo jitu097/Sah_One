@@ -38,6 +38,8 @@ export default function Home() {
     api.modules.users.users.getUserByFirebaseUid,
     currentUser ? { firebaseUid: currentUser.uid } : "skip"
   );
+  // Fetch global serving hours config
+  const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
 
   const handleAddToCart = (item, portionType = 'full') => {
     const isRestaurantOpen = localStorage.getItem('restaurantOpen');
@@ -45,13 +47,12 @@ export default function Home() {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
-    
+
     const price = portionType === 'half' && item.halfPrice ? item.halfPrice : item.fullPrice;
-    const uniqueId = `${item._id}_${portionType}`;
-    
-    addToCart({ 
-      ...item, 
-      id: uniqueId,
+
+    addToCart({
+      ...item,
+      // We pass originalId explicitly so CartContext can find the menu Item ID
       originalId: item._id,
       portionType: portionType,
       price: price,
@@ -60,14 +61,26 @@ export default function Home() {
   };
 
   const getItemQuantity = (itemId, portionType = 'full') => {
-    const uniqueId = `${itemId}_${portionType}`;
-    const cartItem = cartItems.find(item => item.id === uniqueId);
+    // Find item by matching itemId and portionType, NOT by checking `id` string
+    const cartItem = cartItems.find(item =>
+      item.itemId === itemId &&
+      (item.selectedPortion || 'full') === portionType
+    );
     return cartItem ? cartItem.quantity : 0;
   };
 
   const handleUpdateQuantity = (itemId, portionType, change) => {
-    const uniqueId = `${itemId}_${portionType}`;
-    updateQuantity(uniqueId, change);
+    // Find item by matching itemId and portionType to get DB ID
+    const cartItem = cartItems.find(item =>
+      item.itemId === itemId &&
+      (item.selectedPortion || 'full') === portionType
+    );
+
+    if (cartItem) {
+      updateQuantity(cartItem.id, change);
+    } else {
+      console.error("Could not find cart item to update in Home");
+    }
   };
 
   const menuItems = useQuery(api.modules.menu.menu.getAvailableMenuItems);
@@ -78,14 +91,67 @@ export default function Home() {
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Build slides: if there are active offers, show them; else show default slides
+  const offerSlides = activeOffers.length > 0
+    ? activeOffers.map((offer, idx) => ({
+      id: `offer-${offer._id}`,
+      type: 'offer',
+      offer,
+    }))
+    : [];
+
+  const defaultSlides = [
+    {
+      id: 1,
+      type: 'original',
+      backgroundImage: '/image.png'
+    },
+    {
+      id: 2,
+      type: 'image',
+      image: '/Section.png'
+    },
+    {
+      id: 3,
+      type: 'image',
+      image: '/last.png'
+    }
+  ];
+
+  const slides = offerSlides.length > 0 ? offerSlides : defaultSlides;
+
+  // Debug logging
+  useEffect(() => {
+    console.log('=== CAROUSEL DEBUG ===');
+    console.log('Active Offers Count:', activeOffers.length);
+    console.log('Offer Slides:', offerSlides);
+    console.log('Total Slides:', slides.length);
+    console.log('Current Slide Index:', currentSlide);
+    console.log('Slides Array:', slides);
+    console.log('===================');
+  }, [activeOffers, slides, currentSlide]);
+
+  // Reset slide if it's out of bounds
+  useEffect(() => {
+    if (currentSlide >= slides.length) {
+      setCurrentSlide(0);
+    }
+  }, [slides.length, currentSlide]);
+
   // Auto-advance carousel every 3 seconds
   useEffect(() => {
+    if (slides.length === 0) return;
+
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => {
+        const nextSlide = (prev + 1) % slides.length;
+        console.log(`Auto-advancing: ${prev} -> ${nextSlide} (total: ${slides.length})`);
+        return nextSlide;
+      });
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -95,11 +161,14 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
+  const parseHour = (timeStr) => {
+    if (!timeStr) return 0;
+    return parseInt(timeStr.split(':')[0], 10);
+  };
+
   const getTimeStatus = (startHour, endHour) => {
     const now = currentTime;
     const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
 
     // Check if current time is within the range
     if (hours >= startHour && hours < endHour) {
@@ -123,38 +192,6 @@ export default function Home() {
       };
     }
   };
-
-  // Build slides: if there are active offers, show them; else show default slides
-  const offerSlides = activeOffers.length > 0
-    ? activeOffers.map((offer, idx) => ({
-        id: `offer-${offer._id}`,
-        type: 'offer',
-        offer,
-      }))
-    : [];
-
-  const defaultSlides = [
-    {
-      id: 1,
-      type: 'original',
-      backgroundImage: '/image.png'
-    },
-    {
-      id: 2,
-      type: 'image',
-      image: '/Section.png'
-    },
-    {
-      id: 3,
-      type: 'image',
-      image: '/last.png'
-    }
-  ];
-
-  const slides = offerSlides.length > 0 ? offerSlides : defaultSlides;
-  // Debug: print slides array and currentSlide
-  console.log('Slides array:', slides);
-  console.log('Slides length:', slides.length, 'Current slide:', currentSlide);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -182,11 +219,11 @@ export default function Home() {
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
+
     if (isLeftSwipe) {
       nextSlide();
     }
@@ -204,7 +241,7 @@ export default function Home() {
 
   const handlePartyFormSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!currentUser) {
       alert('Please login to book a table!');
       return;
@@ -272,7 +309,7 @@ export default function Home() {
                     }}
                   >
                     {/* Debug info for inspection */}
-                    <div style={{fontSize: '14px', color: '#1976d2', background: '#e3f2fd', padding: '2px 8px', marginBottom: '4px', borderRadius: '4px', width: 'fit-content'}}>
+                    <div style={{ fontSize: '14px', color: '#1976d2', background: '#e3f2fd', padding: '2px 8px', marginBottom: '4px', borderRadius: '4px', width: 'fit-content' }}>
                       Slide index: {currentSlide} / Offer ID: {slides[currentSlide].offer?._id}
                     </div>
                     <div className="offer-card-hero">
@@ -321,69 +358,72 @@ export default function Home() {
             <section className="menu-section">
               <h2 className="section-title">Special Serving Hours</h2>
               <div className="menu-grid">
-     
-                {getTimeStatus(9, 11).isActive ? (
-                  <Link to="/user/serving-hours?slot=breakfast" className="menu-card">
-                    <img src="/Breakfast.jpeg" alt="Breakfast" />
-                    <p className="price active-time">
-                      {getTimeStatus(9, 11).timeString}
-                    </p>
-                    <h3>Breakfast</h3>
-                  </Link>
-                ) : (
-                  <div className="menu-card locked">
-                    <div className="lock-overlay">
-                      <span className="lock-icon">🔒</span>
-                    </div>
-                    <img src="/Breeakfast.png" alt="Breakfast" />
-                    <p className="price inactive-time">
-                      {getTimeStatus(7, 11).timeString}
-                    </p>
-                    <h3>Breakfast</h3>
-                  </div>
-                )}
 
-                {getTimeStatus(13, 16).isActive ? (
-                  <Link to="/user/serving-hours?slot=lunch" className="menu-card">
-                    <img src="/lunch.jpeg" alt="Lunch" />
-                    <p className="price active-time">
-                      {getTimeStatus(13, 16).timeString}
-                    </p>
-                    <h3>Lunch</h3>
-                  </Link>
-                ) : (
-                  <div className="menu-card locked">
-                    <div className="lock-overlay">
-                      <span className="lock-icon">🔒</span>
-                    </div>
-                    <img src="/lunch.jpeg" alt="Lunch" />
-                    <p className="price inactive-time">
-                      {getTimeStatus(13, 16).timeString}
-                    </p>
-                    <h3>Lunch</h3>
-                  </div>
-                )}
+                {/* Breakfast */}
+                {(() => {
+                  const start = parseHour(specialHours?.breakfast?.startTime || "08:00");
+                  const end = parseHour(specialHours?.breakfast?.endTime || "11:00");
+                  const status = getTimeStatus(start, end);
 
-                {getTimeStatus(19, 24).isActive ? (
-                  <Link to="/user/serving-hours?slot=dinner" className="menu-card">
-                    <img src="/Dinner.jpeg" alt="Dinner" />
-                    <p className="price active-time">
-                      {getTimeStatus(19, 24).timeString}
-                    </p>
-                    <h3>Dinner</h3>
-                  </Link>
-                ) : (
-                  <div className="menu-card locked">
-                    <div className="lock-overlay">
-                      <span className="lock-icon">🔒</span>
+                  return status.isActive ? (
+                    <Link to="/user/serving-hours?slot=breakfast" className="menu-card">
+                      <img src="/Breakfast.jpeg" alt="Breakfast" />
+                      <p className="price active-time">{status.timeString}</p>
+                      <h3>Breakfast</h3>
+                    </Link>
+                  ) : (
+                    <div className="menu-card locked">
+                      <div className="lock-overlay"><span className="lock-icon">🔒</span></div>
+                      <img src="/Breeakfast.png" alt="Breakfast" />
+                      <p className="price inactive-time">{status.timeString}</p>
+                      <h3>Breakfast</h3>
                     </div>
-                    <img src="/Dinner.jpeg" alt="Dinner" />
-                    <p className="price inactive-time">
-                      {getTimeStatus(19, 24).timeString}
-                    </p>
-                    <h3>Dinner</h3>
-                  </div>
-                )}
+                  );
+                })()}
+
+                {/* Lunch */}
+                {(() => {
+                  const start = parseHour(specialHours?.lunch?.startTime || "13:00");
+                  const end = parseHour(specialHours?.lunch?.endTime || "16:00");
+                  const status = getTimeStatus(start, end);
+
+                  return status.isActive ? (
+                    <Link to="/user/serving-hours?slot=lunch" className="menu-card">
+                      <img src="/lunch.jpeg" alt="Lunch" />
+                      <p className="price active-time">{status.timeString}</p>
+                      <h3>Lunch</h3>
+                    </Link>
+                  ) : (
+                    <div className="menu-card locked">
+                      <div className="lock-overlay"><span className="lock-icon">🔒</span></div>
+                      <img src="/lunch.jpeg" alt="Lunch" />
+                      <p className="price inactive-time">{status.timeString}</p>
+                      <h3>Lunch</h3>
+                    </div>
+                  );
+                })()}
+
+                {/* Dinner */}
+                {(() => {
+                  const start = parseHour(specialHours?.dinner?.startTime || "19:00");
+                  const end = parseHour(specialHours?.dinner?.endTime || "23:00");
+                  const status = getTimeStatus(start, end);
+
+                  return status.isActive ? (
+                    <Link to="/user/serving-hours?slot=dinner" className="menu-card">
+                      <img src="/Dinner.jpeg" alt="Dinner" />
+                      <p className="price active-time">{status.timeString}</p>
+                      <h3>Dinner</h3>
+                    </Link>
+                  ) : (
+                    <div className="menu-card locked">
+                      <div className="lock-overlay"><span className="lock-icon">🔒</span></div>
+                      <img src="/Dinner.jpeg" alt="Dinner" />
+                      <p className="price inactive-time">{status.timeString}</p>
+                      <h3>Dinner</h3>
+                    </div>
+                  );
+                })()}
 
               </div>
             </section>
@@ -521,11 +561,11 @@ export default function Home() {
               {filteredItems && filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
                   <div id={`menuitem-${item._id}`} key={item._id}>
-                    <MenuItemCard 
+                    <MenuItemCard
                       item={item}
                       onAddToCart={handleAddToCart}
                       quantity={getItemQuantity(item._id)}
-                      onUpdateQuantity={(id, change) => handleUpdateQuantity(item._id, 'full', change)}
+                      onUpdateQuantity={handleUpdateQuantity}
                     />
                   </div>
                 ))
@@ -543,12 +583,12 @@ export default function Home() {
             <div className="bestsellers-grid">
               {menuItems ? (
                 menuItems.slice(0, 4).map((item) => (
-                  <MenuItemCard 
-                    key={item._id} 
+                  <MenuItemCard
+                    key={item._id}
                     item={item}
                     onAddToCart={handleAddToCart}
                     quantity={getItemQuantity(item._id)}
-                    onUpdateQuantity={(id, change) => handleUpdateQuantity(item._id, 'full', change)}
+                    onUpdateQuantity={handleUpdateQuantity}
                   />
                 ))
               ) : (

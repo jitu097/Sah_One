@@ -34,9 +34,21 @@ export default function UserMenu() {
   const categoriesList = useQuery(api.modules.menu.menu.getCategoryNames);
 
   const getItemQuantity = (itemId, portionType = 'full') => {
-    const uniqueId = `${itemId}_${portionType}`;
-    const cartItem = cartItems.find(item => item.id === uniqueId);
+    // Find item by matching itemId and portionType, NOT by checking `id` string
+    const cartItem = cartItems.find(item =>
+      item.itemId === itemId &&
+      (item.selectedPortion || 'full') === portionType
+    );
     return cartItem ? cartItem.quantity : 0;
+  };
+
+  // Helper to get the actual CartItem DB ID
+  const getCartItemId = (itemId, portionType = 'full') => {
+    const cartItem = cartItems.find(item =>
+      item.itemId === itemId &&
+      (item.selectedPortion || 'full') === portionType
+    );
+    return cartItem ? cartItem.id : null;
   };
 
   // Check if restaurant is open
@@ -51,13 +63,14 @@ export default function UserMenu() {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
-    
+
+    // We pass originalId explicitly so CartContext works correctly
+    // The price logic is just for display/local use, backend calculates/verify price usually
+    // But passing it is fine.
     const price = portionType === 'half' && item.halfPrice ? item.halfPrice : item.fullPrice;
-    const uniqueId = `${item._id}_${portionType}`;
-    
-    addToCart({ 
-      ...item, 
-      id: uniqueId,
+
+    addToCart({
+      ...item,
       originalId: item._id,
       portionType: portionType,
       price: price,
@@ -66,12 +79,19 @@ export default function UserMenu() {
   };
 
   // Handle quantity update with restaurant status check
-  const handleUpdateQuantity = (itemId, change) => {
+  // Changed signature to accept itemId and portionType to resolve the DB ID internally
+  const handleUpdateQuantity = (itemId, portionType, change) => {
     if (!isRestaurantOpen() && change > 0) {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
-    updateQuantity(itemId, change);
+
+    const cartItemId = getCartItemId(itemId, portionType);
+    if (cartItemId) {
+      updateQuantity(cartItemId, change);
+    } else {
+      console.error("Could not find cart item to update");
+    }
   };
 
   // Better loading state with error detection
@@ -192,7 +212,7 @@ export default function UserMenu() {
                       {categoryItems.map(item => {
                         const hasAnyQuantity = getItemQuantity(item._id, 'half') > 0 || getItemQuantity(item._id, 'full') > 0;
                         const isItemExpanded = hasAnyQuantity || expandedMobileItems[item._id];
-                        
+
                         return (
                           <div key={item._id} className="mobile-menu-item">
                             <img
@@ -204,7 +224,7 @@ export default function UserMenu() {
                             <div className="mobile-item-details">
                               <h4 className="mobile-item-name">{item.name}</h4>
                               <p className="mobile-item-description">{item.description}</p>
-                              
+
                               {!isItemExpanded ? (
                                 <div className="mobile-initial-view">
                                   {item.halfPrice ? (
@@ -219,7 +239,7 @@ export default function UserMenu() {
                                   )}
                                   <button
                                     className="mobile-add-to-cart-btn"
-                                    onClick={() => setExpandedMobileItems(prev => ({...prev, [item._id]: true}))}
+                                    onClick={() => setExpandedMobileItems(prev => ({ ...prev, [item._id]: true }))}
                                   >
                                     Add to Cart
                                   </button>
@@ -238,7 +258,7 @@ export default function UserMenu() {
                                           className="mobile-add-btn"
                                           onClick={() => {
                                             handleAddToCart(item, 'half');
-                                            setExpandedMobileItems(prev => ({...prev, [item._id]: false}));
+                                            setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
                                           }}
                                         >
                                           Add
@@ -248,9 +268,9 @@ export default function UserMenu() {
                                           <button
                                             className="mobile-qty-btn"
                                             onClick={() => {
-                                              handleUpdateQuantity(`${item._id}_half`, -1);
+                                              handleUpdateQuantity(item._id, 'half', -1);
                                               if (getItemQuantity(item._id, 'half') === 1 && getItemQuantity(item._id, 'full') === 0) {
-                                                setExpandedMobileItems(prev => ({...prev, [item._id]: false}));
+                                                setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
                                               }
                                             }}
                                           >
@@ -259,7 +279,7 @@ export default function UserMenu() {
                                           <span className="mobile-qty-number">{getItemQuantity(item._id, 'half')}</span>
                                           <button
                                             className="mobile-qty-btn"
-                                            onClick={() => handleUpdateQuantity(`${item._id}_half`, 1)}
+                                            onClick={() => handleUpdateQuantity(item._id, 'half', 1)}
                                           >
                                             +
                                           </button>
@@ -279,7 +299,7 @@ export default function UserMenu() {
                                         className="mobile-add-btn"
                                         onClick={() => {
                                           handleAddToCart(item, 'full');
-                                          setExpandedMobileItems(prev => ({...prev, [item._id]: false}));
+                                          setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
                                         }}
                                       >
                                         Add
@@ -289,9 +309,9 @@ export default function UserMenu() {
                                         <button
                                           className="mobile-qty-btn"
                                           onClick={() => {
-                                            handleUpdateQuantity(`${item._id}_full`, -1);
+                                            handleUpdateQuantity(item._id, 'full', -1);
                                             if (getItemQuantity(item._id, 'full') === 1 && getItemQuantity(item._id, 'half') === 0) {
-                                              setExpandedMobileItems(prev => ({...prev, [item._id]: false}));
+                                              setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
                                             }
                                           }}
                                         >
@@ -300,7 +320,7 @@ export default function UserMenu() {
                                         <span className="mobile-qty-number">{getItemQuantity(item._id, 'full')}</span>
                                         <button
                                           className="mobile-qty-btn"
-                                          onClick={() => handleUpdateQuantity(`${item._id}_full`, 1)}
+                                          onClick={() => handleUpdateQuantity(item._id, 'full', 1)}
                                         >
                                           +
                                         </button>

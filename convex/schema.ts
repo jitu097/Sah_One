@@ -118,7 +118,8 @@ export default defineSchema({
     validFrom: v.number(),
     validTo: v.number(),
     isActive: v.boolean(),
-    category: v.optional(v.string()), // category name or id
+    category: v.optional(v.string()), // DEPRECATED: single category (kept for backward compatibility)
+    categories: v.optional(v.array(v.string())), // array of category names
     items: v.optional(v.array(v.string())), // array of item ids
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -221,4 +222,21 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_status", ["status"])
     .index("by_date", ["date"]),
+
+  // Shopping Cart (Server-side)
+  carts: defineTable({
+    userId: v.string(), // Firebase UID
+    couponCode: v.optional(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"]),
+
+  cartItems: defineTable({
+    cartId: v.id("carts"),
+    itemId: v.id("menuItems"),
+    quantity: v.number(),
+    selectedPortion: v.optional(v.string()), // "half" or "full" (defaults to full if undefined)
+  })
+    .index("by_cart", ["cartId"])
+    .index("by_cart_and_item", ["cartId", "itemId"]),
 });
