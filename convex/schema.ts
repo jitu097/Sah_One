@@ -123,6 +123,7 @@ export default defineSchema({
     category: v.optional(v.string()), // DEPRECATED: single category (kept for backward compatibility)
     categories: v.optional(v.array(v.string())), // array of category names
     items: v.optional(v.array(v.string())), // array of item ids
+    imageUrl: v.optional(v.string()), // Offer image URL
     createdAt: v.number(),
     updatedAt: v.number(),
   })

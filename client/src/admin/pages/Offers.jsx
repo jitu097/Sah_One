@@ -71,6 +71,30 @@ export default function Offers() {
     items: []
   });
 
+    // Handle image upload (now in correct scope)
+    const handleImageUpload = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', file);
+        formDataUpload.append('upload_preset', 'sah-one-menu');
+        const res = await fetch('https://api.cloudinary.com/v1_1/drpbuhxmr/image/upload', {
+          method: 'POST',
+          body: formDataUpload
+        });
+        const data = await res.json();
+        console.log('Cloudinary upload response:', data);
+        if (data.secure_url) {
+          setFormData((prev) => ({ ...prev, imageUrl: data.secure_url }));
+        } else {
+          alert('Image upload failed: ' + (data.error?.message || 'Unknown error'));
+        }
+      } catch (err) {
+        console.error('Image upload error:', err);
+        alert('Image upload failed');
+      }
+    };
   const scrollToForm = () => {
     if (formRef.current) {
       setTimeout(() => {
@@ -185,7 +209,8 @@ export default function Offers() {
       validTo: new Date(formData.validTo).getTime(),
       isActive: formData.isActive,
       categories: formData.categories.length > 0 ? formData.categories : undefined,
-      items: formData.items.length > 0 ? formData.items : undefined
+      items: formData.items.length > 0 ? formData.items : undefined,
+      imageUrl: formData.imageUrl || undefined
     };
 
     try {
@@ -303,6 +328,7 @@ export default function Offers() {
                 </div>
 
 
+
                 <div className="form-group">
                   <label>Description</label>
                   <textarea
@@ -311,6 +337,15 @@ export default function Offers() {
                     placeholder="Brief description of the offer"
                     rows="2"
                   />
+                </div>
+
+                {/* Offer Image Upload */}
+                <div className="form-group">
+                  <label>Offer Image (optional)</label>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} />
+                  {formData.imageUrl && (
+                    <img src={formData.imageUrl} alt="Offer Preview" style={{ maxWidth: 200, marginTop: 8 }} />
+                  )}
                 </div>
 
                 {/* Category Selector - Multiple */}

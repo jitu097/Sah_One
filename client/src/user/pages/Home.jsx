@@ -94,10 +94,11 @@ export default function Home() {
   // Build slides: if there are active offers, show them; else show default slides
   const offerSlides = activeOffers.length > 0
     ? activeOffers.map((offer, idx) => ({
-      id: `offer-${offer._id}`,
-      type: 'offer',
-      offer,
-    }))
+        id: `offer-${offer._id}`,
+        type: 'offer',
+        offer,
+        imageUrl: offer.imageUrl || null,
+      }))
     : [];
 
   const defaultSlides = [
@@ -122,13 +123,7 @@ export default function Home() {
 
   // Debug logging
   useEffect(() => {
-    console.log('=== CAROUSEL DEBUG ===');
-    console.log('Active Offers Count:', activeOffers.length);
-    console.log('Offer Slides:', offerSlides);
-    console.log('Total Slides:', slides.length);
-    console.log('Current Slide Index:', currentSlide);
-    console.log('Slides Array:', slides);
-    console.log('===================');
+    // Carousel debug logs removed
   }, [activeOffers, slides, currentSlide]);
 
   // Reset slide if it's out of bounds
@@ -145,7 +140,6 @@ export default function Home() {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => {
         const nextSlide = (prev + 1) % slides.length;
-        console.log(`Auto-advancing: ${prev} -> ${nextSlide} (total: ${slides.length})`);
         return nextSlide;
       });
     }, 3000);
@@ -280,10 +274,20 @@ export default function Home() {
           <>
             {/* Hero Carousel Section */}
             <section
-              className={`hero-carousel ${slides[currentSlide].type === 'original' ? 'hero-carousel-dynamic' : 'hero-carousel-white'}`}
-              style={slides[currentSlide].type === 'original' ? {
-                backgroundImage: `url('${slides[currentSlide].backgroundImage}')`
-              } : {}}
+              className={`hero-carousel ${
+                slides[currentSlide].type === 'offer' && slides[currentSlide].offer && slides[currentSlide].offer.imageUrl
+                  ? 'hero-carousel-dynamic'
+                  : slides[currentSlide].type === 'original'
+                    ? 'hero-carousel-dynamic'
+                    : 'hero-carousel-white'
+              }`}
+              style={
+                slides[currentSlide].type === 'offer' && slides[currentSlide].offer && slides[currentSlide].offer.imageUrl
+                  ? { backgroundImage: `url('${slides[currentSlide].offer.imageUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                  : slides[currentSlide].type === 'original'
+                    ? { backgroundImage: `url('${slides[currentSlide].backgroundImage}')` }
+                    : {}
+              }
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
@@ -299,12 +303,9 @@ export default function Home() {
                     style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, width: '100%' }}
                     onClick={() => {
                       const offer = slides[currentSlide].offer;
-                      // Collect constraints
-                      const categories = [...(offer.categories || [])]; // Create a copy to avoid mutating frozen object
-                      if (offer.category) categories.push(offer.category); // Legacy
-
+                      const categories = [...(offer.categories || [])];
+                      if (offer.category) categories.push(offer.category);
                       const items = offer.items || [];
-
                       navigate('/user/menu', {
                         state: {
                           filterMode: 'coupon',
@@ -315,11 +316,7 @@ export default function Home() {
                       });
                     }}
                   >
-                    {/* Debug info for inspection */}
-                    <div style={{ fontSize: '14px', color: '#1976d2', background: '#e3f2fd', padding: '2px 8px', marginBottom: '4px', borderRadius: '4px', width: 'fit-content' }}>
-                      Slide index: {currentSlide} / Offer ID: {slides[currentSlide].offer?._id}
-                    </div>
-                    <div className="offer-card-hero">
+                    <div className="offer-card-hero offer-card-ui">
                       <div className="offer-discount">
                         {slides[currentSlide].offer.discountValue}
                         {slides[currentSlide].offer.discountType === 'percentage' ? '% OFF' : ' OFF'}

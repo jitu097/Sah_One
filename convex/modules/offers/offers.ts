@@ -82,6 +82,7 @@ export const createOffer = mutation({
     category: v.optional(v.string()),
     categories: v.optional(v.array(v.string())),
     items: v.optional(v.array(v.string())),
+    imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const timestamp = Date.now();
@@ -124,6 +125,7 @@ export const updateOffer = mutation({
     category: v.optional(v.string()),
     categories: v.optional(v.array(v.string())),
     items: v.optional(v.array(v.string())),
+    imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { offerId, ...updates } = args;
