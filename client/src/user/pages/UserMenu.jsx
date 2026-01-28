@@ -180,13 +180,30 @@ export default function UserMenu() {
     }));
   };
 
-  // Group items by category for mobile accordion view
+  // Group items by category for mobile accordion view - now respects coupon filter
   const getItemsByCategory = (category) => {
-    return allMenuItems.filter(item => item.category === category);
+    let items = allMenuItems.filter(item => item.category === category);
+    
+    // Apply coupon filter if active
+    if (couponFilter) {
+      items = items.filter(item => {
+        const hasCatRest = couponFilter.categories.length > 0;
+        const hasItemRest = couponFilter.items.length > 0;
+
+        if (!hasCatRest && !hasItemRest) return true; // Coupon valid for all
+
+        const isCat = hasCatRest && couponFilter.categories.includes(item.category);
+        const isItem = hasItemRest && couponFilter.items.includes(item._id);
+
+        return isCat || isItem;
+      });
+    }
+    
+    return items;
   };
 
   const getCategoryItemCount = (category) => {
-    return allMenuItems.filter(item => item.category === category).length;
+    return getItemsByCategory(category).length;
   };
 
   return (
@@ -259,7 +276,15 @@ export default function UserMenu() {
 
           {/* Mobile Accordion View */}
           <div className="mobile-menu-accordion mobile-only">
-            {categoriesList.map(category => {
+            {categoriesList
+              .filter(category => {
+                // When coupon filter is active, only show categories with items
+                if (couponFilter) {
+                  return getItemsByCategory(category).length > 0;
+                }
+                return true;
+              })
+              .map(category => {
               const categoryItems = getItemsByCategory(category);
               const isExpanded = expandedCategories[category];
 

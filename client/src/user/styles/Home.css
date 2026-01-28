@@ -2,14 +2,15 @@
 
 .hero-carousel-dynamic {
   position: relative;
-  min-height: 500px;
+  min-height: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 140px 20px 60px 20px;
+  margin-top: 0;
   overflow: hidden;
   transition: background 0.5s ease;
-  background-position: center;
+  background-position: center center;
   background-size: cover;
 }
 
@@ -83,16 +84,16 @@
 /* Tablet responsive */
 @media (max-width: 1024px) {
   .hero-carousel-dynamic {
-    min-height: 400px;
-    padding: 40px 20px;
+    min-height: 450px;
+    padding: 120px 20px 40px 20px;
   }
 }
 
 /* Mobile responsive */
 @media (max-width: 768px) {
   .hero-carousel-dynamic {
-    min-height: 300px;
-    padding: 30px 15px;
+    min-height: 400px;
+    padding: 110px 15px 30px 15px;
   }
 
   /* Show mobile search bar */
@@ -114,8 +115,8 @@
 /* Small mobile */
 @media (max-width: 480px) {
   .hero-carousel-dynamic {
-    min-height: 250px;
-    padding: 20px 10px;
+    min-height: 350px;
+    padding: 105px 10px 20px 10px;
   }
 
   .mobile-hero-search {

@@ -68,6 +68,13 @@ export default function Navbar() {
             <img src="/LOGO.png" alt="SAH_ONE" className="logo-img" />
           </Link>
           <button 
+            className="mobile-location-btn"
+            onClick={() => setIsAddressModalOpen(true)}
+            aria-label="Set location"
+          >
+            📍
+          </button>
+          <button 
             className="location" 
             onClick={() => setIsAddressModalOpen(true)}
           >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
@@ -14,8 +14,12 @@ import CategoryPopup from '../components/CategoryPopup';
 export default function Home() {
   const navigate = useNavigate();
   // Fetch active offers for hero carousel (must be inside component)
-  const activeOffers = useQuery(api.modules.offers.offers.getActiveOffers) || [];
-  console.log('Active offers:', activeOffers);
+  const activeOffersRaw = useQuery(api.modules.offers.offers.getActiveOffers);
+  
+  // Stabilize the offers array to prevent unnecessary re-renders
+  // useMemo ensures we don't create a new [] on every render
+  const activeOffers = useMemo(() => activeOffersRaw || [], [activeOffersRaw]);
+  
   const { addToCart, cartItems, updateQuantity } = useCart();
   const { currentUser } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -119,7 +123,18 @@ export default function Home() {
     }
   ];
 
-  const slides = offerSlides.length > 0 ? offerSlides : defaultSlides;
+  // Memoize slides to prevent recreation on every render (especially during carousel auto-slide)
+  const slides = useMemo(() => 
+    offerSlides.length > 0 ? offerSlides : defaultSlides,
+    [activeOffers] // Only recreate when offers actually change
+  );
+
+  // Log offers ONLY when they actually change (not on every render)
+  useEffect(() => {
+    if (activeOffers.length > 0) {
+      console.log('Active offers loaded:', activeOffers);
+    }
+  }, [activeOffers.length]); // Only log when count changes
 
   // Debug logging
   useEffect(() => {
@@ -292,31 +307,46 @@ export default function Home() {
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              <button className="carousel-btn prev" onClick={prevSlide}>
+              <button className="carousel-btn prev" onClick={(e) => { e.stopPropagation(); prevSlide(); }}>
                 ←
               </button>
 
-              <div className="carousel-content">
+              <div 
+                className="carousel-content"
+                onClick={() => {
+                  if (slides[currentSlide].type === 'offer') {
+                    const offer = slides[currentSlide].offer;
+                    const categories = [...(offer.categories || [])];
+                    if (offer.category) categories.push(offer.category);
+                    const items = offer.items || [];
+                    navigate('/user/menu', {
+                      state: {
+                        filterMode: 'coupon',
+                        couponCode: offer.code,
+                        allowedCategories: categories,
+                        allowedItems: items
+                      }
+                    });
+                  }
+                }}
+                style={slides[currentSlide].type === 'offer' ? { cursor: 'pointer' } : {}}
+              >
                 {slides[currentSlide].type === 'offer' ? (
-                  <button
+                  <div
                     className="hero-offer-slide"
-                    style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, width: '100%' }}
-                    onClick={() => {
-                      const offer = slides[currentSlide].offer;
-                      const categories = [...(offer.categories || [])];
-                      if (offer.category) categories.push(offer.category);
-                      const items = offer.items || [];
-                      navigate('/user/menu', {
-                        state: {
-                          filterMode: 'coupon',
-                          couponCode: offer.code,
-                          allowedCategories: categories,
-                          allowedItems: items
-                        }
-                      });
+                    style={{ 
+                      background: 'none', 
+                      border: 'none', 
+                      padding: 0, 
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'flex-start',
+                      pointerEvents: 'none'
                     }}
                   >
-                    <div className="offer-card-hero offer-card-ui">
+                    <div className="offer-card-hero offer-card-ui" style={{ pointerEvents: 'auto' }}>
                       <div className="offer-discount">
                         {slides[currentSlide].offer.discountValue}
                         {slides[currentSlide].offer.discountType === 'percentage' ? '% OFF' : ' OFF'}
@@ -328,7 +358,7 @@ export default function Home() {
                         {new Date(slides[currentSlide].offer.validFrom).toLocaleDateString()} - {new Date(slides[currentSlide].offer.validTo).toLocaleDateString()}
                       </div>
                     </div>
-                  </button>
+                  </div>
                 ) : slides[currentSlide].type === 'original' ? (
                   // Add a highlight-offer class for flash effect
                   <>
@@ -343,7 +373,7 @@ export default function Home() {
                 )}
               </div>
 
-              <button className="carousel-btn next" onClick={nextSlide}>
+              <button className="carousel-btn next" onClick={(e) => { e.stopPropagation(); nextSlide(); }}>
                 →
               </button>
 
@@ -352,10 +382,15 @@ export default function Home() {
                   <button
                     key={index}
                     className={`indicator ${currentSlide === index ? 'active' : ''}`}
-                    onClick={() => goToSlide(index)}
+                    onClick={(e) => { e.stopPropagation(); goToSlide(index); }}
                   />
                 ))}
               </div>
+
+              {/* Mobile-only carousel navigation button */}
+              <button className="mobile-carousel-nav" onClick={(e) => { e.stopPropagation(); nextSlide(); }}>
+                →
+              </button>
             </section>
 
             {/* Menu Items Section */}
@@ -371,7 +406,7 @@ export default function Home() {
 
                   return status.isActive ? (
                     <Link to="/user/serving-hours?slot=breakfast" className="menu-card">
-                      <img src="/Breakfast.jpeg" alt="Breakfast" />
+                      <img src="/Breeakfast.png" alt="Breakfast" />
                       <p className="price active-time">{status.timeString}</p>
                       <h3>Breakfast</h3>
                     </Link>
@@ -528,32 +563,6 @@ export default function Home() {
                 </div>
               </div>
             )}
-
-            {/* Delivery Process Section */}
-            <section className="delivery-section">
-              <h3 className="delivery-tag">EXPRESS DELIVERY</h3>
-              <h2 className="section-title">60 Minutes Delivery Process</h2>
-              <p className="section-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus orci tempus.</p>
-
-              <div className="delivery-steps">
-                <div className="step">
-                  <div className="step-icon">🍜</div>
-                  <p>Choose your products</p>
-                </div>
-                <div className="step">
-                  <div className="step-icon">🛒</div>
-                  <p>Order and make a payment</p>
-                </div>
-                <div className="step">
-                  <div className="step-icon">📍</div>
-                  <p>Share your location</p>
-                </div>
-                <div className="step">
-                  <div className="step-icon">🚚</div>
-                  <p>Get delivered</p>
-                </div>
-              </div>
-            </section>
           </>
         )}
 
@@ -601,6 +610,32 @@ export default function Home() {
             </div>
           </section>
         )}
+
+        {/* Delivery Process Footer */}
+        <section className="delivery-section">
+          <h3 className="delivery-tag">EXPRESS DELIVERY</h3>
+          <h2 className="section-title">60 Minutes Delivery Process</h2>
+          <p className="section-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus orci tempus.</p>
+
+          <div className="delivery-steps">
+            <div className="step">
+              <div className="step-icon">🍜</div>
+              <p>Choose your products</p>
+            </div>
+            <div className="step">
+              <div className="step-icon">🛒</div>
+              <p>Order and make a payment</p>
+            </div>
+            <div className="step">
+              <div className="step-icon">📍</div>
+              <p>Share your location</p>
+            </div>
+            <div className="step">
+              <div className="step-icon">🚚</div>
+              <p>Get delivered</p>
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* Floating Menu Button */}

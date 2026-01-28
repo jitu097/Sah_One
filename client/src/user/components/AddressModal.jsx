@@ -4,7 +4,7 @@ import '../styles/AddressModal.css';
 export default function AddressModal({ isOpen, onClose, onSave }) {
   const [addressData, setAddressData] = useState({
     deliveryArea: '',
-    city: '',
+    city: 'Latehar',
     company: '',
    
    
@@ -102,9 +102,10 @@ export default function AddressModal({ isOpen, onClose, onSave }) {
               type="text"
               name="city"
               value={addressData.city}
-              onChange={handleChange}
+              readOnly
               placeholder="City *"
               required
+              style={{ backgroundColor: '#f3f4f6', cursor: 'not-allowed' }}
             />
           </div>
 

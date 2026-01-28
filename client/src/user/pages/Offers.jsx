@@ -1,64 +1,77 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 import '../styles/Offers.css';
 
 export default function Offers() {
-  const offers = [
-    {
-      id: 1,
-      title: '50% OFF on First Order',
-      description: 'Get 50% discount on your first order. Maximum discount up to ₹100',
-      code: 'FIRST50',
-      validity: 'Valid till Jan 31, 2026',
-      image: '🎉'
-    },
-    {
-      id: 2,
-      title: 'Free Delivery',
-      description: 'Free delivery on orders above ₹299',
-      code: 'FREEDEL',
-      validity: 'Valid till Jan 15, 2026',
-      image: '🚚'
-    },
-    {
-      id: 3,
-      title: 'Buy 1 Get 1 Free',
-      description: 'Buy one pizza and get another one absolutely free',
-      code: 'BOGO',
-      validity: 'Valid on weekends',
-      image: '🍕'
-    },
-    {
-      id: 4,
-      title: 'Flat ₹150 OFF',
-      description: 'Get flat ₹150 off on orders above ₹500',
-      code: 'FLAT150',
-      validity: 'Valid till Feb 28, 2026',
-      image: '💰'
-    },
-    {
-      id: 5,
-      title: 'Student Special',
-      description: '30% OFF for students. Show your valid student ID',
-      code: 'STUDENT30',
-      validity: 'Valid always',
-      image: '🎓'
-    },
-    {
-      id: 6,
-      title: 'Happy Hours',
-      description: '25% OFF on all orders between 2 PM to 5 PM',
-      code: 'HAPPY25',
-      validity: 'Valid Mon-Fri',
-      image: '⏰'
-    }
-  ];
+  const navigate = useNavigate();
+  const [copiedCode, setCopiedCode] = useState(null);
+
+  // Fetch active offers from Convex
+  const offers = useQuery(api.modules.offers.offers.getActiveOffers) || [];
 
   const handleCopyCode = (code) => {
     navigator.clipboard.writeText(code);
-    alert(`Code ${code} copied to clipboard!`);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
   };
+
+  const handleOfferClick = (offer) => {
+    // Copy the code
+    handleCopyCode(offer.code);
+
+    // Build categories array (supports both old and new schema)
+    const categories = [...(offer.categories || [])];
+    if (offer.category) categories.push(offer.category);
+    const items = offer.items || [];
+
+    // Navigate to menu with coupon filter (same as carousel)
+    navigate('/user/menu', {
+      state: {
+        filterMode: 'coupon',
+        couponCode: offer.code,
+        allowedCategories: categories,
+        allowedItems: items
+      }
+    });
+  };
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-IN', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+  };
+
+  const getDiscountText = (offer) => {
+    if (offer.discountType === 'percentage') {
+      return `${offer.discountValue}% OFF`;
+    } else if (offer.discountType === 'fixed') {
+      return `₹${offer.discountValue} OFF`;
+    } else if (offer.buyQuantity && offer.getQuantity) {
+      return `Buy ${offer.buyQuantity} Get ${offer.getQuantity}`;
+    }
+    return 'Special Offer';
+  };
+
+  if (!offers) {
+    return (
+      <>
+        <Navbar />
+        <div className="page-container">
+          <div className="loading-state">
+            <div className="spinner"></div>
+            <p>Loading offers...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -73,34 +86,82 @@ export default function Offers() {
           </div>
         </div>
 
-        <div className="offers-grid">
-          {offers.map((offer) => (
-            <div key={offer.id} className="offer-card">
-              <div className="offer-icon">{offer.image}</div>
-              <div className="offer-content">
-                <h3>{offer.title}</h3>
-                <p className="offer-description">{offer.description}</p>
-                <div className="offer-code-section">
-                  <div className="offer-code">
-                    <span className="code-label">Code:</span>
-                    <span className="code-value">{offer.code}</span>
-                  </div>
-                  <button 
-                    className="copy-code-btn"
-                    onClick={() => handleCopyCode(offer.code)}
-                  >
-                    Copy
-                  </button>
-                </div>
-                <p className="offer-validity">{offer.validity}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {offers.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">🎉</div>
+            <h3>No Active Offers</h3>
+            <p>Check back soon for exciting deals!</p>
+          </div>
+        ) : (
+          <>
+            <div className="offers-grid">
+              {offers.map((offer) => (
+                <div 
+                  key={offer._id} 
+                  className="offer-card"
+                  onClick={() => handleOfferClick(offer)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {offer.imageUrl && (
+                    <div className="offer-image">
+                      <img src={offer.imageUrl} alt={offer.title} />
+                      <div className="offer-badge">{getDiscountText(offer)}</div>
+                    </div>
+                  )}
+                  <div className="offer-content">
+                    <h3>{offer.title}</h3>
+                    <p className="offer-description">{offer.description}</p>
+                    
+                    {offer.minOrderAmount && (
+                      <p className="offer-min-order">
+                        Min. Order: ₹{offer.minOrderAmount}
+                      </p>
+                    )}
+                    
+                    {offer.maxDiscount && (
+                      <p className="offer-max-discount">
+                        Max. Discount: ₹{offer.maxDiscount}
+                      </p>
+                    )}
 
-        <div className="offers-footer">
-          <p>💡 <strong>Pro Tip:</strong> Apply offer codes at checkout to get instant discounts!</p>
-        </div>
+                    <div className="offer-code-section">
+                      <div className="offer-code">
+                        <span className="code-label">Code:</span>
+                        <span className="code-value">{offer.code}</span>
+                      </div>
+                      <button 
+                        className={`copy-code-btn ${copiedCode === offer.code ? 'copied' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopyCode(offer.code);
+                        }}
+                      >
+                        {copiedCode === offer.code ? '✓ Copied' : 'Copy'}
+                      </button>
+                    </div>
+                    
+                    <p className="offer-validity">
+                      Valid till {formatDate(offer.validTo)}
+                    </p>
+
+                    {offer.categories && offer.categories.length > 0 && (
+                      <div className="offer-categories">
+                        <span className="categories-label">Valid on:</span>
+                        {offer.categories.map((cat, idx) => (
+                          <span key={idx} className="category-tag">{cat}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="offers-footer">
+              <p>💡 <strong>Pro Tip:</strong> Click on any offer to copy the code and start shopping!</p>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

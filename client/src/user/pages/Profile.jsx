@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import AddressModal from '../components/AddressModal';
 import { useAuth } from '../../context/AuthContext';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
@@ -18,6 +19,9 @@ export default function Profile() {
   const updateUser = useMutation(api.modules.users.users.updateUser);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [phoneInput, setPhoneInput] = useState('');
   const [formData, setFormData] = useState({
     phone: '',
     address: '',
@@ -43,6 +47,7 @@ export default function Profile() {
         address: addressText,
         name: user.name || ''
       });
+      setPhoneInput(phoneNumber);
     }
   }, [user]);
 
@@ -61,6 +66,58 @@ export default function Profile() {
     } catch (error) {
       console.error("Failed to update profile:", error);
       alert("Failed to update profile. Please try again.");
+    }
+  };
+
+  const handleAddressSave = async (addressData) => {
+    const addressText = `${addressData.company}, ${addressData.locality}, ${addressData.city}`;
+    const phoneNumber = addressData.mobileNumber;
+    
+    try {
+      await updateUser({
+        firebaseUid: user.firebaseUid,
+        address: addressText,
+        phone: phoneNumber,
+        name: user.name || ''
+      });
+      
+      // Save to localStorage
+      localStorage.setItem('userAddress', JSON.stringify(addressData));
+      
+      setFormData(prev => ({
+        ...prev,
+        address: addressText,
+        phone: phoneNumber
+      }));
+    } catch (error) {
+      console.error("Failed to save address:", error);
+      alert("Failed to save address. Please try again.");
+    }
+  };
+
+  const handlePhoneSave = async (e) => {
+    e.preventDefault();
+    if (!phoneInput || phoneInput.length !== 10) {
+      alert("Please enter a valid 10-digit phone number");
+      return;
+    }
+
+    try {
+      await updateUser({
+        firebaseUid: user.firebaseUid,
+        phone: phoneInput,
+        address: user.address || '',
+        name: user.name || ''
+      });
+      
+      setFormData(prev => ({
+        ...prev,
+        phone: phoneInput
+      }));
+      setIsPhoneModalOpen(false);
+    } catch (error) {
+      console.error("Failed to save phone:", error);
+      alert("Failed to save phone number. Please try again.");
     }
   };
 
@@ -124,7 +181,7 @@ export default function Profile() {
             </div>
 
             <div className="profile-options">
-              <div className="option-item">
+              <div className="option-item" onClick={() => setIsAddressModalOpen(true)} style={{ cursor: 'pointer' }}>
                 <span className="option-icon">📍</span>
                 <div>
                   <h3>Delivery Address</h3>
@@ -132,7 +189,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="option-item">
+              <div className="option-item" onClick={() => setIsPhoneModalOpen(true)} style={{ cursor: 'pointer' }}>
                 <span className="option-icon">📱</span>
                 <div>
                   <h3>Phone Number</h3>
@@ -149,6 +206,46 @@ export default function Profile() {
               </div>
             </div>
           </>
+        )}
+
+        {/* Address Modal */}
+        <AddressModal 
+          isOpen={isAddressModalOpen}
+          onClose={() => setIsAddressModalOpen(false)}
+          onSave={handleAddressSave}
+        />
+
+        {/* Phone Number Modal */}
+        {isPhoneModalOpen && (
+          <div className="address-modal-overlay" onClick={() => setIsPhoneModalOpen(false)}>
+            <div className="address-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+              <div className="address-modal-header">
+                <h2>Add Phone Number</h2>
+                <button className="close-modal-btn" onClick={() => setIsPhoneModalOpen(false)}>✕</button>
+              </div>
+              <form onSubmit={handlePhoneSave} className="address-form">
+                <div className="form-group">
+                  <input
+                    type="tel"
+                    value={phoneInput}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*$/.test(value) && value.length <= 10) {
+                        setPhoneInput(value);
+                      }
+                    }}
+                    placeholder="Mobile Number (10 digits) *"
+                    maxLength="10"
+                    required
+                    style={{ fontSize: '1rem', padding: '12px' }}
+                  />
+                </div>
+                <button type="submit" className="save-address-btn">
+                  Save Phone Number
+                </button>
+              </form>
+            </div>
+          </div>
         )}
       </div>
     </>

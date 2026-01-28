@@ -20,7 +20,10 @@ export default function ServingHours() {
   }, [slot]);
 
   const getItemQuantity = (itemId) => {
-    const cartItem = cartItems.find(item => item.id === itemId);
+    // Find cart item by matching the itemId (the original menu item ID)
+    const cartItem = cartItems.find(item => 
+      item.itemId === itemId || item.id === itemId || item.originalId === itemId
+    );
     return cartItem ? cartItem.quantity : 0;
   };
 
@@ -36,7 +39,12 @@ export default function ServingHours() {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
-    addToCart(item);
+    addToCart({
+      ...item,
+      originalId: item.id, // Store the original item ID for tracking
+      fullPrice: item.price,
+      portionType: 'full'
+    });
   };
 
   // Handle quantity update with restaurant status check
@@ -45,7 +53,13 @@ export default function ServingHours() {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
-    updateQuantity(itemId, change);
+    // Find the cart item's database ID to update
+    const cartItem = cartItems.find(item => 
+      item.itemId === itemId || item.id === itemId || item.originalId === itemId
+    );
+    if (cartItem) {
+      updateQuantity(cartItem.id, change); // Use the cart DB ID for updates
+    }
   };
 
   // Get global serving hours
@@ -180,10 +194,10 @@ export default function ServingHours() {
                                 {item.description && <p className="meal-card-description">{item.description}</p>}
                                 <div className="meal-card-footer">
                                   <span className="meal-price">₹{item.price}</span>
-                                  {getItemQuantity(item.id) === 0 ? ( // Note: item.id is string from our new schema
+                                  {getItemQuantity(item.id) === 0 ? (
                                     <button
                                       className="meal-add-btn"
-                                      onClick={() => handleAddToCart({ ...item, fullPrice: item.price })} // Map price to fullPrice for Context
+                                      onClick={() => handleAddToCart(item)}
                                     >
                                       Add to Cart
                                     </button>

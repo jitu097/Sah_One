@@ -45,35 +45,42 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 25px 30px;
+  padding: 20px 25px;
   border-bottom: 1px solid #e5e7eb;
+  gap: 15px;
 }
 
 .address-modal-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: #333;
   font-weight: 600;
+  white-space: nowrap;
+  flex: 1;
 }
 
 .close-modal-btn {
-  background: none;
+  background: #ef4444;
   border: none;
-  font-size: 1.8rem;
-  color: #666;
+  font-size: 1.2rem;
+  color: #000;
   cursor: pointer;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.3s ease;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  font-weight: bold;
 }
 
 .close-modal-btn:hover {
-  background: #f3f4f6;
-  color: #333;
+  background: #dc2626;
+  transform: scale(1.08);
 }
 
 .address-form {

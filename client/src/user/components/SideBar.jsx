@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
 import "../styles/SideBar.css";
 
 export default function SideBar({ isOpen, onClose }) {
@@ -7,13 +9,17 @@ export default function SideBar({ isOpen, onClose }) {
   const navigate = useNavigate();
   const { signOut, currentUser } = useAuth();
 
+  // Fetch user data from Convex
+  const user = useQuery(api.modules.users.users.getUserByFirebaseUid,
+    currentUser ? { firebaseUid: currentUser.uid } : "skip"
+  );
+
   const menu = [
     { path: "/user", icon: "🏠", label: "Home" },
     { path: "/user/offers", icon: "🎁", label: "Offers" },
     { path: "/user/orders", icon: "📦", label: "Orders" },
     { path: "/user/bookings", icon: "📅", label: "My Bookings" },
     { path: "/user/cart", icon: "🛒", label: "Cart" },
-    { path: "/user/profile", icon: "👤", label: "Profile" },
   ];
 
   const handleLogout = async () => {
@@ -44,9 +50,7 @@ export default function SideBar({ isOpen, onClose }) {
             <img src="/user.png" alt="Profile" />
           </div>
           <div className="profile-details">
-            <h3>Welcome,</h3>
-            <h2>{currentUser?.displayName || 'Guest'}!</h2>
-            <p>Enjoy your meal</p>
+            <h2>{user?.name || user?.email?.split('@')[0] || currentUser?.email?.split('@')[0] || 'Guest'}</h2>
           </div>
         </div>
 
@@ -68,8 +72,8 @@ export default function SideBar({ isOpen, onClose }) {
 
         <div className="sidebar-footer">
           <Link to="/user/profile" className="settings-btn" onClick={onClose}>
-            <span>⚙️</span>
-            <span>Settings</span>
+            <span>👤</span>
+            <span>Profile</span>
           </Link>
           <button className="logout-btn" onClick={handleLogout}>
             <span>🚪</span>
