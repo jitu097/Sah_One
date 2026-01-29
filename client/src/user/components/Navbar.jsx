@@ -8,11 +8,12 @@ import AddressModal from "./AddressModal";
 export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-  const [userLocation, setUserLocation] = useState("Your City");
+  const [userLocation, setUserLocation] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const { cartItems } = useCart();
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -20,7 +21,7 @@ export default function Navbar() {
 
   const handleSaveAddress = (addressData) => {
     // Save address to localStorage or backend
-    const locationText = `${addressData.city}, ${addressData.locality}`;
+    const locationText = `${addressData.city || ''}${addressData.locality ? ', ' + addressData.locality : ''}`.trim();
     setUserLocation(locationText);
     localStorage.setItem('userLocation', locationText);
     localStorage.setItem('userAddress', JSON.stringify(addressData));
@@ -29,9 +30,7 @@ export default function Navbar() {
   // Load saved location on mount
   useEffect(() => {
     const savedLocation = localStorage.getItem('userLocation');
-    if (savedLocation) {
-      setUserLocation(savedLocation);
-    }
+    setUserLocation(savedLocation || "");
   }, []);
 
   // Sync internal state with URL params (e.g. on back button)
@@ -59,7 +58,6 @@ export default function Navbar() {
     }
   };
 
-
   return (
     <>
       <nav className="navbar">
@@ -78,19 +76,60 @@ export default function Navbar() {
             className="location" 
             onClick={() => setIsAddressModalOpen(true)}
           >
-            📍 {userLocation}
+            📍 {userLocation && userLocation.trim() !== '' ? userLocation : 'Location'}
           </button>
         </div>
 
         <div className="nav-center">
+          {/* Mobile search overlay */}
+          {showMobileSearch && (
+            <div className="mobile-search-overlay">
+              <button
+                className="mobile-search-back"
+                onClick={() => setShowMobileSearch(false)}
+                aria-label="Back"
+              >
+                <svg width="24" height="24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              </button>
+              <input
+                type="text"
+                placeholder="Search for atta dal and more"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                autoFocus
+                className="mobile-search-input"
+              />
+            </div>
+          )}
+          {/* Desktop and mobile icon */}
           <div className="search-container">
+            <button
+              className="search-btn mobile-only"
+              style={{ display: showMobileSearch ? 'none' : undefined }}
+              onClick={() => setShowMobileSearch(true)}
+              aria-label="Open search"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
             <input
               type="text"
               placeholder="Search food..."
               value={searchTerm}
               onChange={handleSearchChange}
+              className="search-input"
             />
-            <button className="search-btn">
+            <button className="search-btn desktop-only">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"

@@ -13,6 +13,11 @@ export default function ServingHours() {
   const slot = searchParams.get('slot');
   const [expandedCategory, setExpandedCategory] = useState(slot || null);
 
+  // Scroll to top on mount or slot change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slot]);
+
   useEffect(() => {
     if (slot) {
       setExpandedCategory(slot);

@@ -27,21 +27,20 @@ export default function Profile() {
     address: '',
     name: ''
   });
+  // Used to force update when address modal closes
+  const [addressRefresh, setAddressRefresh] = useState(0);
 
-  // Initialize form data when user data is loaded
+  // Sync delivery address from localStorage (used by Navbar and AddressModal)
   useEffect(() => {
     if (user) {
-      // Check for saved address from AddressModal
       const savedAddress = localStorage.getItem('userAddress');
       let addressText = user.address || '';
       let phoneNumber = user.phone || '';
-      
       if (savedAddress) {
         const addressData = JSON.parse(savedAddress);
-        addressText = `${addressData.deliveryArea}, ${addressData.locality}, ${addressData.city}`;
+        addressText = `${addressData.deliveryArea || ''}${addressData.locality ? ', ' + addressData.locality : ''}${addressData.city ? ', ' + addressData.city : ''}`.replace(/^,\s*/, '');
         phoneNumber = addressData.mobileNumber || user.phone || '';
       }
-      
       setFormData({
         phone: phoneNumber,
         address: addressText,
@@ -49,7 +48,7 @@ export default function Profile() {
       });
       setPhoneInput(phoneNumber);
     }
-  }, [user]);
+  }, [user, addressRefresh]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -175,7 +174,7 @@ export default function Profile() {
         ) : (
           <>
             <div className="profile-section">
-              <div className="profile-avatar">👤</div>
+              <div className="profile-avatar" style={{background:'transparent'}}><img src="/people.png" alt="Profile" style={{width:'60px',height:'60px',borderRadius:'50%'}} /></div>
               <h2>{user.name || 'User'}</h2>
               <p className="profile-email">{user.email}</p>
             </div>
@@ -211,7 +210,7 @@ export default function Profile() {
         {/* Address Modal */}
         <AddressModal 
           isOpen={isAddressModalOpen}
-          onClose={() => setIsAddressModalOpen(false)}
+          onClose={() => { setIsAddressModalOpen(false); setAddressRefresh(r => r + 1); }}
           onSave={handleAddressSave}
         />
 

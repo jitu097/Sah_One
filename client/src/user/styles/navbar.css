@@ -451,3 +451,117 @@
     margin-left: 5px;
   }
 }
+
+/* Mobile search icon and input toggle */
+@media (max-width: 600px) {
+  .search-container {
+    display: flex !important;
+    position: relative;
+    align-items: center;
+  }
+  .search-btn.mobile-only {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff6b35 0%, #e23744 100%);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    color: #fff;
+    font-size: 1.3rem;
+    margin: 0 auto;
+    z-index: 1002;
+  }
+  .search-btn.mobile-only svg {
+    width: 24px;
+    height: 24px;
+  }
+  .search-container input {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+
+  .search-container input::placeholder {
+    color: transparent;
+  }
+  .search-container .search-btn.desktop-only {
+    display: none;
+  }
+  .search-container .search-btn.mobile-only {
+    display: inline-flex;
+  }
+  .search-container.show-mobile-search .search-btn.mobile-only {
+    display: none;
+  }
+  .search-container {
+    position: relative;
+  }
+}
+
+/* Mobile search overlay styles */
+@media (max-width: 600px) {
+  .search-container {
+    display: none;
+  }
+  .mobile-search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 64px;
+    background: #fff;
+    z-index: 2001;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 0 16px;
+  }
+  .mobile-search-back {
+    background: none;
+    border: none;
+    margin-right: 8px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .mobile-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1.1rem;
+    background: transparent;
+    height: 40px;
+    padding: 0 8px;
+  }
+  .mobile-search-input::placeholder {
+    color: #888;
+    font-weight: 400;
+  }
+  .search-btn.mobile-only {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 601px) {
+  .mobile-search-overlay {
+    display: none;
+  }
+  .search-container {
+    display: flex;
+  }
+}
+
+@media (min-width: 601px) {
+  .search-container .search-input {
+    display: block;
+  }
+  .search-container .search-btn.mobile-only {
+    display: none;
+  }
+  .search-container .search-btn.desktop-only {
+    display: inline-flex;
+  }
+}

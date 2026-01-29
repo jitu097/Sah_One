@@ -15,11 +15,11 @@ export default function SideBar({ isOpen, onClose }) {
   );
 
   const menu = [
-    { path: "/user", icon: "🏠", label: "Home" },
-    { path: "/user/offers", icon: "🎁", label: "Offers" },
-    { path: "/user/orders", icon: "📦", label: "Orders" },
-    { path: "/user/bookings", icon: "📅", label: "My Bookings" },
-    { path: "/user/cart", icon: "🛒", label: "Cart" },
+    { path: "/user", icon: <img src="/k.png" alt="Home" style={{width:'28px',height:'28px'}} />, label: "Home" },
+    { path: "/user/offers", icon: <img src="/u.png" alt="Offers" style={{width:'28px',height:'28px'}} />, label: "Offers" },
+    { path: "/user/orders", icon: <img src="/s.png" alt="Orders" style={{width:'28px',height:'28px'}} />, label: "Orders" },
+    { path: "/user/bookings", icon: <img src="/h.png" alt="My Bookings" style={{width:'28px',height:'28px'}} />, label: "My Bookings" },
+    { path: "/user/cart", icon: <img src="/a.png" alt="Cart" style={{width:'28px',height:'28px'}} />, label: "Cart" },
   ];
 
   const handleLogout = async () => {
@@ -45,14 +45,7 @@ export default function SideBar({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div className="profile-card">
-          <div className="profile-avatar">
-            <img src="/user.png" alt="Profile" />
-          </div>
-          <div className="profile-details">
-            <h2>{user?.name || user?.email?.split('@')[0] || currentUser?.email?.split('@')[0] || 'Guest'}</h2>
-          </div>
-        </div>
+       
 
         <nav className="sidebar-menu">
           {menu.map((item, index) => (

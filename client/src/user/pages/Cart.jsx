@@ -161,7 +161,7 @@ export default function Cart() {
         <div className="cart-sidebar-header">
           <button className="back-btn" onClick={() => navigate(-1)}>←</button>
           <h1>My Cart</h1>
-          <button className="menu-btn">⋮</button>
+          
         </div>
 
         <div className="cart-items">

@@ -7,6 +7,9 @@ import { uploadImageToCloudinary } from '../../utils/cloudinary';
 
 export default function SpecialServingHours() {
   // Initial Slot State Helper
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const initialSlotState = (startTime, endTime) => ({
     isActive: false,
     startTime,

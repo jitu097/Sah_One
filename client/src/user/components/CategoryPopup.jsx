@@ -72,7 +72,7 @@ export default function CategoryPopup({ isOpen, onClose, onOpenPartyModal }) {
 
                 <div className="popup-footer">
                     <button className="close-btn" onClick={onClose}>
-                        <span>×</span> Close
+                        <span>×</span> 
                     </button>
                 </div>
             </div>
