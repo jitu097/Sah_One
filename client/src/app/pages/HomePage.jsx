@@ -23,12 +23,7 @@ const HomePage = () => {
           <img src="/LOGO.png" alt="Logo" className="nav-logo" />
         </div>
         
-        <div className="navbar-center">
-          <a href="#home" className="nav-item active">Home</a>
-          <a href="#menu" className="nav-item">Menu</a>
-          <a href="#service" className="nav-item">Service</a>
-         
-        </div>
+       
 
         <div className="navbar-right">
          

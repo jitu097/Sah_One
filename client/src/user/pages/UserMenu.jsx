@@ -315,7 +315,11 @@ export default function UserMenu() {
                               src={item.image || '/image.png'}
                               alt={item.name}
                               className="mobile-item-image"
+                              loading="lazy"
+                              decoding="async"
                               onError={(e) => e.target.src = '/image.png'}
+                              srcSet={item.image ? `${item.image}?w=150 150w, ${item.image}?w=300 300w` : undefined}
+                              sizes="(max-width: 300px) 150px, 300px"
                             />
                             <div className="mobile-item-details">
                               <h4 className="mobile-item-name">{item.name}</h4>

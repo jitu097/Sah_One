@@ -104,7 +104,7 @@ export default function Offers() {
                 >
                   {offer.imageUrl && (
                     <div className="offer-image">
-                      <img src={offer.imageUrl} alt={offer.title} />
+                      <img src={offer.imageUrl} alt={offer.title} loading="lazy" decoding="async" srcSet={offer.imageUrl ? `${offer.imageUrl}?w=300 300w, ${offer.imageUrl}?w=600 600w` : undefined} sizes="(max-width: 600px) 300px, 600px" />
                       <div className="offer-badge">{getDiscountText(offer)}</div>
                     </div>
                   )}

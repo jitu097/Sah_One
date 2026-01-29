@@ -326,7 +326,11 @@ export default function Menu() {
                                 src={item.image || '/image.png'}
                                 alt={item.name}
                                 className="item-image"
+                                loading="lazy"
+                                decoding="async"
                                 onError={(e) => e.target.src = '/image.png'}
+                                srcSet={item.image ? `${item.image}?w=200 200w, ${item.image}?w=400 400w` : undefined}
+                                sizes="(max-width: 400px) 200px, 400px"
                               />
                               <span className={`status-pill ${item.isActive ? 'active' : 'inactive'}`}>
                                 {item.isActive ? 'Active' : 'Inactive'}
@@ -459,7 +463,7 @@ export default function Menu() {
                   <div className="image-upload-area">
                     {selectedImage ? (
                       <div className="image-preview-wrapper">
-                        <img src={selectedImage} alt="Preview" />
+                        <img src={selectedImage} alt="Preview" loading="lazy" decoding="async" />
                         <button
                           type="button"
                           className="remove-image-btn"

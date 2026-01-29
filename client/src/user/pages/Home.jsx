@@ -363,12 +363,12 @@ export default function Home() {
                   // Add a highlight-offer class for flash effect
                   <>
                     <div className="hero-content">
-                      <img src="/34.png" alt="Hero" className="hero-image" />
+                      <img src="/34.png" alt="Hero" className="hero-image" loading="lazy" decoding="async" />
                     </div>
                   </>
                 ) : (
                   <div className={`full-image-slide ${currentSlide === 2 ? 'slide-third' : ''}`}>
-                    <img src={slides[currentSlide].image} alt={`Slide ${slides[currentSlide].id}`} />
+                    <img src={slides[currentSlide].image} alt={`Slide ${slides[currentSlide].id}`} loading="lazy" decoding="async" />
                   </div>
                 )}
               </div>
@@ -406,14 +406,14 @@ export default function Home() {
 
                   return status.isActive ? (
                     <Link to="/user/serving-hours?slot=breakfast" className="menu-card">
-                      <img src="/Breeakfast.png" alt="Breakfast" />
+                      <img src="/Breeakfast.png" alt="Breakfast" loading="lazy" decoding="async" />
                       <p className="price active-time">{status.timeString}</p>
                       <h3>Breakfast</h3>
                     </Link>
                   ) : (
                     <div className="menu-card locked">
                       <div className="lock-overlay"><span className="lock-icon">🔒</span></div>
-                      <img src="/Breeakfast.png" alt="Breakfast" />
+                      <img src="/Breeakfast.png" alt="Breakfast" loading="lazy" decoding="async" />
                       <p className="price inactive-time">{status.timeString}</p>
                       <h3>Breakfast</h3>
                     </div>
@@ -428,14 +428,14 @@ export default function Home() {
 
                   return status.isActive ? (
                     <Link to="/user/serving-hours?slot=lunch" className="menu-card">
-                      <img src="/lunch.jpeg" alt="Lunch" />
+                      <img src="/lunch.jpeg" alt="Lunch" loading="lazy" decoding="async" />
                       <p className="price active-time">{status.timeString}</p>
                       <h3>Lunch</h3>
                     </Link>
                   ) : (
                     <div className="menu-card locked">
                       <div className="lock-overlay"><span className="lock-icon">🔒</span></div>
-                      <img src="/lunch.jpeg" alt="Lunch" />
+                      <img src="/lunch.jpeg" alt="Lunch" loading="lazy" decoding="async" />
                       <p className="price inactive-time">{status.timeString}</p>
                       <h3>Lunch</h3>
                     </div>
@@ -450,14 +450,14 @@ export default function Home() {
 
                   return status.isActive ? (
                     <Link to="/user/serving-hours?slot=dinner" className="menu-card">
-                      <img src="/Dinner.jpeg" alt="Dinner" />
+                      <img src="/Dinner.jpeg" alt="Dinner" loading="lazy" decoding="async" />
                       <p className="price active-time">{status.timeString}</p>
                       <h3>Dinner</h3>
                     </Link>
                   ) : (
                     <div className="menu-card locked">
                       <div className="lock-overlay"><span className="lock-icon">🔒</span></div>
-                      <img src="/Dinner.jpeg" alt="Dinner" />
+                      <img src="/Dinner.jpeg" alt="Dinner" loading="lazy" decoding="async" />
                       <p className="price inactive-time">{status.timeString}</p>
                       <h3>Dinner</h3>
                     </div>
@@ -470,12 +470,14 @@ export default function Home() {
             {/* Parties Section */}
             <section className="parties-section">
               <div className="parties-image-container">
-                <img src="/parties.png" alt="Parties" className="parties-image" />
-                <img src="/Background.png" alt="Background" className="parties-background-image" />
+                <img src="/parties.png" alt="Parties" className="parties-image" loading="lazy" decoding="async" />
+                <img src="/Background.png" alt="Background" className="parties-background-image" loading="lazy" decoding="async" />
                 <img
                   src="/69.png"
                   alt="Book Now"
                   className="parties-button-image"
+                  loading="lazy"
+                  decoding="async"
                   onClick={() => setShowPartyModal(true)}
                 />
               </div>

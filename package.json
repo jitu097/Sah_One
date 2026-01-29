@@ -9,5 +9,8 @@
   },
   "devDependencies": {
     "convex": "^1.31.2"
+  },
+  "dependencies": {
+    "normalize.css": "^8.0.1"
   }
 }

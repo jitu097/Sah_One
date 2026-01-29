@@ -86,7 +86,11 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
         <img
           src={item.image || '/image.png'}
           alt={item.name}
+          loading="lazy"
+          decoding="async"
           onError={(e) => e.target.src = '/image.png'}
+          srcSet={item.image ? `${item.image}?w=300 300w, ${item.image}?w=600 600w` : undefined}
+          sizes="(max-width: 600px) 300px, 600px"
         />
       </div>
 
