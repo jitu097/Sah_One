@@ -312,67 +312,79 @@
 
 /* Menu Item Card */
 .menu-item-card {
-  background: white;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 3px solid transparent;
   display: flex;
   flex-direction: column;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  background: linear-gradient(white, white) padding-box,
-              linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%) border-box;
-}
-
-.menu-item-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background: linear-gradient(90deg, #ff6b35 0%, #667eea 50%, #ff5722 100%);
-  transform: scaleX(0);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10;
-}
-
-.menu-item-card:hover::before {
-  transform: scaleX(1);
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  cursor: pointer;
 }
 
 .menu-item-card:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 28px 56px rgba(255, 107, 53, 0.2), 0 8px 16px rgba(0, 0, 0, 0.08);
-  border-color: rgba(255, 107, 53, 0.4);
+  transform: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.menu-item-card.inactive {
-  opacity: 0.6;
-  filter: grayscale(0.6);
-  background: linear-gradient(white, white) padding-box,
-              linear-gradient(135deg, rgba(148, 163, 184, 0.2) 0%, rgba(203, 213, 225, 0.2) 100%) border-box;
+.menu-item-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
 }
 
-.menu-item-card.inactive:hover {
-  opacity: 1;
-  filter: grayscale(0);
-  transform: translateY(-8px) scale(1.01);
+.menu-item-card h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  text-align: center;
+}
+
+.menu-item-card p {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.menu-item-card .price {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #e63946;
+  margin: 8px 0;
+}
+
+.menu-item-card .add-to-cart-btn {
+  background-color: #e63946;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.menu-item-card .add-to-cart-btn:hover {
+
 }
 
 /* Add Item Card */
 .add-item-card {
   background: linear-gradient(135deg, #fff5f2 0%, #ffffff 100%);
   border-radius: 24px;
-  border: 4px dashed #ff6b35;
+  border: 4px dashed red;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 360px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+ 
   gap: 20px;
   position: relative;
   overflow: hidden;
@@ -399,9 +411,9 @@
 
 .add-item-card:hover {
   background: linear-gradient(135deg, #ffe5dc 0%, #fff5f2 100%);
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 24px 48px rgba(255, 107, 53, 0.25);
-  border-color: #ff5722;
+ 
+ 
+  border-color: #ff2222;
   border-width: 4px;
 }
 
@@ -409,23 +421,22 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff6b35 0%, #ff5722 100%);
+  background: linear-gradient(135deg,red 0%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 4rem;
   font-weight: 300;
-  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  box-shadow: 0 16px 36px rgba(255, 107, 53, 0.35), 0 4px 12px rgba(255, 107, 53, 0.2);
+  
   z-index: 1;
   border: 4px solid rgba(255, 255, 255, 0.3);
 }
 
 .add-item-card:hover .add-item-icon {
-  transform: rotate(180deg) scale(1.2);
-  box-shadow: 0 20px 44px rgba(255, 107, 53, 0.5), 0 8px 16px rgba(255, 107, 53, 0.3);
-  border-color: rgba(255, 255, 255, 0.6);
+ 
+ 
+ 
 }
 
 .add-item-card p {
@@ -433,7 +444,7 @@
   font-size: 1.2rem;
   font-weight: 800;
   color: #ff6b35;
-  transition: all 0.3s ease;
+
   z-index: 1;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -441,7 +452,7 @@
 
 .add-item-card:hover p {
   color: #ff5722;
-  transform: scale(1.08);
+  
   letter-spacing: 0.5px;
 }
 
@@ -455,11 +466,18 @@
 .card-image-container::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+
+  top: -10%;
+  left: -10%;
+  right: -10%;
+  bottom: -10%;
+
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+
   pointer-events: none;
 }
 
@@ -472,7 +490,7 @@
 }
 
 .menu-item-card:hover .item-image {
-  transform: scale(1.15) rotate(2deg);
+  
   filter: brightness(1.1);
 }
 
@@ -572,16 +590,17 @@
   margin-top: auto;
   flex-wrap: wrap;
   padding-top: 12px;
+  margin-right: 250px;
 }
 
 .price-tag {
-  padding: 10px 18px;
+  padding: 1px 20px;
   border-radius: 14px;
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 500;
   border: 2px solid;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  
+ 
   position: relative;
   overflow: hidden;
 }
@@ -621,7 +640,7 @@
 }
 
 .price-tag.full:hover {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, red, #ea580c 100%);
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(249, 115, 22, 0.35);
@@ -634,11 +653,11 @@
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  gap: 16px;
+  gap: 20px;
 }
 
 .toggle-switch.small {
-  transform: scale(0.9);
+  transform: scale(1.4,1);
   transform-origin: left;
 }
 
@@ -678,11 +697,11 @@
 }
 
 .icon-btn.edit::before {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ 
 }
 
 .icon-btn.delete::before {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+ 
 }
 
 .icon-btn:hover::before {
@@ -692,15 +711,15 @@
 
 .icon-btn.edit:hover {
   color: white;
-  border-color: #667eea;
-  transform: translateY(-3px) rotate(8deg) scale(1.05);
-  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+ 
+ 
+ 
 }
 
 .icon-btn.delete:hover {
   color: white;
-  border-color: #ef4444;
-  transform: translateY(-3px) rotate(-8deg) scale(1.05);
+ 
+  
   box-shadow: 0 12px 24px rgba(239, 68, 68, 0.4);
 }
 

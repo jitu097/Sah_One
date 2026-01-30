@@ -266,6 +266,7 @@ export const updateMenuItem = mutation({
     halfPrice: v.optional(v.number()),
     fullPrice: v.optional(v.number()),
     isAvailable: v.optional(v.boolean()),
+      isBestSeller: v.optional(v.boolean())
   },
   handler: async (ctx, args) => {
     const { itemId, ...updates } = args;

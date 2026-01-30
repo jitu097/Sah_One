@@ -837,10 +837,22 @@
 
 .bestsellers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-  max-width: 1400px;
+  justify-content: center;
+  padding: 0;
   margin: 0 auto;
+}
+
+.bestsellers-grid .menu-card {
+  box-shadow: none;
+  transform: none;
+  transition: none;
+}
+
+.bestsellers-grid .menu-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Desktop: 5 Column Grid Layout */

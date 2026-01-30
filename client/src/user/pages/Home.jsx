@@ -91,6 +91,9 @@ export default function Home() {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
 
+  // Filter for best sellers only
+  const bestSellerItems = menuItems?.filter(item => item.isBestSeller);
+
   const filteredItems = menuItems?.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -287,6 +290,7 @@ export default function Home() {
         {/* Show these sections only when NOT searching */}
         {!searchQuery && (
           <>
+         
             {/* Hero Carousel Section */}
             <section
               className={`hero-carousel ${
@@ -596,16 +600,18 @@ export default function Home() {
           <section className="bestsellers-section">
             <h2 className="section-title">Best Sellers</h2>
             <div className="bestsellers-grid">
-              {menuItems ? (
-                menuItems.slice(0, 4).map((item) => (
-                  <MenuItemCard
-                    key={item._id}
-                    item={item}
-                    onAddToCart={handleAddToCart}
-                    quantity={getItemQuantity(item._id)}
-                    onUpdateQuantity={handleUpdateQuantity}
-                  />
-                ))
+              {bestSellerItems && bestSellerItems.length > 0 ? (
+                <div className="bestsellers-grid">
+                  {bestSellerItems.slice(0, 4).map((item) => (
+                    <MenuItemCard
+                      key={item._id}
+                      item={item}
+                      onAddToCart={handleAddToCart}
+                      quantity={getItemQuantity(item._id)}
+                      onUpdateQuantity={handleUpdateQuantity}
+                    />
+                  ))}
+                </div>
               ) : (
                 <div className="loading-text">Loading delicious items...</div>
               )}

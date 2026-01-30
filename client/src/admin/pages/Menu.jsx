@@ -1,3 +1,5 @@
+// ...existing code...
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -7,6 +9,18 @@ import { api } from '../../../../convex/_generated/api';
 import { uploadImageToCloudinary } from '../../utils/cloudinary';
 
 export default function Menu() {
+  // Toggle Best Seller status for a menu item
+  const handleToggleBestSeller = async (item) => {
+    try {
+      await updateMenuItem({
+        itemId: item._id,
+        isBestSeller: !item.isBestSeller
+      });
+    } catch (error) {
+      console.error("Error toggling best seller status:", error);
+      alert("Failed to update best seller status.");
+    }
+  };
   const [activeCategory, setActiveCategory] = useState('All');
   const [showModal, setShowModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -34,7 +48,8 @@ export default function Menu() {
     isActive: i.isAvailable, // Map backend isAvailable to frontend isActive
     priceFull: i.fullPrice,
     priceHalf: i.halfPrice,
-    hasHalfOption: i.hasHalfPortion
+    hasHalfOption: i.hasHalfPortion,
+    isBestSeller: i.isBestSeller || false
   }));
 
   // Convex Mutations
@@ -55,7 +70,8 @@ export default function Menu() {
     priceHalf: '',
     priceFull: '',
     hasHalfOption: false,
-    isActive: true
+    isActive: true,
+    isBestSeller: false
   });
 
   // Local state for expanded categories in UI
@@ -72,7 +88,8 @@ export default function Menu() {
       priceHalf: '',
       priceFull: '',
       hasHalfOption: false,
-      isActive: true
+      isActive: true,
+      isBestSeller: false
     });
     setSelectedImage('');
     setShowModal(true);
@@ -153,7 +170,8 @@ export default function Menu() {
       priceHalf: item.priceHalf || '',
       priceFull: item.priceFull,
       hasHalfOption: item.hasHalfOption,
-      isActive: item.isActive
+      isActive: item.isActive,
+      isBestSeller: item.isBestSeller || false
     });
     setSelectedImage(item.image || '');
     setShowModal(true);
@@ -219,6 +237,7 @@ export default function Menu() {
       isAvailable: formData.isActive,
       hasHalfPortion: formData.hasHalfOption,
       halfPrice: formData.hasHalfOption ? Number(formData.priceHalf) : undefined,
+      isBestSeller: formData.isBestSeller || false,
     };
 
     try {
@@ -332,7 +351,7 @@ export default function Menu() {
                                 srcSet={item.image ? `${item.image}?w=200 200w, ${item.image}?w=400 400w` : undefined}
                                 sizes="(max-width: 400px) 200px, 400px"
                               />
-                              <span className={`status-pill ${item.isActive ? 'active' : 'inactive'}`}>
+                              <span className={`status-pill ${item.isActive ? 'active' : 'inactive'}`}> 
                                 {item.isActive ? 'Active' : 'Inactive'}
                               </span>
                             </div>
@@ -357,6 +376,16 @@ export default function Menu() {
                                   onChange={() => handleToggleActive(item)}
                                 />
                                 <span className="toggle-slider"></span>
+                              </label>
+                              {/* Best Seller Checkbox */}
+                              <label style={{ marginLeft: '10px', fontWeight: 500 }}>
+                                <input
+                                  type="checkbox"
+                                  checked={item.isBestSeller || false}
+                                  onChange={() => handleToggleBestSeller(item)}
+                                  style={{ marginRight: '5px' }}
+                                />
+                                Best Seller
                               </label>
                               <div className="action-buttons">
                                 <button className="icon-btn edit" onClick={() => handleEdit(item)} title="Edit">✏️</button>

@@ -11,8 +11,9 @@ export default defineSchema({
     email: v.string(),
     name: v.optional(v.string()),
     phone: v.optional(v.string()),
-    role: v.string(), // "user", "admin", "delivery"
     address: v.optional(v.string()),
+    role: v.string(), // "user", "admin", "delivery"
+    location: v.optional(v.string()), // Added location field
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -74,6 +75,7 @@ export default defineSchema({
     isAvailable: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
+    isBestSeller: v.optional(v.boolean()),
   })
     .index("by_category", ["category"])
     .index("by_availability", ["isAvailable"]),
