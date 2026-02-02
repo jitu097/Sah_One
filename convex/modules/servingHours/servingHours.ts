@@ -37,6 +37,21 @@ export const updateGlobalServingHours = mutation({
     dinner: slotSchema,
   },
   handler: async (ctx, args) => {
+    // Auth Check
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", identity.subject))
+      .first();
+
+    if (!user || user.role !== "admin") {
+      throw new Error("Access denied: Admins only");
+    }
+
     const existing = await ctx.db.query("servingHoursConfig").first();
     const timestamp = Date.now();
 
@@ -57,6 +72,51 @@ export const updateGlobalServingHours = mutation({
         updatedAt: timestamp,
       });
       return configId;
+    }
+  },
+});
+
+/**
+ * Toggle restaurant open/closed status atomically
+ */
+export const toggleRestaurantStatus = mutation({
+  args: {
+    isClosed: v.boolean(),
+    reason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Auth Check
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", identity.subject))
+      .first();
+
+    if (!user || user.role !== "admin") {
+      throw new Error("Access denied: Admins only");
+    }
+
+    const existing = await ctx.db.query("servingHoursConfig").first();
+    const timestamp = Date.now();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        isClosed: args.isClosed,
+        reason: args.reason,
+        updatedAt: timestamp,
+      });
+    } else {
+      // Create with defaults if not exists
+      await ctx.db.insert("servingHoursConfig", {
+        isClosed: args.isClosed,
+        reason: args.reason,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
     }
   },
 });

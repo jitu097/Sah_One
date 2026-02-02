@@ -238,10 +238,35 @@ export default defineSchema({
 
   cartItems: defineTable({
     cartId: v.id("carts"),
-    itemId: v.id("menuItems"),
+    itemId: v.union(v.id("menuItems"), v.string()), // Support both menu items and serving hours items
     quantity: v.number(),
     selectedPortion: v.optional(v.string()), // "half" or "full" (defaults to full if undefined)
+    itemType: v.optional(v.string()), // "menu" or "serving" to distinguish item types
   })
     .index("by_cart", ["cartId"])
     .index("by_cart_and_item", ["cartId", "itemId"]),
+
+  // Notifications
+  notifications: defineTable({
+    recipientId: v.string(), // userid (Convex ID) or "admin"
+    recipientFirebaseUid: v.optional(v.string()), // For legacy support or external reference
+    type: v.union(
+      v.literal("order"),
+      v.literal("booking"),
+      v.literal("payment"),
+      v.literal("offer"),
+      v.literal("system")
+    ),
+    title: v.string(),
+    message: v.string(),
+    referenceId: v.optional(v.string()), // orderId, bookingId
+    isRead: v.boolean(),
+    isAdmin: v.boolean(), // Explicit flag for admin notifications
+    createdAt: v.number(),
+  })
+    .index("by_recipient", ["recipientId"])
+    .index("by_recipient_firebase", ["recipientFirebaseUid"])
+    .index("by_recipient_and_read", ["recipientId", "isRead"])
+    .index("by_admin", ["isAdmin"]), // For admin queries
 });
+

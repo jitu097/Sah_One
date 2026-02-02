@@ -44,9 +44,6 @@ export default function SpecialServingHours() {
   // Queries & Mutations
   const globalConfig = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
   const updateGlobalServingHours = useMutation(api.modules.servingHours.servingHours.updateGlobalServingHours);
-  const createMenuItem = useMutation(api.modules.menu.menu.createMenuItem);
-  const createCategory = useMutation(api.modules.menu.menu.createCategory);
-  const deleteMenuItem = useMutation(api.modules.menu.menu.deleteMenuItem);
 
   // Update form data when data is fetched
   useEffect(() => {
@@ -110,68 +107,16 @@ export default function SpecialServingHours() {
     }
 
     try {
-      // 1. Ensure "Special" category exists (silent check/create if needed)
-      // Note: In a real app we might want to fetch categories first, but for now we'll try to rely on existing or create.
-      // Since we don't have a "getCategoryByName" handy here without a new query, 
-      // we will assume valid setup or try to create standard "Special" category if feasible, 
-      // BUT `createCategory` throws if exists. 
-      // BETTER APPROACH: Just use "Special" and let `createMenuItem` failing tell us if it's missing, 
-      // OR we just define it. 
-      // Let's rely on the user having a "Special" category or create a silent one.
-      // Actually, `createMenuItem` validates category. 
-      // Let's wrap this in a try/catch block that handles creation.
-
-      const categoryName = "Special";
-
-      // Temporary: We are not checking if category exists to avoid complexity of adding a query just for this.
-      // If "Special" category doesn't exist, this will fail. 
-      // Let's assume the user has one or we should create it. 
-      // Ideally we would look up `getActiveCategories` or similar. 
-      // For this fix, let's try to create a real item.
-
-      let realItemId;
-      try {
-        realItemId = await createMenuItem({
-          name: newItem.name,
-          description: newItem.description || "Special Item",
-          category: categoryName,
-          fullPrice: parseFloat(newItem.price),
-          hasHalfPortion: false,
-          image: newItem.image,
-          isAvailable: false // HIDDEN by default so it doesn't clutter main menu
-        });
-      } catch (err) {
-        if (err.message.includes("Category does not exist")) {
-          // Try to create the category
-          try {
-            await createCategory({ name: categoryName, isActive: false });
-            // Retry creating item
-            realItemId = await createMenuItem({
-              name: newItem.name,
-              description: newItem.description || "Special Item",
-              category: categoryName,
-              fullPrice: parseFloat(newItem.price),
-              hasHalfPortion: false,
-              image: newItem.image,
-              isAvailable: false
-            });
-          } catch (catErr) {
-            console.error("Failed to create Special category or item:", catErr);
-            alert("Error: Could not create backend item. Ensure 'Special' category exists.");
-            return;
-          }
-        } else {
-          throw err;
-        }
-      }
+      // Generate a simple unique ID for the special item (client-side only)
+      const itemId = `special_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       const itemToAdd = {
-        id: realItemId, // use the REAL ID from Convex
+        id: itemId,
         name: newItem.name,
         price: parseFloat(newItem.price),
         description: newItem.description,
         image: newItem.image,
-        isActive: true // Active in the SLOT, but hidden in main menu
+        isActive: true
       };
 
       setFormData(prev => ({
@@ -194,7 +139,7 @@ export default function SpecialServingHours() {
   const removeItemFromSlot = async (slotName, itemId) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
-    // Remove from local list first
+    // Remove from local list
     setFormData(prev => ({
       ...prev,
       [slotName]: {
@@ -202,18 +147,6 @@ export default function SpecialServingHours() {
         items: prev[slotName].items.filter(item => item.id !== itemId)
       }
     }));
-
-    // Attempt to delete it from backend (clean up)
-    // We do this silently as it's an optimization.
-    // NOTE: This assumes the ID is a valid Convex ID. 
-    // Old invalid IDs (timestamps) will fail, which is fine (we catch it).
-    try {
-      if (itemId.length > 20) { // Simple check if it looks like a Convex ID
-        await deleteMenuItem({ itemId: itemId });
-      }
-    } catch (err) {
-      console.warn("Could not delete underlying backend item (maybe it was an old invalid ID):", itemId);
-    }
   };
 
   const toggleItemActive = (slotName, itemId) => {

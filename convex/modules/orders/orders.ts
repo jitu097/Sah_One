@@ -1,5 +1,7 @@
 import { mutation, query } from "../../_generated/server";
+import { internal } from "../../_generated/api";
 import { v } from "convex/values";
+import { Id } from "../../_generated/dataModel";
 
 /**
  * Create a new order
@@ -44,6 +46,16 @@ export const createOrder = mutation({
       deliveryPersonId: undefined,
       createdAt: timestamp,
       updatedAt: timestamp,
+    });
+
+    // Notify Admin of new order
+    await ctx.scheduler.runAfter(0, internal.notifications.create, {
+      recipientId: "admin",
+      type: "order",
+      title: "New Order Received",
+      message: `New order from ${args.customerName || "Customer"} for ₹${args.totalAmount}`,
+      referenceId: orderId,
+      isAdmin: true,
     });
 
     return orderId;
@@ -93,7 +105,7 @@ export const getOrdersByDeliveryPerson = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("orders")
-      .withIndex("by_delivery_person", (q) => 
+      .withIndex("by_delivery_person", (q) =>
         q.eq("deliveryPersonId", args.deliveryPersonId)
       )
       .collect();
@@ -119,10 +131,30 @@ export const updateOrderStatus = mutation({
     status: v.string(),
   },
   handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) throw new Error("Order not found");
+
     await ctx.db.patch(args.orderId, {
       status: args.status,
       updatedAt: Date.now(),
     });
+
+    // Notify User of status update
+    // Notify User of status update
+    // Need to get Firebase UID from the user record because frontend queries by Firebase UID
+    // Need to get Firebase UID from the user record because frontend queries by Firebase UID
+    const user = await ctx.db.get(order.userId as Id<"users">);
+    if (user && user.firebaseUid) {
+      await ctx.scheduler.runAfter(0, internal.notifications.create, {
+        recipientId: user._id,
+        recipientFirebaseUid: user.firebaseUid,
+        type: "order",
+        title: "Order Status Update",
+        message: `Your order is now ${args.status}`,
+        referenceId: args.orderId,
+        isAdmin: false,
+      });
+    }
 
     return { success: true };
   },
@@ -137,11 +169,30 @@ export const assignDeliveryPerson = mutation({
     deliveryPersonId: v.string(),
   },
   handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) throw new Error("Order not found");
+
     await ctx.db.patch(args.orderId, {
       deliveryPersonId: args.deliveryPersonId,
       status: "out-for-delivery",
       updatedAt: Date.now(),
     });
+
+    // Notify User
+    // Notify User
+    // Notify User
+    const user = await ctx.db.get(order.userId as Id<"users">);
+    if (user && user.firebaseUid) {
+      await ctx.scheduler.runAfter(0, internal.notifications.create, {
+        recipientId: user._id,
+        recipientFirebaseUid: user.firebaseUid,
+        type: "order",
+        title: "Order Out for Delivery",
+        message: "Your order is on the way!",
+        referenceId: args.orderId,
+        isAdmin: false,
+      });
+    }
 
     return { success: true };
   },
@@ -153,9 +204,40 @@ export const assignDeliveryPerson = mutation({
 export const cancelOrder = mutation({
   args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) throw new Error("Order not found");
+
     await ctx.db.patch(args.orderId, {
       status: "cancelled",
       updatedAt: Date.now(),
+    });
+
+    // Notify User if admin cancelled, or Admin if user cancelled?
+    // For now, assuming this action notifies the User (e.g. if Admin cancelled it).
+    // If user cancelled their own order, they shouldn't verify get a notification? 
+    // Just notify User to be safe/consistent.
+    // Notify User
+    const user = await ctx.db.get(order.userId as Id<"users">);
+    if (user && user.firebaseUid) {
+      await ctx.scheduler.runAfter(0, internal.notifications.create, {
+        recipientId: user._id,
+        recipientFirebaseUid: user.firebaseUid,
+        type: "order",
+        title: "Order Cancelled",
+        message: "Your order has been cancelled.",
+        referenceId: args.orderId,
+        isAdmin: false,
+      });
+    }
+
+    // Also Notify Admin about cancellation
+    await ctx.scheduler.runAfter(0, internal.notifications.create, {
+      recipientId: "admin",
+      type: "order",
+      title: "Order Cancelled",
+      message: `Order #${args.orderId} was cancelled.`,
+      referenceId: args.orderId,
+      isAdmin: true,
     });
 
     return { success: true };
@@ -180,7 +262,7 @@ export const getRecentOrders = query({
 export const getOrderStatistics = query({
   handler: async (ctx) => {
     const allOrders = await ctx.db.query("orders").collect();
-    
+
     const totalOrders = allOrders.length;
     const pendingOrders = allOrders.filter(o => o.status === "pending").length;
     const confirmedOrders = allOrders.filter(o => o.status === "confirmed").length;
@@ -188,7 +270,7 @@ export const getOrderStatistics = query({
     const outForDelivery = allOrders.filter(o => o.status === "out-for-delivery").length;
     const deliveredOrders = allOrders.filter(o => o.status === "delivered").length;
     const cancelledOrders = allOrders.filter(o => o.status === "cancelled").length;
-    
+
     const totalRevenue = allOrders
       .filter(o => o.status === "delivered")
       .reduce((sum, order) => sum + order.totalAmount, 0);

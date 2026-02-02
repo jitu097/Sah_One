@@ -230,8 +230,6 @@
 
 .carousel-btn {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   background: rgba(226, 55, 68, 0.8);
   border: 2px solid white;
   color: white;
@@ -241,7 +239,7 @@
   font-size: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 100;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -250,7 +248,7 @@
 .carousel-btn:hover {
   background: #e23744;
   color: white;
-  transform: translateY(-50%) scale(1.15);
+  transform: scale(1.15);
   box-shadow: 0 4px 15px rgba(226, 55, 68, 0.5);
 }
 
@@ -260,9 +258,8 @@
   justify-content: center;
   position: absolute;
   left: 16px;
-  top: 90%;
-  transform: translateY(-50%);
-  z-index: 1002;
+  bottom: 30px;
+  z-index: 10;
   background: #e23744;
   color: #faf4f5;
   border: none;
@@ -275,6 +272,11 @@
   opacity: 1 !important;
 }
 
+.carousel-btn.prev:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 15px rgba(226, 55, 68, 0.5);
+}
+
 .carousel-btn.prev:active,
 .carousel-btn.prev:focus {
   outline: 2px solid #e23744;
@@ -283,6 +285,7 @@
 @media (max-width: 600px) {
   .carousel-btn.prev {
     left: 8px;
+    bottom: 20px;
     width: 38px;
     height: 38px;
     font-size: 1.2rem;
@@ -295,9 +298,8 @@
   justify-content: center;
   position: absolute;
   right: 16px;
-  top: 90%;
-  transform: translateY(-50%);
-  z-index: 1002;
+  bottom: 30px;
+  z-index: 10;
   background:#e23744;
   color: #e9e0e1;
   border: none;
@@ -310,6 +312,11 @@
   opacity: 1 !important;
 }
 
+.carousel-btn.next:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 15px rgba(226, 55, 68, 0.5);
+}
+
 .carousel-btn.next:active,
 .carousel-btn.next:focus {
   outline: 2px solid #e23744;
@@ -318,6 +325,7 @@
 @media (max-width: 600px) {
   .carousel-btn.next {
     right: 8px;
+    bottom: 20px;
     width: 38px;
     height: 38px;
     font-size: 1.2rem;

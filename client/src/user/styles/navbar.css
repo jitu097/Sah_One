@@ -458,7 +458,13 @@
     display: flex !important;
     position: relative;
     align-items: center;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    width: auto;
   }
+
   .search-btn.mobile-only {
     display: inline-flex !important;
     align-items: center;
@@ -468,33 +474,38 @@
     border-radius: 50%;
     width: 44px;
     height: 44px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     color: #fff;
     font-size: 1.3rem;
     margin: 0 auto;
     z-index: 1002;
   }
+
   .search-btn.mobile-only svg {
     width: 24px;
     height: 24px;
   }
+
   .search-container input {
-    font-size: 0.9rem;
-    padding: 10px 14px;
+    display: none;
   }
 
   .search-container input::placeholder {
-    color: transparent;
+    display: none;
   }
+
   .search-container .search-btn.desktop-only {
     display: none;
   }
+
   .search-container .search-btn.mobile-only {
     display: inline-flex;
   }
+
   .search-container.show-mobile-search .search-btn.mobile-only {
     display: none;
   }
+
   .search-container {
     position: relative;
   }
@@ -505,6 +516,7 @@
   .search-container {
     display: none;
   }
+
   .mobile-search-overlay {
     position: fixed;
     top: 0;
@@ -515,9 +527,10 @@
     z-index: 2001;
     display: flex;
     align-items: center;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     padding: 0 16px;
   }
+
   .mobile-search-back {
     background: none;
     border: none;
@@ -527,6 +540,7 @@
     align-items: center;
     cursor: pointer;
   }
+
   .mobile-search-input {
     flex: 1;
     border: none;
@@ -536,10 +550,12 @@
     height: 40px;
     padding: 0 8px;
   }
+
   .mobile-search-input::placeholder {
     color: #888;
     font-weight: 400;
   }
+
   .search-btn.mobile-only {
     display: inline-flex;
   }
@@ -549,6 +565,7 @@
   .mobile-search-overlay {
     display: none;
   }
+
   .search-container {
     display: flex;
   }
@@ -558,10 +575,61 @@
   .search-container .search-input {
     display: block;
   }
+
   .search-container .search-btn.mobile-only {
     display: none;
   }
+
   .search-container .search-btn.desktop-only {
     display: inline-flex;
   }
+}
+
+/* Expanded Search Styles */
+.navbar-expanded {
+  justify-content: center;
+}
+
+.nav-center.expanded {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-center.expanded .search-container {
+  width: 100%;
+  max-width: 900px;
+  background: white;
+  border-color: #e23744;
+  box-shadow: 0 4px 20px rgba(226, 55, 68, 0.15);
+}
+
+.search-back-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  transition: all 0.3s ease;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.search-back-btn:hover {
+  color: #e23744;
+  background: rgba(226, 55, 68, 0.08);
+}
+
+/* Ensure smooth transition for search container width */
+.search-container {
+  transition: width 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Adjustments for search input in expanded mode if needed */
+.nav-center.expanded .search-container input {
+  font-size: 1rem;
 }

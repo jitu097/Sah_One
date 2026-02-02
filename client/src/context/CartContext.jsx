@@ -32,9 +32,13 @@ export function CartProvider({ children }) {
       return;
     }
 
+    // Determine if this is a serving hours item or menu item
+    const isServingItem = item.id && typeof item.id === 'string' && item.id.startsWith('special_');
+    
     // Resolve the correct Menu Item ID
     // UserMenu passes: { ...item, id: `${item._id}_${portionType}`, originalId: item._id, ... }
-    const menuItemId = item.originalId || (item.id && item.id.includes('_') ? item.id.split('_')[0] : item.id);
+    // ServingHours passes: { ...item, originalId: item.id } where item.id is like "special_xxx"
+    const menuItemId = isServingItem ? item.id : (item.originalId || (item.id && item.id.includes('_') ? item.id.split('_')[0] : item.id));
 
     // Fallback if menuItemId is still ambiguous or missing (should be a valid ID string)
     if (!menuItemId) {
@@ -47,7 +51,8 @@ export function CartProvider({ children }) {
       userId: currentUser.uid,
       itemId: menuItemId,
       quantity: 1,
-      selectedPortion: item.portionType || 'full'
+      selectedPortion: item.portionType || 'full',
+      itemType: isServingItem ? 'serving' : 'menu'
     };
 
     console.log('[CartContext] Sending payload to database:', payload);

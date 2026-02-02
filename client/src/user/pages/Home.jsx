@@ -10,16 +10,17 @@ import '../styles/pages.css';
 import '../styles/Home.css';
 
 import CategoryPopup from '../components/CategoryPopup';
+import { isRestaurantOpen } from '../../utils/restaurantStatus';
 
 export default function Home() {
   const navigate = useNavigate();
   // Fetch active offers for hero carousel (must be inside component)
   const activeOffersRaw = useQuery(api.modules.offers.offers.getActiveOffers);
-  
+
   // Stabilize the offers array to prevent unnecessary re-renders
   // useMemo ensures we don't create a new [] on every render
   const activeOffers = useMemo(() => activeOffersRaw || [], [activeOffersRaw]);
-  
+
   const { addToCart, cartItems, updateQuantity } = useCart();
   const { currentUser } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -46,8 +47,8 @@ export default function Home() {
   const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
 
   const handleAddToCart = (item, portionType = 'full') => {
-    const isRestaurantOpen = localStorage.getItem('restaurantOpen');
-    if (isRestaurantOpen === 'false') {
+    // Use the global config fetched from DB
+    if (!isRestaurantOpen(specialHours)) {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
@@ -101,11 +102,11 @@ export default function Home() {
   // Build slides: if there are active offers, show them; else show default slides
   const offerSlides = activeOffers.length > 0
     ? activeOffers.map((offer, idx) => ({
-        id: `offer-${offer._id}`,
-        type: 'offer',
-        offer,
-        imageUrl: offer.imageUrl || null,
-      }))
+      id: `offer-${offer._id}`,
+      type: 'offer',
+      offer,
+      imageUrl: offer.imageUrl || null,
+    }))
     : [];
 
   const defaultSlides = [
@@ -127,7 +128,7 @@ export default function Home() {
   ];
 
   // Memoize slides to prevent recreation on every render (especially during carousel auto-slide)
-  const slides = useMemo(() => 
+  const slides = useMemo(() =>
     offerSlides.length > 0 ? offerSlides : defaultSlides,
     [activeOffers] // Only recreate when offers actually change
   );
@@ -290,16 +291,15 @@ export default function Home() {
         {/* Show these sections only when NOT searching */}
         {!searchQuery && (
           <>
-         
+
             {/* Hero Carousel Section */}
             <section
-              className={`hero-carousel ${
-                slides[currentSlide].type === 'offer' && slides[currentSlide].offer && slides[currentSlide].offer.imageUrl
+              className={`hero-carousel ${slides[currentSlide].type === 'offer' && slides[currentSlide].offer && slides[currentSlide].offer.imageUrl
+                ? 'hero-carousel-dynamic'
+                : slides[currentSlide].type === 'original'
                   ? 'hero-carousel-dynamic'
-                  : slides[currentSlide].type === 'original'
-                    ? 'hero-carousel-dynamic'
-                    : 'hero-carousel-white'
-              }`}
+                  : 'hero-carousel-white'
+                }`}
               style={
                 slides[currentSlide].type === 'offer' && slides[currentSlide].offer && slides[currentSlide].offer.imageUrl
                   ? { backgroundImage: `url('${slides[currentSlide].offer.imageUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -315,7 +315,7 @@ export default function Home() {
                 ←
               </button>
 
-              <div 
+              <div
                 className="carousel-content"
                 onClick={() => {
                   if (slides[currentSlide].type === 'offer') {
@@ -338,10 +338,10 @@ export default function Home() {
                 {slides[currentSlide].type === 'offer' ? (
                   <div
                     className="hero-offer-slide"
-                    style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      padding: 0, 
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
                       width: '100%',
                       height: '100%',
                       display: 'flex',
@@ -579,14 +579,13 @@ export default function Home() {
             <div className="bestsellers-grid">
               {filteredItems && filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
-                  <div id={`menuitem-${item._id}`} key={item._id}>
-                    <MenuItemCard
-                      item={item}
-                      onAddToCart={handleAddToCart}
-                      quantity={getItemQuantity(item._id)}
-                      onUpdateQuantity={handleUpdateQuantity}
-                    />
-                  </div>
+                  <MenuItemCard
+                    key={item._id}
+                    item={item}
+                    onAddToCart={handleAddToCart}
+                    quantity={getItemQuantity(item._id)}
+                    onUpdateQuantity={handleUpdateQuantity}
+                  />
                 ))
               ) : (
                 <div className="no-results">
@@ -601,17 +600,15 @@ export default function Home() {
             <h2 className="section-title">Best Sellers</h2>
             <div className="bestsellers-grid">
               {bestSellerItems && bestSellerItems.length > 0 ? (
-                <div className="bestsellers-grid">
-                  {bestSellerItems.slice(0, 4).map((item) => (
-                    <MenuItemCard
-                      key={item._id}
-                      item={item}
-                      onAddToCart={handleAddToCart}
-                      quantity={getItemQuantity(item._id)}
-                      onUpdateQuantity={handleUpdateQuantity}
-                    />
-                  ))}
-                </div>
+                bestSellerItems.slice(0, 4).map((item) => (
+                  <MenuItemCard
+                    key={item._id}
+                    item={item}
+                    onAddToCart={handleAddToCart}
+                    quantity={getItemQuantity(item._id)}
+                    onUpdateQuantity={handleUpdateQuantity}
+                  />
+                ))
               ) : (
                 <div className="loading-text">Loading delicious items...</div>
               )}

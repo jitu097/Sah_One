@@ -1,5 +1,7 @@
 import { mutation, query } from "../../_generated/server";
+import { internal } from "../../_generated/api";
 import { v } from "convex/values";
+import { Id } from "../../_generated/dataModel";
 
 /**
  * Create a new table booking
@@ -28,6 +30,16 @@ export const createBooking = mutation({
       updatedAt: timestamp,
     });
 
+    // Notify Admin of new booking
+    await ctx.scheduler.runAfter(0, internal.notifications.create, {
+      recipientId: "admin",
+      type: "booking",
+      title: "New Table Booking",
+      message: `${args.name} booked a table for ${args.guests} on ${args.date} at ${args.time}`,
+      referenceId: bookingId,
+      isAdmin: true,
+    });
+
     return bookingId;
   },
 });
@@ -53,7 +65,7 @@ export const getBookingsByUserId = query({
       .query("bookings")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
-    
+
     return bookings.sort((a, b) => b.createdAt - a.createdAt);
   },
 });
@@ -87,6 +99,23 @@ export const updateBookingStatus = mutation({
       updatedAt: timestamp,
     });
 
+    const booking = await ctx.db.get(args.bookingId);
+    if (booking) {
+      // Resolve user.userId to firebaseUid
+      const user = await ctx.db.get(booking.userId as Id<"users">);
+      if (user && user.firebaseUid) {
+        await ctx.scheduler.runAfter(0, internal.notifications.create, {
+          recipientId: user._id,
+          recipientFirebaseUid: user.firebaseUid,
+          type: "booking",
+          title: `Booking ${args.status}`,
+          message: `Your booking for ${booking.date} has been ${args.status}`,
+          referenceId: args.bookingId,
+          isAdmin: false,
+        });
+      }
+    }
+
     return args.bookingId;
   },
 });
@@ -113,7 +142,7 @@ export const getPendingBookingsCount = query({
       .query("bookings")
       .withIndex("by_status", (q) => q.eq("status", "pending"))
       .collect();
-    
+
     return pendingBookings.length;
   },
 });

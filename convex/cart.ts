@@ -31,28 +31,62 @@ export const getCart = query({
             .withIndex("by_cart", (q) => q.eq("cartId", cart._id))
             .collect();
 
-        // 3. Join with Menu Items to get fresh prices/details
+        // 3. Join with Menu Items or Serving Hours to get fresh prices/details
         const itemsWithDetails = await Promise.all(
             cartItems.map(async (item) => {
-                const menuItem = await ctx.db.get(item.itemId);
-                if (!menuItem) return null; // Item might have been deleted
+                // Check if this is a serving hours item (string ID) or menu item (Convex ID)
+                const isServingItem = item.itemType === "serving" || (typeof item.itemId === "string" && item.itemId.startsWith("special_"));
 
-                // Determine price based on portion
-                let price = menuItem.fullPrice;
-                if (item.selectedPortion === "half" && menuItem.hasHalfPortion && menuItem.halfPrice) {
-                    price = menuItem.halfPrice;
+                if (isServingItem) {
+                    // For serving hours items, we need to fetch from servingHoursConfig
+                    const servingHours = await ctx.db.query("servingHoursConfig").first();
+                    if (!servingHours) return null;
+
+                    // Search in all slots for the item
+                    let foundItem = null;
+                    const slots = [servingHours.breakfast, servingHours.lunch, servingHours.dinner];
+                    
+                    for (const slot of slots) {
+                        if (slot?.items) {
+                            foundItem = slot.items.find(i => i.id === item.itemId);
+                            if (foundItem) break;
+                        }
+                    }
+
+                    if (!foundItem || !foundItem.isActive) return null; // Item not found or inactive
+
+                    return {
+                        ...item,
+                        name: foundItem.name,
+                        image: foundItem.image || "/image.png",
+                        price: foundItem.price,
+                        category: "Special Menu",
+                        fullPrice: foundItem.price,
+                        halfPrice: undefined,
+                        hasHalfPortion: false
+                    };
+                } else {
+                    // Regular menu item
+                    const menuItem = await ctx.db.get(item.itemId as any);
+                    if (!menuItem) return null; // Item might have been deleted
+
+                    // Determine price based on portion
+                    let price = menuItem.fullPrice;
+                    if (item.selectedPortion === "half" && menuItem.hasHalfPortion && menuItem.halfPrice) {
+                        price = menuItem.halfPrice;
+                    }
+
+                    return {
+                        ...item,
+                        name: menuItem.name,
+                        image: menuItem.image,
+                        price: price,
+                        category: menuItem.category,
+                        fullPrice: menuItem.fullPrice,
+                        halfPrice: menuItem.halfPrice,
+                        hasHalfPortion: menuItem.hasHalfPortion
+                    };
                 }
-
-                return {
-                    ...item,
-                    name: menuItem.name,
-                    image: menuItem.image,
-                    price: price,
-                    category: menuItem.category,
-                    fullPrice: menuItem.fullPrice,
-                    halfPrice: menuItem.halfPrice,
-                    hasHalfPortion: menuItem.hasHalfPortion
-                };
             })
         );
 
@@ -131,16 +165,37 @@ export const getCart = query({
 export const addToCart = mutation({
     args: {
         userId: v.string(),
-        itemId: v.id("menuItems"),
+        itemId: v.union(v.id("menuItems"), v.string()), // Support both menu items and serving hours items
         quantity: v.number(),
-        selectedPortion: v.optional(v.string()) // "full" or "half"
+        selectedPortion: v.optional(v.string()), // "full" or "half"
+        itemType: v.optional(v.string()) // "menu" or "serving"
     },
     handler: async (ctx, args) => {
         const userId = args.userId;
         if (!userId) throw new Error("User ID is required");
 
-        const menuItem = await ctx.db.get(args.itemId);
-        if (!menuItem) throw new Error("Item not found");
+        // Determine if this is a serving hours item or menu item
+        const isServingItem = args.itemType === "serving" || (typeof args.itemId === "string" && args.itemId.startsWith("special_"));
+
+        // Validate item exists
+        if (isServingItem) {
+            const servingHours = await ctx.db.query("servingHoursConfig").first();
+            if (!servingHours) throw new Error("Serving hours not configured");
+            
+            let foundItem = null;
+            const slots = [servingHours.breakfast, servingHours.lunch, servingHours.dinner];
+            for (const slot of slots) {
+                if (slot?.items) {
+                    foundItem = slot.items.find(i => i.id === args.itemId);
+                    if (foundItem) break;
+                }
+            }
+            if (!foundItem) throw new Error("Serving hours item not found");
+            if (!foundItem.isActive) throw new Error("Item is not available");
+        } else {
+            const menuItem = await ctx.db.get(args.itemId as any);
+            if (!menuItem) throw new Error("Menu item not found");
+        }
 
         // 1. Get or Create Cart
         let cart = await ctx.db
@@ -178,6 +233,7 @@ export const addToCart = mutation({
                 itemId: args.itemId,
                 quantity: args.quantity,
                 selectedPortion: portionToMatch,
+                itemType: isServingItem ? "serving" : "menu",
             });
         }
 

@@ -8,6 +8,7 @@ import { useCart } from '../../context/CartContext';
 import '../styles/MenuItemCard.css';
 import '../styles/pages.css';
 import '../styles/UserMenu.css';
+import { isRestaurantOpen } from '../../utils/restaurantStatus';
 
 export default function UserMenu() {
   const { addToCart, cartItems, updateQuantity } = useCart();
@@ -42,6 +43,8 @@ export default function UserMenu() {
   // Fetch data from Convex
   const allMenuItems = useQuery(api.modules.menu.menu.getAvailableMenuItems);
   const categoriesList = useQuery(api.modules.menu.menu.getCategoryNames);
+  // Fetch global serving hours
+  const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
 
   const getItemQuantity = (itemId, portionType = 'full') => {
     // Find item by matching itemId and portionType, NOT by checking `id` string
@@ -62,14 +65,11 @@ export default function UserMenu() {
   };
 
   // Check if restaurant is open
-  const isRestaurantOpen = () => {
-    const savedStatus = localStorage.getItem('restaurantOpen');
-    return savedStatus !== null ? savedStatus === 'true' : true;
-  };
+  // const isRestaurantOpen = ... (removed local function)
 
   // Handle add to cart with restaurant status check
   const handleAddToCart = (item, portionType = 'full') => {
-    if (!isRestaurantOpen()) {
+    if (!isRestaurantOpen(specialHours)) {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
@@ -91,7 +91,7 @@ export default function UserMenu() {
   // Handle quantity update with restaurant status check
   // Changed signature to accept itemId and portionType to resolve the DB ID internally
   const handleUpdateQuantity = (itemId, portionType, change) => {
-    if (!isRestaurantOpen() && change > 0) {
+    if (!isRestaurantOpen(specialHours) && change > 0) {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
@@ -183,7 +183,7 @@ export default function UserMenu() {
   // Group items by category for mobile accordion view - now respects coupon filter
   const getItemsByCategory = (category) => {
     let items = allMenuItems.filter(item => item.category === category);
-    
+
     // Apply coupon filter if active
     if (couponFilter) {
       items = items.filter(item => {
@@ -198,7 +198,7 @@ export default function UserMenu() {
         return isCat || isItem;
       });
     }
-    
+
     return items;
   };
 
@@ -285,79 +285,120 @@ export default function UserMenu() {
                 return true;
               })
               .map(category => {
-              const categoryItems = getItemsByCategory(category);
-              const isExpanded = expandedCategories[category];
+                const categoryItems = getItemsByCategory(category);
+                const isExpanded = expandedCategories[category];
 
-              return (
-                <div key={category} className="accordion-category">
-                  <div
-                    className="accordion-category-header"
-                    onClick={() => toggleCategory(category)}
-                  >
-                    <div className="category-info">
-                      <h3>{category}</h3>
-                      <span className="item-count">({categoryItems.length} items)</span>
+                return (
+                  <div key={category} className="accordion-category">
+                    <div
+                      className="accordion-category-header"
+                      onClick={() => toggleCategory(category)}
+                    >
+                      <div className="category-info">
+                        <h3>{category}</h3>
+                        <span className="item-count">({categoryItems.length} items)</span>
+                      </div>
+                      <span className={`accordion-arrow ${isExpanded ? 'expanded' : ''}`}>
+                        ▼
+                      </span>
                     </div>
-                    <span className={`accordion-arrow ${isExpanded ? 'expanded' : ''}`}>
-                      ▼
-                    </span>
-                  </div>
 
-                  {isExpanded && (
-                    <div className="accordion-category-content">
-                      {categoryItems.map(item => {
-                        const hasAnyQuantity = getItemQuantity(item._id, 'half') > 0 || getItemQuantity(item._id, 'full') > 0;
-                        const isItemExpanded = hasAnyQuantity || expandedMobileItems[item._id];
+                    {isExpanded && (
+                      <div className="accordion-category-content">
+                        {categoryItems.map(item => {
+                          const hasAnyQuantity = getItemQuantity(item._id, 'half') > 0 || getItemQuantity(item._id, 'full') > 0;
+                          const isItemExpanded = hasAnyQuantity || expandedMobileItems[item._id];
 
-                        return (
-                          <div key={item._id} className="mobile-menu-item">
-                            <img
-                              src={item.image || '/image.png'}
-                              alt={item.name}
-                              className="mobile-item-image"
-                              loading="lazy"
-                              decoding="async"
-                              onError={(e) => e.target.src = '/image.png'}
-                              srcSet={item.image ? `${item.image}?w=150 150w, ${item.image}?w=300 300w` : undefined}
-                              sizes="(max-width: 300px) 150px, 300px"
-                            />
-                            <div className="mobile-item-details">
-                              <h4 className="mobile-item-name">{item.name}</h4>
-                              <p className="mobile-item-description">{item.description}</p>
+                          return (
+                            <div key={item._id} className="mobile-menu-item">
+                              <img
+                                src={item.image || '/image.png'}
+                                alt={item.name}
+                                className="mobile-item-image"
+                                loading="lazy"
+                                decoding="async"
+                                onError={(e) => e.target.src = '/image.png'}
+                                srcSet={item.image ? `${item.image}?w=150 150w, ${item.image}?w=300 300w` : undefined}
+                                sizes="(max-width: 300px) 150px, 300px"
+                              />
+                              <div className="mobile-item-details">
+                                <h4 className="mobile-item-name">{item.name}</h4>
+                                <p className="mobile-item-description">{item.description}</p>
 
-                              {!isItemExpanded ? (
-                                <div className="mobile-initial-view">
-                                  {item.halfPrice ? (
-                                    <div className="mobile-price-display">
-                                      <span className="mobile-price-item">Half: <strong>₹{item.halfPrice}</strong></span>
-                                      <span className="mobile-price-item">Full: <strong>₹{item.fullPrice}</strong></span>
-                                    </div>
-                                  ) : (
-                                    <div className="mobile-price-display">
-                                      <span className="mobile-price-item single-price">₹{item.fullPrice}</span>
-                                    </div>
-                                  )}
-                                  <button
-                                    className="mobile-add-to-cart-btn"
-                                    onClick={() => setExpandedMobileItems(prev => ({ ...prev, [item._id]: true }))}
-                                  >
-                                    Add to Cart
-                                  </button>
-                                </div>
-                              ) : (
-                                <>
-                                  {/* Half Portion */}
-                                  {item.halfPrice && (
+                                {!isItemExpanded ? (
+                                  <div className="mobile-initial-view">
+                                    {item.halfPrice ? (
+                                      <div className="mobile-price-display">
+                                        <span className="mobile-price-item">Half: <strong>₹{item.halfPrice}</strong></span>
+                                        <span className="mobile-price-item">Full: <strong>₹{item.fullPrice}</strong></span>
+                                      </div>
+                                    ) : (
+                                      <div className="mobile-price-display">
+                                        <span className="mobile-price-item single-price">₹{item.fullPrice}</span>
+                                      </div>
+                                    )}
+                                    <button
+                                      className="mobile-add-to-cart-btn"
+                                      onClick={() => setExpandedMobileItems(prev => ({ ...prev, [item._id]: true }))}
+                                    >
+                                      Add to Cart
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    {/* Half Portion */}
+                                    {item.halfPrice && (
+                                      <div className="mobile-item-portion">
+                                        <div className="mobile-portion-header">
+                                          <span className="mobile-portion-label">Half</span>
+                                          <span className="mobile-item-price">₹{item.halfPrice}</span>
+                                        </div>
+                                        {getItemQuantity(item._id, 'half') === 0 ? (
+                                          <button
+                                            className="mobile-add-btn"
+                                            onClick={() => {
+                                              handleAddToCart(item, 'half');
+                                              setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
+                                            }}
+                                          >
+                                            Add
+                                          </button>
+                                        ) : (
+                                          <div className="mobile-quantity-controls">
+                                            <button
+                                              className="mobile-qty-btn"
+                                              onClick={() => {
+                                                handleUpdateQuantity(item._id, 'half', -1);
+                                                if (getItemQuantity(item._id, 'half') === 1 && getItemQuantity(item._id, 'full') === 0) {
+                                                  setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
+                                                }
+                                              }}
+                                            >
+                                              −
+                                            </button>
+                                            <span className="mobile-qty-number">{getItemQuantity(item._id, 'half')}</span>
+                                            <button
+                                              className="mobile-qty-btn"
+                                              onClick={() => handleUpdateQuantity(item._id, 'half', 1)}
+                                            >
+                                              +
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* Full Portion */}
                                     <div className="mobile-item-portion">
                                       <div className="mobile-portion-header">
-                                        <span className="mobile-portion-label">Half</span>
-                                        <span className="mobile-item-price">₹{item.halfPrice}</span>
+                                        <span className="mobile-portion-label">Full</span>
+                                        <span className="mobile-item-price">₹{item.fullPrice}</span>
                                       </div>
-                                      {getItemQuantity(item._id, 'half') === 0 ? (
+                                      {getItemQuantity(item._id, 'full') === 0 ? (
                                         <button
                                           className="mobile-add-btn"
                                           onClick={() => {
-                                            handleAddToCart(item, 'half');
+                                            handleAddToCart(item, 'full');
                                             setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
                                           }}
                                         >
@@ -368,76 +409,35 @@ export default function UserMenu() {
                                           <button
                                             className="mobile-qty-btn"
                                             onClick={() => {
-                                              handleUpdateQuantity(item._id, 'half', -1);
-                                              if (getItemQuantity(item._id, 'half') === 1 && getItemQuantity(item._id, 'full') === 0) {
+                                              handleUpdateQuantity(item._id, 'full', -1);
+                                              if (getItemQuantity(item._id, 'full') === 1 && getItemQuantity(item._id, 'half') === 0) {
                                                 setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
                                               }
                                             }}
                                           >
                                             −
                                           </button>
-                                          <span className="mobile-qty-number">{getItemQuantity(item._id, 'half')}</span>
+                                          <span className="mobile-qty-number">{getItemQuantity(item._id, 'full')}</span>
                                           <button
                                             className="mobile-qty-btn"
-                                            onClick={() => handleUpdateQuantity(item._id, 'half', 1)}
+                                            onClick={() => handleUpdateQuantity(item._id, 'full', 1)}
                                           >
                                             +
                                           </button>
                                         </div>
                                       )}
                                     </div>
-                                  )}
-
-                                  {/* Full Portion */}
-                                  <div className="mobile-item-portion">
-                                    <div className="mobile-portion-header">
-                                      <span className="mobile-portion-label">Full</span>
-                                      <span className="mobile-item-price">₹{item.fullPrice}</span>
-                                    </div>
-                                    {getItemQuantity(item._id, 'full') === 0 ? (
-                                      <button
-                                        className="mobile-add-btn"
-                                        onClick={() => {
-                                          handleAddToCart(item, 'full');
-                                          setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
-                                        }}
-                                      >
-                                        Add
-                                      </button>
-                                    ) : (
-                                      <div className="mobile-quantity-controls">
-                                        <button
-                                          className="mobile-qty-btn"
-                                          onClick={() => {
-                                            handleUpdateQuantity(item._id, 'full', -1);
-                                            if (getItemQuantity(item._id, 'full') === 1 && getItemQuantity(item._id, 'half') === 0) {
-                                              setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
-                                            }
-                                          }}
-                                        >
-                                          −
-                                        </button>
-                                        <span className="mobile-qty-number">{getItemQuantity(item._id, 'full')}</span>
-                                        <button
-                                          className="mobile-qty-btn"
-                                          onClick={() => handleUpdateQuantity(item._id, 'full', 1)}
-                                        >
-                                          +
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                </>
-                              )}
+                                  </>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
           </div>
         </section>
       </div>

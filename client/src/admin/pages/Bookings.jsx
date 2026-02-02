@@ -73,8 +73,19 @@ export default function Bookings() {
   };
 
   const filteredBookings = getFilteredBookings();
-  const pendingCount = allBookings?.filter(b => b.status === 'pending').length || 0;
-  const acceptedCount = allBookings?.filter(b => b.status === 'accepted').length || 0;
+  
+  // Sort bookings: active (pending, accepted) first, then past (rejected, cancelled)
+  // Within each group, sort by date (newest first)
+  const sortedBookings = [...filteredBookings].sort((a, b) => {
+    const activeStatuses = ['pending', 'accepted'];
+    const aIsActive = activeStatuses.includes(a.status);
+    const bIsActive = activeStatuses.includes(b.status);
+    
+    if (aIsActive === bIsActive) {
+      return b.createdAt - a.createdAt; // Newest first within same group
+    }
+    return aIsActive ? -1 : 1; // Active bookings first
+  });
 
   return (
     <>
@@ -82,20 +93,6 @@ export default function Bookings() {
       <div className="bookings-container">
         <div className="bookings-header">
           <h1>Table Bookings</h1>
-          <div className="bookings-stats">
-            <div className="stat-card">
-              <span className="stat-number">{pendingCount}</span>
-              <span className="stat-label">Pending</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{acceptedCount}</span>
-              <span className="stat-label">Accepted</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{allBookings?.length || 0}</span>
-              <span className="stat-label">Total</span>
-            </div>
-          </div>
         </div>
 
         <div className="bookings-filters">
@@ -133,7 +130,7 @@ export default function Bookings() {
               <p>No bookings found</p>
             </div>
           ) : (
-            filteredBookings.map((booking) => (
+            sortedBookings.map((booking) => (
               <div key={booking._id} className="booking-card">
                 <div className="booking-header">
                   <div className="booking-info">

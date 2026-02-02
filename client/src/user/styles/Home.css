@@ -210,35 +210,98 @@
 }
 
 .bestsellers-section {
-  margin: 2rem 0;
-  text-align: center;
+  margin: 4rem auto;
+  max-width: 1600px;
+  padding: 0 3rem;
+  width: 100%;
 }
 
 .bestsellers-section .section-title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  color: #333;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 3rem;
+  color: #2c3e50;
+  text-align: center;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.bestsellers-section .section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(135deg, #e23744 0%, #ff6b6b 100%);
+  border-radius: 2px;
 }
 
 .bestsellers-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.5rem;
+  width: 100%;
+  justify-items: stretch;
+  align-items: start;
 }
 
-.bestsellers-grid .menu-item-card {
-  width: 250px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Large Desktop - 4 columns */
+@media (min-width: 1200px) {
+  .bestsellers-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+  }
+  
+  .bestsellers-section {
+    padding: 0 3rem;
+  }
 }
 
-.bestsellers-grid .menu-item-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+/* Desktop - 3 columns */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .bestsellers-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  
+  .bestsellers-section {
+    padding: 0 2.5rem;
+    max-width: 1400px;
+  }
+}
+
+/* Tablet - 2 columns */
+@media (min-width: 600px) and (max-width: 899px) {
+  .bestsellers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .bestsellers-section {
+    padding: 0 2rem;
+    max-width: 1200px;
+  }
+}
+
+/* Mobile - 1 column */
+@media (max-width: 599px) {
+  .bestsellers-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .bestsellers-section {
+    margin: 2rem auto;
+    padding: 0 1rem;
+    max-width: 100%;
+  }
+  
+  .bestsellers-section .section-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .bestsellers-grid .loading-text {
@@ -246,4 +309,5 @@
   color: #666;
   text-align: center;
   margin-top: 2rem;
+  grid-column: 1 / -1;
 }

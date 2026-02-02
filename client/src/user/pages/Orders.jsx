@@ -67,35 +67,66 @@ export default function Orders() {
               <Link to="/menu" className="btn-primary">Browse Menu</Link>
             </div>
           ) : (
-            orders.map(order => (
-              <div key={order._id} className="order-card">
-                <div className="order-header">
-                  <span className="order-id">#{order._id.substring(0, 8)}</span>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <span className={`order-status ${getStatusClass(order.status)}`}>
-                      {order.status.replace(/-/g, ' ')}
-                    </span>
+            (() => {
+              const activeStatuses = ['pending', 'confirmed', 'preparing', 'out-for-delivery'];
+              // Sort all orders by date descending first (already sorted by backend query usually, but ensure frontend sort)
+              const sortedOrders = [...orders].sort((a, b) => b.createdAt - a.createdAt);
+
+              const activeOrders = sortedOrders.filter(o => activeStatuses.includes(o.status));
+              const pastOrders = sortedOrders.filter(o => !activeStatuses.includes(o.status));
+
+              const renderOrderCard = (order) => (
+                <div key={order._id} className="order-card">
+                  <div className="order-header">
+                    <span className="order-id">#{order._id.substring(0, 8)}</span>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <span className={`order-status ${getStatusClass(order.status)}`}>
+                        {order.status.replace(/-/g, ' ')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="order-items">
+                    <p>
+                      {order.items.map(item => `${item.name} x${item.quantity}`).join(', ')}
+                    </p>
+                    <p className="order-date">{formatDate(order.createdAt)}</p>
+                  </div>
+                  <div className="order-footer">
+                    <span className="order-total">₹{order.totalAmount}</span>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button className="view-details-btn" onClick={() => setSelectedOrder(order)}>
+                        View Details
+                      </button>
+                      {['out-for-delivery'].includes(order.status) && (
+                        <button className="track-btn">Track</button>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="order-items">
-                  <p>
-                    {order.items.map(item => `${item.name} x${item.quantity}`).join(', ')}
-                  </p>
-                  <p className="order-date">{formatDate(order.createdAt)}</p>
+              );
+
+              return (
+                <div className="orders-sections">
+                  {activeOrders.length > 0 && (
+                    <div className="section active-orders">
+                      <h2 className="section-title">🔥 On-going Orders</h2>
+                      <div className="orders-grid">
+                        {activeOrders.map(renderOrderCard)}
+                      </div>
+                    </div>
+                  )}
+
+                  {pastOrders.length > 0 && (
+                    <div className="section past-orders">
+                      <h2 className="section-title">🕒 Past Orders</h2>
+                      <div className="orders-grid">
+                        {pastOrders.map(renderOrderCard)}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="order-footer">
-                  <span className="order-total">₹{order.totalAmount}</span>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="view-details-btn" onClick={() => setSelectedOrder(order)}>
-                      View Details
-                    </button>
-                    {['out-for-delivery'].includes(order.status) && (
-                      <button className="track-btn">Track</button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
+              );
+            })()
           )}
         </div>
 

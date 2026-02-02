@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import { useCart } from '../../context/CartContext';
 import '../styles/pages.css';
 import '../styles/ServingHours.css';
+import { isRestaurantOpen } from '../../utils/restaurantStatus';
 
 export default function ServingHours() {
   const { addToCart, cartItems, updateQuantity } = useCart();
@@ -26,21 +27,18 @@ export default function ServingHours() {
 
   const getItemQuantity = (itemId) => {
     // Find cart item by matching the itemId (the original menu item ID)
-    const cartItem = cartItems.find(item => 
+    const cartItem = cartItems.find(item =>
       item.itemId === itemId || item.id === itemId || item.originalId === itemId
     );
     return cartItem ? cartItem.quantity : 0;
   };
 
   // Check if restaurant is open (Global Check)
-  const isRestaurantOpen = () => {
-    const savedStatus = localStorage.getItem('restaurantOpen');
-    return savedStatus !== null ? savedStatus === 'true' : true;
-  };
+  // const isRestaurantOpen = ... (removed local function)
 
   // Handle add to cart with restaurant status check
   const handleAddToCart = (item) => {
-    if (!isRestaurantOpen()) {
+    if (!isRestaurantOpen(specialHours)) {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
@@ -54,12 +52,12 @@ export default function ServingHours() {
 
   // Handle quantity update with restaurant status check
   const handleUpdateQuantity = (itemId, change) => {
-    if (!isRestaurantOpen() && change > 0) {
+    if (!isRestaurantOpen(specialHours) && change > 0) {
       alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
       return;
     }
     // Find the cart item's database ID to update
-    const cartItem = cartItems.find(item => 
+    const cartItem = cartItems.find(item =>
       item.itemId === itemId || item.id === itemId || item.originalId === itemId
     );
     if (cartItem) {

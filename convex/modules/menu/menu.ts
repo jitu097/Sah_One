@@ -39,7 +39,7 @@ export const getCategoryNames = query({
       .query("categories")
       .withIndex("by_active", (q) => q.eq("isActive", true))
       .collect();
-    
+
     return categories.map((cat) => cat.name).sort();
   },
 });
@@ -139,7 +139,7 @@ export const deleteCategory = mutation({
   args: { categoryId: v.id("categories") },
   handler: async (ctx, args) => {
     const category = await ctx.db.get(args.categoryId);
-    
+
     if (category) {
       // Check if category has items
       const items = await ctx.db
@@ -216,6 +216,8 @@ export const createMenuItem = mutation({
     halfPrice: v.optional(v.number()),
     fullPrice: v.number(),
     isAvailable: v.optional(v.boolean()),
+    // Added optional best seller flag, defaults to false
+    isBestSeller: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const timestamp = Date.now();
@@ -244,6 +246,8 @@ export const createMenuItem = mutation({
       halfPrice: args.halfPrice,
       fullPrice: args.fullPrice,
       isAvailable: args.isAvailable ?? true,
+      // specific logic for isBestSeller
+      isBestSeller: args.isBestSeller ?? false,
       createdAt: timestamp,
       updatedAt: timestamp,
     });
@@ -266,7 +270,7 @@ export const updateMenuItem = mutation({
     halfPrice: v.optional(v.number()),
     fullPrice: v.optional(v.number()),
     isAvailable: v.optional(v.boolean()),
-      isBestSeller: v.optional(v.boolean())
+    isBestSeller: v.optional(v.boolean())
   },
   handler: async (ctx, args) => {
     const { itemId, ...updates } = args;
@@ -336,7 +340,7 @@ export const searchMenuItems = query({
   args: { searchTerm: v.string() },
   handler: async (ctx, args) => {
     const allItems = await ctx.db.query("menuItems").collect();
-    
+
     return allItems.filter((item) =>
       item.name.toLowerCase().includes(args.searchTerm.toLowerCase())
     );

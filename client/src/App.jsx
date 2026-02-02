@@ -20,6 +20,7 @@ import Profile from './user/pages/Profile';
 import UserOffers from './user/pages/Offers';
 import ServingHours from './user/pages/ServingHours';
 import UserMenu from './user/pages/UserMenu';
+import Notifications from './user/pages/Notifications';
 
 // Admin Pages
 import AdminDashboard from './admin/pages/Dashboard';
@@ -30,6 +31,7 @@ import Offers from './admin/pages/Offers';
 import Reports from './admin/pages/Reports';
 import SpecialServingHours from './admin/pages/SpecialServingHours';
 import AdminProfile from './admin/pages/Profile';
+import AdminNotifications from './admin/pages/AdminNotifications';
 
 // Delivery Pages
 import AssignedOrders from './delivery/pages/AssignedOrders';
@@ -64,6 +66,7 @@ function AppContent() {
         <Route path="/user/offers" element={<UserOffers />} />
         <Route path="/user/serving-hours" element={<ServingHours />} />
         <Route path="/user/menu" element={<UserMenu />} />
+        <Route path="/user/notifications" element={<Notifications />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboard />} />
@@ -74,6 +77,7 @@ function AppContent() {
         <Route path="/admin/offers" element={<Offers />} />
         <Route path="/admin/reports" element={<Reports />} />
         <Route path="/admin/special-serving-hours" element={<SpecialServingHours />} />
+        <Route path="/admin/notifications" element={<AdminNotifications />} />
 
         {/* Delivery Routes */}
         <Route path="/delivery" element={<AssignedOrders />} />

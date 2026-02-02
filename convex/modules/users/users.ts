@@ -1,4 +1,5 @@
 import { mutation, query } from "../../_generated/server";
+import { internal } from "../../_generated/api";
 import { v } from "convex/values";
 
 /**
@@ -41,6 +42,31 @@ export const createOrUpdateUser = mutation({
         createdAt: timestamp,
         updatedAt: timestamp,
       });
+
+      // Notify Admin of new user
+      if (role === 'user') {
+        await ctx.scheduler.runAfter(0, internal.notifications.create, {
+          recipientId: "admin",
+          type: "system",
+          title: "New User Joined",
+          message: `${otherData.name || "New User"} just joined!`,
+          referenceId: userId,
+          isAdmin: true,
+        });
+
+        // Welcome notification for the user
+        // Welcome notification for the user
+        await ctx.scheduler.runAfter(0, internal.notifications.create, {
+          recipientId: userId,
+          recipientFirebaseUid: firebaseUid,
+          type: "system",
+          title: "Welcome to Sah One!",
+          message: "Thanks for joining us. Enjoy ordering!",
+          referenceId: userId,
+          isAdmin: false,
+        });
+      }
+
       return userId;
     }
   },

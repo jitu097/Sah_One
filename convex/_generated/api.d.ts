@@ -24,6 +24,7 @@ import type * as modules_reports_reports from "../modules/reports/reports.js";
 import type * as modules_servingHours_servingHours from "../modules/servingHours/servingHours.js";
 import type * as modules_settings_settings from "../modules/settings/settings.js";
 import type * as modules_users_users from "../modules/users/users.js";
+import type * as notifications from "../notifications.js";
 import type * as seedCategories from "../seedCategories.js";
 
 import type {
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   "modules/servingHours/servingHours": typeof modules_servingHours_servingHours;
   "modules/settings/settings": typeof modules_settings_settings;
   "modules/users/users": typeof modules_users_users;
+  notifications: typeof notifications;
   seedCategories: typeof seedCategories;
 }>;
 

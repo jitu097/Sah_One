@@ -1,67 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import './RestaurantStatus.css';
 
 export default function RestaurantStatus() {
   const [showPopup, setShowPopup] = useState(false);
-  const [restaurantOpen, setRestaurantOpen] = useState(true);
+  const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
+  const isRestaurantClosed = specialHours ? specialHours.isClosed : false; // Default Open
 
   useEffect(() => {
-    // Check restaurant status when component mounts
-    const checkRestaurantStatus = () => {
-      const savedStatus = localStorage.getItem('restaurantOpen');
-      const isOpen = savedStatus !== null ? savedStatus === 'true' : true;
-      
-      console.log('🔍 RestaurantStatus Check:', { savedStatus, isOpen });
-      console.log('📋 Session popup shown:', sessionStorage.getItem('closedPopupShown'));
-      
-      setRestaurantOpen(isOpen);
-      
-      // If restaurant is closed and user hasn't seen the popup yet (in this session)
-      if (!isOpen && !sessionStorage.getItem('closedPopupShown')) {
-        console.log('✅ Showing popup - restaurant is closed');
+    // React to status changes
+    if (isRestaurantClosed) {
+      const hasSeenPopup = sessionStorage.getItem('closedPopupShown');
+      if (!hasSeenPopup) {
         setShowPopup(true);
-      } else {
-        console.log('❌ Not showing popup:', { isOpen, hasSeenPopup: sessionStorage.getItem('closedPopupShown') });
       }
-    };
-
-    checkRestaurantStatus();
-
-    // Listen for restaurant status changes from admin
-    const handleStatusChange = (event) => {
-      const isOpen = event.detail.isOpen;
-      console.log('🔔 Status changed event received:', isOpen);
-      setRestaurantOpen(isOpen);
-      
-      // Show popup immediately when restaurant closes
-      if (!isOpen) {
-        console.log('🔴 Restaurant closed - showing popup');
-        setShowPopup(true);
-        sessionStorage.removeItem('closedPopupShown'); // Allow popup to show again
-      }
-    };
-
-    window.addEventListener('restaurantStatusChanged', handleStatusChange);
-    
-    // Also check on storage change (in case admin changes it in another tab)
-    const handleStorageChange = (e) => {
-      if (e.key === 'restaurantOpen') {
-        const isOpen = e.newValue === 'true';
-        setRestaurantOpen(isOpen);
-        if (!isOpen) {
-          setShowPopup(true);
-          sessionStorage.removeItem('closedPopupShown');
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('restaurantStatusChanged', handleStatusChange);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+    } else {
+      // If open, close popup and reset session flag so it shows again next time it closes
+      setShowPopup(false);
+      sessionStorage.removeItem('closedPopupShown');
+    }
+  }, [isRestaurantClosed]);
 
   const handleClosePopup = () => {
     setShowPopup(false);
@@ -71,12 +30,12 @@ export default function RestaurantStatus() {
 
   // Function to check if user can add to cart (export this or use context)
   const canAddToCart = () => {
-    return restaurantOpen;
+    return !isRestaurantClosed;
   };
 
-  // Make the status available globally
+  // Make the status available globally (Maintenance: largely deprecated, but kept for legacy external scripts)
   window.restaurantStatus = {
-    isOpen: restaurantOpen,
+    isOpen: !isRestaurantClosed,
     canAddToCart: canAddToCart
   };
 

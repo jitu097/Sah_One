@@ -8,6 +8,7 @@ import CategoryPopup from '../components/CategoryPopup';
 import PaymentModal from '../components/PaymentModal';
 import '../styles/pages.css';
 import '../styles/cart.css';
+import { isRestaurantOpen } from '../../utils/restaurantStatus';
 
 export default function Cart() {
   const {
@@ -19,7 +20,8 @@ export default function Cart() {
     getCartDiscount,
     getCartCoupon,
     applyCoupon,
-    removeCoupon
+    removeCoupon,
+    clearCart
   } = useCart();
 
   const { currentUser } = useAuth();
@@ -36,14 +38,14 @@ export default function Cart() {
   const navigate = useNavigate();
   const deliveryCharge = 50;
 
-  // Check if restaurant is open
-  const isRestaurantOpen = () => {
-    const savedStatus = localStorage.getItem('restaurantOpen');
-    return savedStatus !== null ? savedStatus === 'true' : true;
-  };
+  // Fetch global serving hours config
+  const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
+
+  // Check if restaurant is open using util
+  // const isRestaurantOpen = ... (removed local function)
 
   const handleUpdateQuantity = (cartItemId, change) => {
-    if (!isRestaurantOpen() && change > 0) {
+    if (!isRestaurantOpen(specialHours) && change > 0) {
       alert('⚠️ Restaurant is temporarily closed. Cannot increase item quantity.');
       return;
     }
@@ -90,7 +92,9 @@ export default function Cart() {
       return;
     }
 
-    const savedAddress = localStorage.getItem('userAddress');
+    // Check DB address first, then local storage
+    const savedAddress = (user && user.address) ? user.address : localStorage.getItem('userAddress');
+
     if (!savedAddress) {
       alert("Please add your delivery address by clicking the location button in the navbar.");
       return;
@@ -109,7 +113,8 @@ export default function Cart() {
 
   const handlePaymentSuccess = async () => {
     try {
-      const savedAddress = localStorage.getItem('userAddress');
+      // Use DB address if available
+      const savedAddress = (user && user.address) ? user.address : localStorage.getItem('userAddress');
       const addressData = savedAddress ? JSON.parse(savedAddress) : {};
       const deliveryAddress = `${addressData.deliveryArea || ''}, ${addressData.company || ''}, Floor: ${addressData.floor || ''}, ${addressData.locality || ''}, ${addressData.city || ''}, Mobile: ${addressData.mobileNumber || ''}`;
 
@@ -136,22 +141,18 @@ export default function Cart() {
       });
 
       // Clear cart
-      // We should use the updated clearCart logic from context which calls the mutation
-      // But the context clearCart is available.
-      // However, we need to access `clearCart` from useCart()
-      // I need to add clearCart to destructuring above.
-      // Wait, I missed adding clearCart to destructuring in the code block.
-      // I will rely on context.clearCart
+      await clearCart();
+
+      alert('✅ Order placed successfully!');
+
+      // Navigate to order page
+      navigate('/user/orders');
     } catch (error) {
       // ... existing error handling
       console.error(error);
       alert('❌ Failed to place order');
       return;
     }
-
-    // Actually createOrder DOES NOT clear server cart automatically in my code?
-    // I should call clearCart() here.
-    // ...
   };
 
   return (
@@ -161,7 +162,7 @@ export default function Cart() {
         <div className="cart-sidebar-header">
           <button className="back-btn" onClick={() => navigate(-1)}>←</button>
           <h1>My Cart</h1>
-          
+
         </div>
 
         <div className="cart-items">

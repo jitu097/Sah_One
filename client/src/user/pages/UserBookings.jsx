@@ -1,12 +1,23 @@
-import React from 'react';
-import { useQuery } from 'convex/react';
+import React, { useState } from 'react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../components/Navbar';
 import '../styles/UserBookings.css';
+import '../styles/pages.css';
 
 export default function UserBookings() {
   const { currentUser } = useAuth();
+  
+  // Party booking modal state
+  const [showPartyModal, setShowPartyModal] = useState(false);
+  const [partyForm, setPartyForm] = useState({
+    name: '',
+    phone: '',
+    guests: '',
+    date: '',
+    time: ''
+  });
   
   // Get user data
   const getUserByFirebaseUid = useQuery(
@@ -19,6 +30,9 @@ export default function UserBookings() {
     api.modules.bookings.bookings.getBookingsByUserId,
     getUserByFirebaseUid ? { userId: getUserByFirebaseUid._id } : "skip"
   );
+  
+  // Mutation for creating booking
+  const createBooking = useMutation(api.modules.bookings.bookings.createBooking);
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -65,6 +79,46 @@ export default function UserBookings() {
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${minutes} ${ampm}`;
+  };
+  
+  // Party form handlers
+  const handlePartyFormChange = (e) => {
+    setPartyForm({
+      ...partyForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handlePartyFormSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!currentUser) {
+      alert('Please login to book a table!');
+      return;
+    }
+
+    if (!getUserByFirebaseUid) {
+      alert('Please wait, loading user data...');
+      return;
+    }
+
+    try {
+      await createBooking({
+        userId: getUserByFirebaseUid._id,
+        name: partyForm.name,
+        phone: partyForm.phone,
+        guests: parseInt(partyForm.guests),
+        date: partyForm.date,
+        time: partyForm.time,
+      });
+
+      alert('Table booking submitted successfully! We will notify you once it is confirmed.');
+      setShowPartyModal(false);
+      setPartyForm({ name: '', phone: '', guests: '', date: '', time: '' });
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      alert('Failed to submit booking. Please try again.');
+    }
   };
 
   if (!currentUser) {
@@ -147,6 +201,99 @@ export default function UserBookings() {
             ))
           )}
         </div>
+        
+        {/* Floating Book a Table Button */}
+        <button
+          className="fab-book-table"
+          onClick={() => setShowPartyModal(true)}
+          title="Book Now"
+        >
+          <span className="fab-icon">🍽️</span>
+          <span className="fab-text">Book Now</span>
+        </button>
+
+        {/* Party Booking Modal */}
+        {showPartyModal && (
+          <div className="modal-overlay" onClick={() => setShowPartyModal(false)}>
+            <div className="party-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setShowPartyModal(false)}>
+                ×
+              </button>
+              <h2>Party Booking Enquiry</h2>
+              <form onSubmit={handlePartyFormSubmit} className="party-form">
+                <div className="form-group">
+                  <label htmlFor="name">Name *</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={partyForm.name}
+                    onChange={handlePartyFormChange}
+                    required
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="phone">Phone Number *</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={partyForm.phone}
+                    onChange={handlePartyFormChange}
+                    required
+                    placeholder="Enter phone number"
+                    pattern="[0-9]{10}"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="guests">Number of Guests *</label>
+                  <input
+                    type="number"
+                    id="guests"
+                    name="guests"
+                    value={partyForm.guests}
+                    onChange={handlePartyFormChange}
+                    required
+                    placeholder="Enter number of guests"
+                    min="1"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="date">Date for Booking *</label>
+                  <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={partyForm.date}
+                    onChange={handlePartyFormChange}
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="time">Time *</label>
+                  <input
+                    type="time"
+                    id="time"
+                    name="time"
+                    value={partyForm.time}
+                    onChange={handlePartyFormChange}
+                    required
+                  />
+                </div>
+
+                <button type="submit" className="submit-btn">
+                  Submit Enquiry
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -1,18 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../styles/AddressModal.css';
 
-export default function AddressModal({ isOpen, onClose, onSave }) {
+export default function AddressModal({ isOpen, onClose, onSave, initialAddress }) {
   const [addressData, setAddressData] = useState({
     deliveryArea: '',
     city: 'Latehar',
     company: '',
-   
-   
     landmark: '',
     locality: '',
     mobileNumber: '',
     addressType: 'Home'
   });
+
+  useEffect(() => {
+    if (initialAddress) {
+      setAddressData(prev => ({
+        ...prev,
+        ...initialAddress
+      }));
+    }
+  }, [initialAddress, isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,12 +29,12 @@ export default function AddressModal({ isOpen, onClose, onSave }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Only allow numbers for mobile number field
     if (name === 'mobileNumber' && value && !/^\d*$/.test(value)) {
       return;
     }
-    
+
     setAddressData(prev => ({
       ...prev,
       [name]: value
@@ -72,9 +79,9 @@ export default function AddressModal({ isOpen, onClose, onSave }) {
             />
           </div>
 
-          
 
-         
+
+
 
           <div className="form-group">
             <input

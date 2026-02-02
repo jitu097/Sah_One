@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
 import '../styles/navbar.css';
+import NotificationBell from '../../user/components/NotificationBell';
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Initialize restaurant status from localStorage or default to true (open)
-  const [restaurantOpen, setRestaurantOpen] = useState(() => {
-    const savedStatus = localStorage.getItem('restaurantOpen');
-    return savedStatus !== null ? savedStatus === 'true' : true;
-  });
+  const activeConfig = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
+  const toggleStatus = useMutation(api.modules.servingHours.servingHours.toggleRestaurantStatus);
+
+  // Derived state from DB (default to Open/True if not yet loaded to avoid flash, or False? 
+  // Safety: Default false (closed) until loaded is safer, OR check undefined.
+  // Existing logic defaulted to TRUE. Let's stick to that but handle loading.
+  const restaurantOpen = activeConfig ? !activeConfig.isClosed : true;
 
   const handleLogout = () => {
     navigate('/login');
@@ -20,23 +25,28 @@ export default function Navbar() {
     return location.pathname === path ? 'active' : '';
   };
 
-  const toggleRestaurant = () => {
-    const newStatus = !restaurantOpen;
-    setRestaurantOpen(newStatus);
+  const toggleRestaurant = async () => {
+    const isCurrentlyOpen = restaurantOpen;
+    const newStatus = !isCurrentlyOpen; // if Open (true), new is False (Closed)
+    // The mutation takes "isClosed". 
+    // If we want to OPEN (newStatus=true), isClosed should be false.
+    // If we want to CLOSE (newStatus=false), isClosed should be true.
 
-    // Save status to localStorage so it persists and is accessible to user side
-    localStorage.setItem('restaurantOpen', newStatus.toString());
+    try {
+      await toggleStatus({
+        isClosed: !newStatus // isClosed = true means CLOSED (false)
+      });
 
-    // Dispatch custom event to notify other parts of the app
-    window.dispatchEvent(new CustomEvent('restaurantStatusChanged', {
-      detail: { isOpen: newStatus }
-    }));
+      // Notification logic remains, but driven by success
+      if (newStatus) {
+        alert('🟢 Restaurant is now OPEN. Users can browse and place orders.');
+      } else {
+        alert('🔴 Restaurant is now CLOSED. Users can browse but cannot place orders.');
+      }
 
-    // Show notification to admin
-    if (newStatus) {
-      alert('🟢 Restaurant is now OPEN. Users can browse and place orders.');
-    } else {
-      alert('🔴 Restaurant is now CLOSED. Users can browse but cannot place orders.');
+    } catch (err) {
+      console.error("Failed to toggle status:", err);
+      alert("Failed to update restaurant status");
     }
   };
 
@@ -82,6 +92,7 @@ export default function Navbar() {
       </div>
 
       <div className="admin-nav-right">
+        <NotificationBell isAdmin={true} />
         <button className="admin-logout-btn" onClick={handleLogout}>
           Logout
         </button>

@@ -18,10 +18,25 @@ export default function Orders() {
   const assignDeliveryPerson = useMutation(api.modules.orders.orders.assignDeliveryPerson);
   const cancelOrder = useMutation(api.modules.orders.orders.cancelOrder);
 
+  // Sort orders: Active statuses first (pending, confirmed, preparing, out-for-delivery), then by newest first
+  const sortedOrders = [...ordersRaw].sort((a, b) => {
+    const activeStatuses = ['pending', 'confirmed', 'preparing', 'out-for-delivery'];
+    const aIsActive = activeStatuses.includes(a.status);
+    const bIsActive = activeStatuses.includes(b.status);
+    
+    // If both active or both inactive, sort by date (newest first)
+    if (aIsActive === bIsActive) {
+      return b.createdAt - a.createdAt;
+    }
+    
+    // Active orders come before inactive
+    return aIsActive ? -1 : 1;
+  });
+
   // Filter orders based on active tab
   const filteredOrders = activeTab === 'All'
-    ? ordersRaw
-    : ordersRaw.filter(order => order.status.toLowerCase() === activeTab.toLowerCase().replace(/\s+/g, '-'));
+    ? sortedOrders
+    : sortedOrders.filter(order => order.status.toLowerCase() === activeTab.toLowerCase().replace(/\s+/g, '-'));
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
