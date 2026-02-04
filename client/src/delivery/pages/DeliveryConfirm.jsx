@@ -4,16 +4,20 @@ import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
+import { useAuth } from '../../context/AuthContext';
 
 export default function DeliveryConfirm() {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const { currentUser, loading } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Fetch Order
   const order = useQuery(api.modules.orders.orders.getOrderById, { orderId: orderId });
   const updateStatus = useMutation(api.modules.orders.orders.updateOrderStatus);
 
+  if (loading) return <div className="delivery-loading">Loading auth...</div>;
+  if (!currentUser) return <div className="delivery-loading">Please log in to continue.</div>;
   if (order === undefined) return <div className="delivery-loading">Loading order details...</div>;
   if (order === null) return <div className="delivery-error">Order not found.</div>;
 
@@ -24,7 +28,8 @@ export default function DeliveryConfirm() {
         orderId: order._id,
         status: 'delivered'
       });
-      navigate('/delivery');
+      // Navigate to history tab after completing delivery
+      navigate('/delivery?tab=history');
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Failed to complete delivery. Please try again.");

@@ -2,6 +2,14 @@ import { mutation, query } from "../../_generated/server";
 import { internal } from "../../_generated/api";
 import { v } from "convex/values";
 import { Id } from "../../_generated/dataModel";
+import { calculateDeliveryCharge } from "../../lib/deliveryCharges";
+
+const ensureRestaurantOpen = async (ctx: any) => {
+  const config = await ctx.db.query("servingHoursConfig").first();
+  if (config?.isClosed) {
+    throw new Error("Restaurant is currently closed. Please try again later.");
+  }
+};
 
 /**
  * Create a new order
@@ -29,18 +37,27 @@ export const createOrder = mutation({
     subtotal: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await ensureRestaurantOpen(ctx);
     const timestamp = Date.now();
+
+    const cartTotal = args.totalAmount;
+    const deliveryCalc = await calculateDeliveryCharge(ctx, cartTotal);
+    if (!deliveryCalc.hasRules) {
+      throw new Error("Delivery charges not configured. Please try again later.");
+    }
+    const deliveryCharge = deliveryCalc.fee;
+    const totalWithDelivery = cartTotal + deliveryCharge;
 
     const orderId = await ctx.db.insert("orders", {
       userId: args.userId,
       items: args.items,
-      totalAmount: args.totalAmount,
+      totalAmount: totalWithDelivery,
       deliveryAddress: args.deliveryAddress,
       customerName: args.customerName,
       customerPhone: args.customerPhone,
       customerEmail: args.customerEmail,
       paymentMethod: args.paymentMethod || 'Cash on Delivery',
-      deliveryCharge: args.deliveryCharge || 0,
+      deliveryCharge,
       subtotal: args.subtotal || args.totalAmount,
       status: "pending",
       deliveryPersonId: undefined,
@@ -113,6 +130,72 @@ export const getOrdersByDeliveryPerson = query({
 });
 
 /**
+ * Get assigned orders (preparing status) for a delivery person
+ * These are orders that have been assigned but delivery hasn't started yet
+ */
+export const getAssignedOrders = query({
+  args: { deliveryPersonId: v.string() },
+  handler: async (ctx, args) => {
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_delivery_person", (q) =>
+        q.eq("deliveryPersonId", args.deliveryPersonId)
+      )
+      .collect();
+    
+    // Filter for assigned orders (preparing status and not yet started)
+    return orders.filter(
+      order => order.status === "preparing" && 
+      order.deliveryAssignedAt !== undefined &&
+      order.deliveryStartedAt === undefined
+    );
+  },
+});
+
+/**
+ * Get ongoing orders (out-for-delivery status) for a delivery person
+ * These are orders where delivery has been started but not completed yet
+ */
+export const getOngoingOrders = query({
+  args: { deliveryPersonId: v.string() },
+  handler: async (ctx, args) => {
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_delivery_person", (q) =>
+        q.eq("deliveryPersonId", args.deliveryPersonId)
+      )
+      .collect();
+    
+    // Filter for ongoing deliveries (out-for-delivery status and has been started)
+    return orders.filter(
+      order => order.status === "out-for-delivery" && 
+      order.deliveryStartedAt !== undefined
+    );
+  },
+});
+
+/**
+ * Get completed/cancelled orders for a delivery person
+ * Sorted by most recent first (updatedAt descending)
+ */
+export const getDeliveryHistory = query({
+  args: { deliveryPersonId: v.string() },
+  handler: async (ctx, args) => {
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_delivery_person", (q) =>
+        q.eq("deliveryPersonId", args.deliveryPersonId)
+      )
+      .collect();
+    
+    // Filter for completed or cancelled orders and sort by most recent first
+    return orders
+      .filter(order => order.status === "delivered" || order.status === "cancelled")
+      .sort((a, b) => b.updatedAt - a.updatedAt);
+  },
+});
+
+/**
  * Get single order by ID
  */
 export const getOrderById = query({
@@ -134,10 +217,18 @@ export const updateOrderStatus = mutation({
     const order = await ctx.db.get(args.orderId);
     if (!order) throw new Error("Order not found");
 
-    await ctx.db.patch(args.orderId, {
+    const timestamp = Date.now();
+    const updateData: any = {
       status: args.status,
-      updatedAt: Date.now(),
-    });
+      updatedAt: timestamp,
+    };
+
+    // Set deliveryStartedAt when status changes to out-for-delivery
+    if (args.status === "out-for-delivery" && !order.deliveryStartedAt) {
+      updateData.deliveryStartedAt = timestamp;
+    }
+
+    await ctx.db.patch(args.orderId, updateData);
 
     // Notify User of status update
     // Notify User of status update
@@ -172,14 +263,14 @@ export const assignDeliveryPerson = mutation({
     const order = await ctx.db.get(args.orderId);
     if (!order) throw new Error("Order not found");
 
+    const timestamp = Date.now();
     await ctx.db.patch(args.orderId, {
       deliveryPersonId: args.deliveryPersonId,
-      status: "out-for-delivery",
-      updatedAt: Date.now(),
+      status: "preparing",
+      deliveryAssignedAt: timestamp,
+      updatedAt: timestamp,
     });
 
-    // Notify User
-    // Notify User
     // Notify User
     const user = await ctx.db.get(order.userId as Id<"users">);
     if (user && user.firebaseUid) {
@@ -187,8 +278,8 @@ export const assignDeliveryPerson = mutation({
         recipientId: user._id,
         recipientFirebaseUid: user.firebaseUid,
         type: "order",
-        title: "Order Out for Delivery",
-        message: "Your order is on the way!",
+        title: "Delivery Agent Assigned",
+        message: "Your order is being prepared for delivery!",
         referenceId: args.orderId,
         isAdmin: false,
       });

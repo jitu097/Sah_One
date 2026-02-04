@@ -4,16 +4,20 @@ import Navbar from '../components/Navbar';
 import '../styles/pages.css';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Pickup() {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const { currentUser, loading } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Fetch Order
   const order = useQuery(api.modules.orders.orders.getOrderById, { orderId: orderId });
   const updateStatus = useMutation(api.modules.orders.orders.updateOrderStatus);
 
+  if (loading) return <div className="delivery-loading">Loading auth...</div>;
+  if (!currentUser) return <div className="delivery-loading">Please log in to continue.</div>;
   if (order === undefined) return <div className="delivery-loading">Loading order details...</div>;
   if (order === null) return <div className="delivery-error">Order not found.</div>;
 
@@ -24,7 +28,7 @@ export default function Pickup() {
         orderId: order._id,
         status: 'out-for-delivery'
       });
-      navigate('/delivery');
+      navigate('/delivery?tab=ongoing');
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Failed to confirm pickup. Please try again.");
@@ -38,7 +42,7 @@ export default function Pickup() {
       <Navbar />
       <div className="delivery-container">
         <div className="delivery-header">
-          <h1>🏪 Pickup Order</h1>
+          <h1>🚀 Start Delivery</h1>
         </div>
 
         <div className="pickup-details">
@@ -51,7 +55,7 @@ export default function Pickup() {
             </div>
 
             <div className="items-list">
-              <h4>Items to Pickup:</h4>
+              <h4>Items to Deliver:</h4>
               {order.items.map((item, index) => (
                 <div key={index} className="item-row">
                   <span className="item-qty">{item.quantity}x</span>
@@ -71,7 +75,7 @@ export default function Pickup() {
                 onClick={handlePickup}
                 disabled={isUpdating}
               >
-                {isUpdating ? 'Updating...' : 'Confirm Pickup'}
+                {isUpdating ? 'Starting...' : 'Confirm Start Delivery'}
               </button>
             </div>
           </div>

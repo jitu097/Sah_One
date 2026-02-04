@@ -23,17 +23,17 @@ export default function Navbar() {
         </div>
 
         <div className="navbar-links">
-          <Link to="/delivery" className={`nav-link ${isActive('/delivery')}`}>
+          <Link to="/delivery?tab=assigned" className={`nav-link ${isActive('/delivery') && (location.search.includes('tab=assigned') || !location.search) ? 'active' : ''}`}>
             <span className="nav-icon">📦</span>
             <span className="nav-text">Assigned</span>
           </Link>
-          <Link to="/delivery/pickup" className={`nav-link ${isActive('/delivery/pickup')}`}>
-            <span className="nav-icon">📍</span>
-            <span className="nav-text">Pickup</span>
+          <Link to="/delivery?tab=ongoing" className={`nav-link ${location.search.includes('tab=ongoing') ? 'active' : ''}`}>
+            <span className="nav-icon">🚲</span>
+            <span className="nav-text">Ongoing</span>
           </Link>
-          <Link to="/delivery/confirm" className={`nav-link ${isActive('/delivery/confirm')}`}>
-            <span className="nav-icon">✅</span>
-            <span className="nav-text">Confirm</span>
+          <Link to="/delivery?tab=history" className={`nav-link ${location.search.includes('tab=history') ? 'active' : ''}`}>
+            <span className="nav-icon">📜</span>
+            <span className="nav-text">History</span>
           </Link>
         </div>
 

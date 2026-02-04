@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import '../styles/offers.css';
+import AdminDeleteButton from '../components/AdminDeleteButton';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 
@@ -71,30 +72,30 @@ export default function Offers() {
     items: []
   });
 
-    // Handle image upload (now in correct scope)
-    const handleImageUpload = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        const formDataUpload = new FormData();
-        formDataUpload.append('file', file);
-        formDataUpload.append('upload_preset', 'sah-one-menu');
-        const res = await fetch('https://api.cloudinary.com/v1_1/drpbuhxmr/image/upload', {
-          method: 'POST',
-          body: formDataUpload
-        });
-        const data = await res.json();
-        console.log('Cloudinary upload response:', data);
-        if (data.secure_url) {
-          setFormData((prev) => ({ ...prev, imageUrl: data.secure_url }));
-        } else {
-          alert('Image upload failed: ' + (data.error?.message || 'Unknown error'));
-        }
-      } catch (err) {
-        console.error('Image upload error:', err);
-        alert('Image upload failed');
+  // Handle image upload (now in correct scope)
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('upload_preset', 'sah-one-menu');
+      const res = await fetch('https://api.cloudinary.com/v1_1/drpbuhxmr/image/upload', {
+        method: 'POST',
+        body: formDataUpload
+      });
+      const data = await res.json();
+      console.log('Cloudinary upload response:', data);
+      if (data.secure_url) {
+        setFormData((prev) => ({ ...prev, imageUrl: data.secure_url }));
+      } else {
+        alert('Image upload failed: ' + (data.error?.message || 'Unknown error'));
       }
-    };
+    } catch (err) {
+      console.error('Image upload error:', err);
+      alert('Image upload failed');
+    }
+  };
   const scrollToForm = () => {
     if (formRef.current) {
       setTimeout(() => {
@@ -366,13 +367,13 @@ export default function Offers() {
                           checked={formData.categories.includes(cat.name)}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setFormData({ 
-                                ...formData, 
+                              setFormData({
+                                ...formData,
                                 categories: [...formData.categories, cat.name]
                               });
                             } else {
-                              setFormData({ 
-                                ...formData, 
+                              setFormData({
+                                ...formData,
                                 categories: formData.categories.filter(c => c !== cat.name)
                               });
                             }
@@ -412,13 +413,13 @@ export default function Offers() {
                               checked={formData.items.includes(item.id)}
                               onChange={(e) => {
                                 if (e.target.checked) {
-                                  setFormData({ 
-                                    ...formData, 
+                                  setFormData({
+                                    ...formData,
                                     items: [...formData.items, item.id]
                                   });
                                 } else {
-                                  setFormData({ 
-                                    ...formData, 
+                                  setFormData({
+                                    ...formData,
                                     items: formData.items.filter(i => i !== item.id)
                                   });
                                 }
@@ -579,7 +580,7 @@ export default function Offers() {
                       </label>
                       <div className="action-buttons">
                         <button className="icon-btn edit" onClick={() => handleEdit(offer)}>✏️</button>
-                        <button className="icon-btn delete" onClick={() => handleDelete(offer.id)}>🗑️</button>
+                        <AdminDeleteButton onClick={() => handleDelete(offer.id)} />
                       </div>
                     </div>
                   </div>

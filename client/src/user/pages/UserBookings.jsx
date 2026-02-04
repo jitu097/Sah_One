@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import Navbar from '../components/Navbar';
 import '../styles/UserBookings.css';
 import '../styles/pages.css';
+import { isRestaurantOpen } from '../../utils/restaurantStatus';
 
 export default function UserBookings() {
   const { currentUser } = useAuth();
@@ -33,6 +34,8 @@ export default function UserBookings() {
   
   // Mutation for creating booking
   const createBooking = useMutation(api.modules.bookings.bookings.createBooking);
+  const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
+  const restaurantOpen = isRestaurantOpen(specialHours);
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -92,6 +95,11 @@ export default function UserBookings() {
   const handlePartyFormSubmit = async (e) => {
     e.preventDefault();
 
+    if (!restaurantOpen) {
+      alert('⚠️ Restaurant is temporarily closed. We are not accepting bookings at the moment.');
+      return;
+    }
+
     if (!currentUser) {
       alert('Please login to book a table!');
       return;
@@ -138,6 +146,11 @@ export default function UserBookings() {
     <>
       <Navbar />
       <div className="user-bookings-container">
+        {!restaurantOpen && (
+          <div className="restaurant-closed-info">
+            ⚠️ Restaurant currently closed. You can browse, but booking is disabled.
+          </div>
+        )}
         <div className="bookings-header">
           <h1>My Table Bookings</h1>
           <p className="bookings-subtitle">Track your table reservation requests</p>
@@ -205,8 +218,9 @@ export default function UserBookings() {
         {/* Floating Book a Table Button */}
         <button
           className="fab-book-table"
-          onClick={() => setShowPartyModal(true)}
-          title="Book Now"
+          onClick={() => restaurantOpen && setShowPartyModal(true)}
+          title={restaurantOpen ? 'Book Now' : 'Restaurant closed'}
+          disabled={!restaurantOpen}
         >
           <span className="fab-icon">🍽️</span>
           <span className="fab-text">Book Now</span>

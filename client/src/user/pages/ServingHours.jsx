@@ -67,6 +67,7 @@ export default function ServingHours() {
 
   // Get global serving hours
   const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
+  const restaurantOpen = isRestaurantOpen(specialHours);
 
   // Loading state
   if (specialHours === undefined) {
@@ -133,6 +134,11 @@ export default function ServingHours() {
     <>
       <Navbar />
       <div className="page-container">
+        {!restaurantOpen && (
+          <div className="restaurant-closed-info">
+            ⚠️ Restaurant currently closed. You can browse, but ordering is disabled.
+          </div>
+        )}
         <div className="serving-hours-container">
           <div className="serving-hours-header">
             <h1>🕐 Serving Hours</h1>
@@ -201,6 +207,8 @@ export default function ServingHours() {
                                     <button
                                       className="meal-add-btn"
                                       onClick={() => handleAddToCart(item)}
+                                      disabled={!restaurantOpen}
+                                      title={restaurantOpen ? 'Add to cart' : 'Restaurant closed'}
                                     >
                                       Add to Cart
                                     </button>
@@ -216,6 +224,8 @@ export default function ServingHours() {
                                       <button
                                         className="qty-btn"
                                         onClick={() => handleUpdateQuantity(item.id, 1)}
+                                        disabled={!restaurantOpen}
+                                        title={restaurantOpen ? 'Increase quantity' : 'Restaurant closed'}
                                       >
                                         +
                                       </button>

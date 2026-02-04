@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import '../styles/servingHours.css';
+import AdminDeleteButton from '../components/AdminDeleteButton';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { uploadImageToCloudinary } from '../../utils/cloudinary';
@@ -347,7 +348,7 @@ export default function SpecialServingHours() {
                           />
                           <span className="toggle-slider-small"></span>
                         </label>
-                        <button className="delete-btn" onClick={() => removeItemFromSlot(slotName, item.id)}>🗑️</button>
+                        <AdminDeleteButton onClick={() => removeItemFromSlot(slotName, item.id)} />
                       </div>
                     </div>
                   ))}
@@ -377,43 +378,11 @@ export default function SpecialServingHours() {
         </header>
 
         <div className="hours-layout-single">
-          <div className="global-settings-card">
-            <div className="settings-row">
-              <div className="setting-info">
-                <h3>Restaurant Status</h3>
-                <p>Toggle to temporarily close the restaurant for the day.</p>
-              </div>
-              <label className="toggle-switch large">
-                <input
-                  type="checkbox"
-                  checked={formData.isClosed}
-                  onChange={(e) => setFormData({ ...formData, isClosed: e.target.checked })}
-                />
-                <span className="toggle-slider"></span>
-                <span className="toggle-label-side">{formData.isClosed ? 'CLOSED 🔴' : 'OPEN 🟢'}</span>
-              </label>
-            </div>
-
-            {formData.isClosed && (
-              <div className="closure-reason-input">
-                <label>Reason for Closure</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Weekly Off, Public Holiday, Maintenance"
-                  value={formData.reason}
-                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                />
-              </div>
-            )}
+          <div className="slots-container">
+            {renderSlotSection('breakfast', 'Breakfast', 'slot-breakfast')}
+            {renderSlotSection('lunch', 'Lunch', 'slot-lunch')}
+            {renderSlotSection('dinner', 'Dinner', 'slot-dinner')}
           </div>
-
-          {!formData.isClosed && (
-            <div className="slots-container">
-              {renderSlotSection('breakfast', 'Breakfast', 'slot-breakfast')}
-              {renderSlotSection('lunch', 'Lunch', 'slot-lunch')}
-              {renderSlotSection('dinner', 'Dinner', 'slot-dinner')}
-            </div>
-          )}
         </div>
       </div>
     </>

@@ -1,5 +1,6 @@
 import { mutation, query } from "../../_generated/server";
 import { v } from "convex/values";
+import { verifyAdmin } from "../../lib/auth";
 
 // Helper for slot validation with item toggle
 const slotSchema = v.optional(v.object({
@@ -43,13 +44,23 @@ export const updateGlobalServingHours = mutation({
       throw new Error("Unauthorized");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", identity.subject))
-      .first();
+    const firebaseUid = identity.subject || identity.tokenIdentifier;
+    if (!firebaseUid) {
+      throw new Error("Unauthorized");
+    }
 
-    if (!user || user.role !== "admin") {
-      throw new Error("Access denied: Admins only");
+    // Verify admin via admins table, fallback to users table role
+    try {
+      await verifyAdmin(ctx, firebaseUid);
+    } catch (error) {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", firebaseUid))
+        .first();
+
+      if (!user || user.role !== "admin") {
+        throw new Error("Access denied: Admins only");
+      }
     }
 
     const existing = await ctx.db.query("servingHoursConfig").first();
@@ -91,13 +102,23 @@ export const toggleRestaurantStatus = mutation({
       throw new Error("Unauthorized");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", identity.subject))
-      .first();
+    const firebaseUid = identity.subject || identity.tokenIdentifier;
+    if (!firebaseUid) {
+      throw new Error("Unauthorized");
+    }
 
-    if (!user || user.role !== "admin") {
-      throw new Error("Access denied: Admins only");
+    // Verify admin via admins table, fallback to users table role
+    try {
+      await verifyAdmin(ctx, firebaseUid);
+    } catch (error) {
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_firebase_uid", (q) => q.eq("firebaseUid", firebaseUid))
+        .first();
+
+      if (!user || user.role !== "admin") {
+        throw new Error("Access denied: Admins only");
+      }
     }
 
     const existing = await ctx.db.query("servingHoursConfig").first();

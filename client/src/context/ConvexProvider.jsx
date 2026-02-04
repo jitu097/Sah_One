@@ -1,6 +1,8 @@
 import { ConvexProvider as BaseConvexProvider } from 'convex/react';
 import { ConvexReactClient } from 'convex/react';
-import { useState, createContext, useContext } from 'react';
+import { useState, createContext, useContext, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../config/firebase';
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL || 'https://giddy-lyrebird-252.convex.cloud';
 const convex = new ConvexReactClient(convexUrl);
@@ -29,6 +31,23 @@ export const useConvexQuery = (functionName, args) => {
 
 export const ConvexProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const setConvexAuth = () => {
+      convex.setAuth(async () => {
+        const user = auth.currentUser;
+        if (!user) return null;
+        return await user.getIdToken(true);
+      });
+    };
+
+    setConvexAuth();
+    const unsubscribe = onAuthStateChanged(auth, () => {
+      setConvexAuth();
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <ConvexContext.Provider value={{ isConnected, convex }}>

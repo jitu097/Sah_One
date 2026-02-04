@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
+import AdminDeleteButton from '../components/AdminDeleteButton';
 import '../styles/bookings.css';
 
 export default function Bookings() {
   const [filterStatus, setFilterStatus] = useState('all');
-  
+
   // Fetch all bookings
   const allBookings = useQuery(api.modules.bookings.bookings.getAllBookings);
   const updateBookingStatus = useMutation(api.modules.bookings.bookings.updateBookingStatus);
@@ -57,10 +58,10 @@ export default function Bookings() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -73,14 +74,14 @@ export default function Bookings() {
   };
 
   const filteredBookings = getFilteredBookings();
-  
+
   // Sort bookings: active (pending, accepted) first, then past (rejected, cancelled)
   // Within each group, sort by date (newest first)
   const sortedBookings = [...filteredBookings].sort((a, b) => {
     const activeStatuses = ['pending', 'accepted'];
     const aIsActive = activeStatuses.includes(a.status);
     const bIsActive = activeStatuses.includes(b.status);
-    
+
     if (aIsActive === bIsActive) {
       return b.createdAt - a.createdAt; // Newest first within same group
     }
@@ -193,12 +194,10 @@ export default function Bookings() {
                       Cancel
                     </button>
                   )}
-                  <button
-                    className="action-btn delete-btn"
+                  <AdminDeleteButton
                     onClick={() => handleDeleteBooking(booking._id)}
-                  >
-                    Delete
-                  </button>
+                    title="Delete Booking"
+                  />
                 </div>
               </div>
             ))

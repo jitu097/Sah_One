@@ -19,6 +19,9 @@ export default function Cart() {
     getCartTotal,
     getCartDiscount,
     getCartCoupon,
+    getDeliveryCharge,
+    getTotalWithDelivery,
+    hasDeliveryRules,
     applyCoupon,
     removeCoupon,
     clearCart
@@ -36,10 +39,11 @@ export default function Cart() {
 
   const createOrder = useMutation(api.modules.orders.orders.createOrder);
   const navigate = useNavigate();
-  const deliveryCharge = 50;
+  const deliveryCharge = getDeliveryCharge();
 
   // Fetch global serving hours config
   const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
+  const restaurantOpen = isRestaurantOpen(specialHours);
 
   // Check if restaurant is open using util
   // const isRestaurantOpen = ... (removed local function)
@@ -74,8 +78,9 @@ export default function Cart() {
   const subtotal = getCartSubtotal();
   const discount = getCartDiscount();
   const cartTotal = getCartTotal(); // This is Subtotal - Discount
-  const finalTotal = cartTotal + deliveryCharge;
+  const finalTotal = getTotalWithDelivery();
   const appliedCoupon = getCartCoupon();
+  const isDeliveryConfigured = hasDeliveryRules();
 
   // If coupon became invalid (e.g. cart change), backend might return "isInvalid" or just null.
   // My backend returns { error: "...", isInvalid: true} if code exists but invalid.
@@ -86,6 +91,16 @@ export default function Cart() {
   }
 
   const handleCheckout = () => {
+    if (!restaurantOpen) {
+      alert('⚠️ Restaurant is temporarily closed. Please try again later.');
+      return;
+    }
+
+    if (!isDeliveryConfigured) {
+      alert('⚠️ Delivery services are currently unavailable (configuration missing). Please try again later.');
+      return;
+    }
+
     if (!currentUser) {
       alert("Please login to checkout");
       navigate('/login');
@@ -112,6 +127,10 @@ export default function Cart() {
   };
 
   const handlePaymentSuccess = async () => {
+    if (!restaurantOpen) {
+      alert('⚠️ Restaurant is temporarily closed. Please try again later.');
+      return;
+    }
     try {
       // Use DB address if available
       const savedAddress = (user && user.address) ? user.address : localStorage.getItem('userAddress');
@@ -165,6 +184,12 @@ export default function Cart() {
 
         </div>
 
+        {!restaurantOpen && (
+          <div className="restaurant-closed-info">
+            ⚠️ Restaurant currently closed. You can browse, but checkout is disabled.
+          </div>
+        )}
+
         <div className="cart-items">
           {cartItems.length === 0 ? (
             <div className="empty-cart">
@@ -206,6 +231,8 @@ export default function Cart() {
                       <button
                         className="cart-qty-btn plus"
                         onClick={() => handleUpdateQuantity(item.id, 1)}
+                        disabled={!restaurantOpen}
+                        title={restaurantOpen ? 'Increase quantity' : 'Restaurant closed'}
                       >
                         +
                       </button>
@@ -277,10 +304,17 @@ export default function Cart() {
               <span>Total:</span>
               <span>₹{finalTotal}</span>
             </div>
-            <button className="checkout-btn" onClick={handleCheckout}>Proceed to Checkout</button>
+            {!isDeliveryConfigured && (
+              <div className="delivery-warning" style={{ color: '#dc3545', fontSize: '0.9rem', textAlign: 'center', marginBottom: '10px' }}>
+                ⚠️ Delivery not configured
+              </div>
+            )}
+            <button className="checkout-btn" onClick={handleCheckout} disabled={!restaurantOpen || !isDeliveryConfigured}>
+              Proceed to Checkout
+            </button>
           </div>
         )}
-      </div>
+      </div >
 
       <CategoryPopup
         isOpen={showCategoryPopup}

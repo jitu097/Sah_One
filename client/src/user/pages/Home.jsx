@@ -45,6 +45,7 @@ export default function Home() {
   );
   // Fetch global serving hours config
   const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
+  const restaurantOpen = isRestaurantOpen(specialHours);
 
   const handleAddToCart = (item, portionType = 'full') => {
     // Use the global config fetched from DB
@@ -75,6 +76,10 @@ export default function Home() {
   };
 
   const handleUpdateQuantity = (itemId, portionType, change) => {
+    if (!restaurantOpen && change > 0) {
+      alert('⚠️ Restaurant is temporarily closed. We are not accepting orders at the moment.');
+      return;
+    }
     // Find item by matching itemId and portionType to get DB ID
     const cartItem = cartItems.find(item =>
       item.itemId === itemId &&
@@ -255,6 +260,11 @@ export default function Home() {
   const handlePartyFormSubmit = async (e) => {
     e.preventDefault();
 
+    if (!restaurantOpen) {
+      alert('⚠️ Restaurant is temporarily closed. We are not accepting bookings at the moment.');
+      return;
+    }
+
     if (!currentUser) {
       alert('Please login to book a table!');
       return;
@@ -288,6 +298,11 @@ export default function Home() {
     <>
       <Navbar />
       <div className="page-container">
+        {!restaurantOpen && (
+          <div className="restaurant-closed-info">
+            ⚠️ Restaurant currently closed. You can browse the menu, but ordering and bookings are disabled.
+          </div>
+        )}
         {/* Show these sections only when NOT searching */}
         {!searchQuery && (
           <>
@@ -482,7 +497,10 @@ export default function Home() {
                   className="parties-button-image"
                   loading="lazy"
                   decoding="async"
-                  onClick={() => setShowPartyModal(true)}
+                  onClick={() => restaurantOpen && setShowPartyModal(true)}
+                  style={{ pointerEvents: restaurantOpen ? 'auto' : 'none', opacity: restaurantOpen ? 1 : 0.6 }}
+                  aria-disabled={!restaurantOpen}
+                  title={restaurantOpen ? 'Book a table' : 'Restaurant closed'}
                 />
               </div>
             </section>
@@ -585,6 +603,7 @@ export default function Home() {
                     onAddToCart={handleAddToCart}
                     quantity={getItemQuantity(item._id)}
                     onUpdateQuantity={handleUpdateQuantity}
+                    canOrder={restaurantOpen}
                   />
                 ))
               ) : (
@@ -607,6 +626,7 @@ export default function Home() {
                     onAddToCart={handleAddToCart}
                     quantity={getItemQuantity(item._id)}
                     onUpdateQuantity={handleUpdateQuantity}
+                    canOrder={restaurantOpen}
                   />
                 ))
               ) : (

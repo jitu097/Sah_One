@@ -45,6 +45,7 @@ export default function UserMenu() {
   const categoriesList = useQuery(api.modules.menu.menu.getCategoryNames);
   // Fetch global serving hours
   const specialHours = useQuery(api.modules.servingHours.servingHours.getGlobalServingHours);
+  const restaurantOpen = isRestaurantOpen(specialHours);
 
   const getItemQuantity = (itemId, portionType = 'full') => {
     // Find item by matching itemId and portionType, NOT by checking `id` string
@@ -210,6 +211,11 @@ export default function UserMenu() {
     <>
       <Navbar />
       <div className="page-container">
+        {!restaurantOpen && (
+          <div className="restaurant-closed-info">
+            ⚠️ Restaurant currently closed. You can browse the menu, but ordering is disabled.
+          </div>
+        )}
         <section className="bestsellers-section">
           <div className="menu-page-header">
             <h1>Good Food Starts Here</h1>
@@ -270,6 +276,7 @@ export default function UserMenu() {
                 quantity={getItemQuantity(item._id)}
                 onUpdateQuantity={handleUpdateQuantity}
                 showCategory={selectedCategory === 'All'}
+                canOrder={restaurantOpen}
               />
             ))}
           </div>
@@ -339,7 +346,9 @@ export default function UserMenu() {
                                     )}
                                     <button
                                       className="mobile-add-to-cart-btn"
-                                      onClick={() => setExpandedMobileItems(prev => ({ ...prev, [item._id]: true }))}
+                                      onClick={() => restaurantOpen && setExpandedMobileItems(prev => ({ ...prev, [item._id]: true }))}
+                                      disabled={!restaurantOpen}
+                                      title={restaurantOpen ? 'Add to cart' : 'Restaurant closed'}
                                     >
                                       Add to Cart
                                     </button>
@@ -357,9 +366,12 @@ export default function UserMenu() {
                                           <button
                                             className="mobile-add-btn"
                                             onClick={() => {
+                                              if (!restaurantOpen) return;
                                               handleAddToCart(item, 'half');
                                               setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
                                             }}
+                                            disabled={!restaurantOpen}
+                                            title={restaurantOpen ? 'Add to cart' : 'Restaurant closed'}
                                           >
                                             Add
                                           </button>
@@ -380,6 +392,8 @@ export default function UserMenu() {
                                             <button
                                               className="mobile-qty-btn"
                                               onClick={() => handleUpdateQuantity(item._id, 'half', 1)}
+                                              disabled={!restaurantOpen}
+                                              title={restaurantOpen ? 'Increase quantity' : 'Restaurant closed'}
                                             >
                                               +
                                             </button>
@@ -398,9 +412,12 @@ export default function UserMenu() {
                                         <button
                                           className="mobile-add-btn"
                                           onClick={() => {
+                                            if (!restaurantOpen) return;
                                             handleAddToCart(item, 'full');
                                             setExpandedMobileItems(prev => ({ ...prev, [item._id]: false }));
                                           }}
+                                          disabled={!restaurantOpen}
+                                          title={restaurantOpen ? 'Add to cart' : 'Restaurant closed'}
                                         >
                                           Add
                                         </button>
@@ -421,6 +438,8 @@ export default function UserMenu() {
                                           <button
                                             className="mobile-qty-btn"
                                             onClick={() => handleUpdateQuantity(item._id, 'full', 1)}
+                                            disabled={!restaurantOpen}
+                                            title={restaurantOpen ? 'Increase quantity' : 'Restaurant closed'}
                                           >
                                             +
                                           </button>

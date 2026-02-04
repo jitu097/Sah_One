@@ -34,7 +34,7 @@ export function CartProvider({ children }) {
 
     // Determine if this is a serving hours item or menu item
     const isServingItem = item.id && typeof item.id === 'string' && item.id.startsWith('special_');
-    
+
     // Resolve the correct Menu Item ID
     // UserMenu passes: { ...item, id: `${item._id}_${portionType}`, originalId: item._id, ... }
     // ServingHours passes: { ...item, originalId: item.id } where item.id is like "special_xxx"
@@ -138,6 +138,9 @@ export function CartProvider({ children }) {
   const getCartSubtotal = () => cartData?.subtotal || 0;
   const getCartDiscount = () => cartData?.discount || 0;
   const getCartCoupon = () => cartData?.coupon || null;
+  const getDeliveryCharge = () => cartData?.deliveryCharge || 0;
+  const getTotalWithDelivery = () => cartData?.totalWithDelivery || 0;
+  const hasDeliveryRules = () => cartData?.hasDeliveryRules ?? true;
 
   const value = {
     cartItems,
@@ -151,6 +154,9 @@ export function CartProvider({ children }) {
     getCartSubtotal,
     getCartDiscount,
     getCartCoupon,
+    getDeliveryCharge,
+    getTotalWithDelivery,
+    hasDeliveryRules,
     isLoading: !cartData && currentUser
   };
 

@@ -101,12 +101,16 @@ export default defineSchema({
     deliveryCharge: v.optional(v.number()),
     subtotal: v.optional(v.number()),
     deliveryPersonId: v.optional(v.string()),
+    deliveryAssignedAt: v.optional(v.number()), // Timestamp when assigned to delivery person
+    deliveryStartedAt: v.optional(v.number()), // Timestamp when delivery person started delivery
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
     .index("by_status", ["status"])
-    .index("by_delivery_person", ["deliveryPersonId"]),
+    .index("by_delivery_person", ["deliveryPersonId"])
+    .index("by_delivery_assigned", ["deliveryPersonId", "deliveryAssignedAt"])
+    .index("by_delivery_started", ["deliveryPersonId", "deliveryStartedAt"]),
 
   // Offers
   offers: defineTable({
@@ -194,6 +198,17 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_key", ["settingKey"]),
+
+  // Delivery Charge Rules
+  deliveryChargeRules: defineTable({
+    minOrderAmount: v.number(),
+    deliveryFee: v.number(),
+    isActive: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_min_order", ["minOrderAmount"])
+    .index("by_active", ["isActive"]),
 
   // Reports/Analytics
   reports: defineTable({

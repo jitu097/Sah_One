@@ -1,6 +1,14 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { validateCoupon } from "./lib/couponUtils";
+import { calculateDeliveryCharge } from "./lib/deliveryCharges";
+
+const ensureRestaurantOpen = async (ctx: any) => {
+    const config = await ctx.db.query("servingHoursConfig").first();
+    if (config?.isClosed) {
+        throw new Error("Restaurant is currently closed. Please try again later.");
+    }
+};
 
 /**
  * Get the current user's cart with calculated totals and coupon status.
@@ -139,6 +147,10 @@ export const getCart = query({
             }
         }
 
+        const deliveryCalc = await calculateDeliveryCharge(ctx, finalTotal);
+        const deliveryCharge = deliveryCalc.fee;
+        const totalWithDelivery = finalTotal + deliveryCharge;
+
         return {
             cartId: cart._id,
             items: activeItems.map(item => ({
@@ -154,6 +166,9 @@ export const getCart = query({
             subtotal,
             discount,
             total: finalTotal,
+            deliveryCharge,
+            totalWithDelivery,
+            hasDeliveryRules: deliveryCalc.hasRules,
             coupon: couponStatus
         };
     },
@@ -171,6 +186,7 @@ export const addToCart = mutation({
         itemType: v.optional(v.string()) // "menu" or "serving"
     },
     handler: async (ctx, args) => {
+        await ensureRestaurantOpen(ctx);
         const userId = args.userId;
         if (!userId) throw new Error("User ID is required");
 
@@ -251,6 +267,13 @@ export const updateQuantity = mutation({
         quantity: v.number()
     },
     handler: async (ctx, args) => {
+        const existingItem = await ctx.db.get(args.cartItemId);
+        if (!existingItem) throw new Error("Cart item not found");
+
+        if (args.quantity > existingItem.quantity) {
+            await ensureRestaurantOpen(ctx);
+        }
+
         if (args.quantity <= 0) {
             await ctx.db.delete(args.cartItemId);
         } else {

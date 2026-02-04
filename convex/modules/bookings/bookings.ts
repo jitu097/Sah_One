@@ -3,6 +3,13 @@ import { internal } from "../../_generated/api";
 import { v } from "convex/values";
 import { Id } from "../../_generated/dataModel";
 
+const ensureRestaurantOpen = async (ctx: any) => {
+  const config = await ctx.db.query("servingHoursConfig").first();
+  if (config?.isClosed) {
+    throw new Error("Restaurant is currently closed. Please try again later.");
+  }
+};
+
 /**
  * Create a new table booking
  */
@@ -16,6 +23,7 @@ export const createBooking = mutation({
     time: v.string(),
   },
   handler: async (ctx, args) => {
+    await ensureRestaurantOpen(ctx);
     const timestamp = Date.now();
 
     const bookingId = await ctx.db.insert("bookings", {

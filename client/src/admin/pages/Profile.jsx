@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import Navbar from '../components/Navbar';
+import DeliverySettings from '../components/DeliverySettings';
 import '../styles/profile.css'; // We'll need to make sure this exists or reuse user profile styles
 
 export default function AdminProfile() {
@@ -164,6 +165,10 @@ export default function AdminProfile() {
                         )}
                     </div>
                 </div>
+            </div>
+
+            <div className="profile-container" style={{ marginTop: '24px' }}>
+                <DeliverySettings />
             </div>
         </div>
     );

@@ -61,7 +61,7 @@ export default function Orders() {
     try {
       await assignDeliveryPerson({
         orderId: selectedOrder._id,
-        deliveryPersonId: selectedDriver
+        deliveryPersonId: selectedDriver.toString() // Ensure it's a string
       });
       setShowAssignModal(false);
       setSelectedOrder(null);
@@ -273,11 +273,11 @@ export default function Orders() {
                   ) : (
                     <div className="drivers-grid">
                       {deliveryPersonnel.map(person => (
-                        <label key={person._id} className={`driver-option ${!person.isAvailable ? 'busy' : ''} ${selectedDriver === person._id ? 'selected' : ''}`}>
+                        <label key={person._id} className={`driver-option ${!person.isAvailable ? 'busy' : ''} ${selectedDriver === person._id.toString() ? 'selected' : ''}`}>
                           <input
                             type="radio"
                             name="driver"
-                            value={person._id}
+                            value={person._id.toString()}
                             disabled={!person.isAvailable}
                             onChange={(e) => setSelectedDriver(e.target.value)}
                           />

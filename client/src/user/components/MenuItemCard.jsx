@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import '../styles/MenuItemCard.css';
 
-export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuantity, showCategory = true }) {
+export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuantity, showCategory = true, canOrder = true }) {
   const { cartItems, updateQuantity: updateCartQuantity } = useCart();
   const [showPortionControls, setShowPortionControls] = useState(false);
 
   const handlePortionAdd = (portionType) => {
+    if (!canOrder) return;
     console.log(`[MenuItemCard] Adding portion: ${portionType} for item: ${item._id}`);
     if (onAddToCart) {
       onAddToCart(item, portionType);
@@ -16,6 +17,7 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
   };
 
   const handlePortionUpdate = (portionType, change) => {
+    if (!canOrder && change > 0) return;
     // Construct the unique ID matching how it's stored in CartContext
     // This MUST match what Home.jsx/UserMenu.jsx uses if they store composite IDs.
     // However, CartContext now tracks items by `itemId` (menu item) if strict.
@@ -119,10 +121,10 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
                     <div className="quantity-controls">
                       <button className="qty-btn" onClick={() => handlePortionUpdate('half', -1)}>−</button>
                       <span className="qty-number">{halfQty}</span>
-                      <button className="qty-btn" onClick={() => handlePortionUpdate('half', 1)}>+</button>
+                      <button className="qty-btn" onClick={() => handlePortionUpdate('half', 1)} disabled={!canOrder}>+</button>
                     </div>
                   ) : (
-                    <button className="add-portion-btn-text" onClick={() => handlePortionAdd('half')}>Add</button>
+                    <button className="add-portion-btn-text" onClick={() => handlePortionAdd('half')} disabled={!canOrder}>Add</button>
                   )}
                 </div>
 
@@ -135,10 +137,10 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
                     <div className="quantity-controls">
                       <button className="qty-btn" onClick={() => handlePortionUpdate('full', -1)}>−</button>
                       <span className="qty-number">{fullQty}</span>
-                      <button className="qty-btn" onClick={() => handlePortionUpdate('full', 1)}>+</button>
+                      <button className="qty-btn" onClick={() => handlePortionUpdate('full', 1)} disabled={!canOrder}>+</button>
                     </div>
                   ) : (
-                    <button className="add-portion-btn-text" onClick={() => handlePortionAdd('full')}>Add</button>
+                    <button className="add-portion-btn-text" onClick={() => handlePortionAdd('full')} disabled={!canOrder}>Add</button>
                   )}
                 </div>
               </div>
@@ -155,7 +157,7 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
                     <span className="price-value">₹{item.fullPrice}</span>
                   </div>
                 </div>
-                <button className="add-to-cart-btn" onClick={handleAddToCartClick}>
+                <button className="add-to-cart-btn" onClick={handleAddToCartClick} disabled={!canOrder}>
                   Add to Cart
                 </button>
               </div>
@@ -169,10 +171,10 @@ export default function MenuItemCard({ item, onAddToCart, quantity, onUpdateQuan
                 <div className="quantity-controls">
                   <button className="qty-btn" onClick={() => handlePortionUpdate('full', -1)}>−</button>
                   <span className="qty-number">{fullQty}</span>
-                  <button className="qty-btn" onClick={() => handlePortionUpdate('full', 1)}>+</button>
+                  <button className="qty-btn" onClick={() => handlePortionUpdate('full', 1)} disabled={!canOrder}>+</button>
                 </div>
               ) : (
-                <button className="add-to-cart-btn" onClick={() => handlePortionAdd('full')}>
+                <button className="add-to-cart-btn" onClick={() => handlePortionAdd('full')} disabled={!canOrder}>
                   Add to Cart
                 </button>
               )}
