@@ -131,7 +131,7 @@ const DeliverySettings = () => {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style>{`
                 .delivery-settings-content {
                     padding: 20px;
                 }
